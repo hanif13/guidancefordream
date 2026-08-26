@@ -1,133 +1,157 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import Image from "next/image";
+import { useEffect, useState, useCallback } from "react";
+
+const ENTRANCE_EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
+const VIDEO_URL =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260819_212700_3bb9329b-5c50-4257-a09b-ca85cf3654a3.mp4";
+
+// วันเปิดรับสมัคร: 16 กันยายน 2569 (พ.ศ.) = 16 Sep 2026 (ค.ศ.)
+const TARGET_DATE = new Date("2026-09-16T00:00:00+07:00").getTime();
+
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+function getTimeLeft(): TimeLeft {
+  const now = Date.now();
+  const diff = Math.max(0, TARGET_DATE - now);
+
+  return {
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((diff / (1000 * 60)) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
+}
 
 export default function HeroSection() {
-  const heroRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(getTimeLeft());
 
-  const scrollToSection = (id: string) => {
+  useEffect(() => {
+    const mountTimer = setTimeout(() => setMounted(true), 300);
+    return () => clearTimeout(mountTimer);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft(getTimeLeft());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const scrollToSection = useCallback((id: string) => {
     const el = document.querySelector(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
+
+  const countdownUnits = [
+    { value: timeLeft.days, label: "วัน" },
+    { value: timeLeft.hours, label: "ชั่วโมง" },
+    { value: timeLeft.minutes, label: "นาที" },
+    { value: timeLeft.seconds, label: "วินาที" },
+  ];
 
   return (
     <section
       id="hero"
-      ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative w-full h-screen overflow-hidden flex items-center justify-center"
     >
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/images/mountian.png"
-          alt="Background"
-          fill
-          className="object-cover object-center"
-          priority
-          quality={90}
+      {/* Background Video — use will-change + GPU layer for smooth playback */}
+      <div
+        className="absolute inset-0 will-change-transform"
+        style={{
+          opacity: mounted ? 1 : 0,
+          transition: `opacity 1400ms ${ENTRANCE_EASING}`,
+        }}
+      >
+        <video
+          src={VIDEO_URL}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover"
         />
       </div>
 
-      {/* Gradient Overlay for smooth fade */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-purple-deeper/40 via-purple-primary/15 to-cream-bg" />
+      {/* Gradient Overlay — simple, no blur */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-purple-light/40 via-purple-primary/25 to-purple-deeper/80" />
 
-      {/* Realistic Animated Floating Clouds & Fog Layers */}
-      <div className="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
-        {/* Fog Layer 1 - Low Valley Mist (Drifting Left-Right) */}
-        <div 
-          className="absolute -bottom-10 -left-1/4 w-[160%] h-96 opacity-60 mix-blend-screen blur-3xl rounded-[100%]"
+      {/* Content — centered */}
+      <div className="relative z-10 text-center px-4 sm:px-8 max-w-3xl mx-auto">
+        {/* Coming Soon */}
+        <h1
+          className="text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-4 md:mb-6 drop-shadow-lg will-change-[opacity,transform]"
           style={{
-            background: "radial-gradient(ellipse at center, rgba(242, 196, 208, 0.45) 0%, rgba(255, 240, 245, 0.3) 40%, rgba(255, 255, 255, 0) 75%)",
-            animation: "fog-drift-1 26s ease-in-out infinite"
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(32px)",
+            transition: `opacity 900ms ${ENTRANCE_EASING} 400ms, transform 900ms ${ENTRANCE_EASING} 400ms`,
           }}
-        />
+        >
+          Coming Soon
+        </h1>
 
-        {/* Fog Layer 2 - Mid Ridge Cloud Stream (Drifting Opposite) */}
-        <div 
-          className="absolute top-1/3 -right-1/4 w-[150%] h-80 opacity-50 mix-blend-screen blur-2xl rounded-[100%]"
+        {/* Camp Name */}
+        <p
+          className="text-white/90 text-xl sm:text-2xl md:text-3xl font-medium tracking-wide drop-shadow-md mb-8 md:mb-10 will-change-[opacity,transform]"
           style={{
-            background: "radial-gradient(ellipse at center, rgba(212, 133, 154, 0.35) 0%, rgba(180, 154, 209, 0.25) 45%, rgba(255, 255, 255, 0) 70%)",
-            animation: "fog-drift-2 32s ease-in-out infinite"
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(32px)",
+            transition: `opacity 900ms ${ENTRANCE_EASING} 600ms, transform 900ms ${ENTRANCE_EASING} 600ms`,
           }}
-        />
-
-        {/* Fog Layer 3 - Mountain Peak Soft Cloud Ambient */}
-        <div 
-          className="absolute top-12 left-0 w-full h-72 opacity-40 mix-blend-screen blur-3xl"
-          style={{
-            background: "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(255, 255, 255, 0.4) 0%, rgba(242, 196, 208, 0.15) 50%, rgba(255, 255, 255, 0) 80%)",
-            animation: "fog-drift-3 20s ease-in-out infinite"
-          }}
-        />
-      </div>
-
-      {/* Decorative Light Blobs */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-purple-primary/20 rounded-full blur-3xl animate-float-slow z-[2]" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-accent/20 rounded-full blur-3xl animate-float-delay-2 z-[2]" />
-      <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-pink-light/15 rounded-full blur-2xl animate-float-delay-1 z-[2]" />
-
-      {/* Content */}
-      <div className="relative z-10 text-center px-4 sm:px-8 max-w-4xl mx-auto">
-
-        {/* Coming Soon Pure Text in Lucian Schoenschrift */}
-        <div className="animate-float mb-2 sm:mb-4 flex flex-col items-center justify-center overflow-visible">
-          <h1 className="font-lucian text-gradient-coming-soon text-7xl sm:text-8xl md:text-9xl lg:text-[11rem] tracking-wide select-none leading-[1.3] pt-6 pb-4 px-6 sm:px-10 overflow-visible inline-block">
-            Coming Soon
-          </h1>
-        </div>
-
-        {/* Tagline */}
-        <p className="text-white/90 text-lg sm:text-xl lg:text-2xl font-light mb-3 animate-[fade-in-up_1s_ease-out_0.3s_both] tracking-wide">
+        >
           ค่ายสานฝันเพื่อน้อง ครั้งที่ 7
         </p>
 
-        {/* Date & Location */}
-        <div className="liquid-glass inline-flex items-center gap-3 px-7 py-3.5 rounded-full mb-8 animate-[fade-in-up_1s_ease-out_0.5s_both]">
-          <svg
-            className="w-5 h-5 text-pink-light"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-          <span className="text-white text-sm sm:text-base font-semibold drop-shadow-sm">
-            6-9 พฤศจิกายน 2569
-          </span>
-          <span className="text-white/50">|</span>
-          <svg
-            className="w-5 h-5 text-pink-light"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          <span className="text-white text-sm sm:text-base font-semibold drop-shadow-sm">
-            ม.สงขลานครินทร์ หาดใหญ่
-          </span>
+        {/* Countdown Label */}
+        <p
+          className="text-white/70 text-sm sm:text-base tracking-wide mb-4 will-change-[opacity,transform]"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(32px)",
+            transition: `opacity 900ms ${ENTRANCE_EASING} 750ms, transform 900ms ${ENTRANCE_EASING} 750ms`,
+          }}
+        >
+          นับถอยหลังวันเปิดรับสมัคร
+        </p>
+
+        {/* Countdown Timer — no backdrop-blur for mobile performance */}
+        <div
+          className="flex items-center justify-center gap-3 sm:gap-5 will-change-[opacity,transform]"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(32px)",
+            transition: `opacity 900ms ${ENTRANCE_EASING} 900ms, transform 900ms ${ENTRANCE_EASING} 900ms`,
+          }}
+        >
+          {countdownUnits.map((unit) => (
+            <div key={unit.label} className="flex flex-col items-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center rounded-2xl bg-white/15 border border-white/20">
+                <span className="text-white text-2xl sm:text-3xl md:text-4xl font-bold tabular-nums drop-shadow-md">
+                  {String(unit.value).padStart(2, "0")}
+                </span>
+              </div>
+              <span className="text-white/60 text-xs sm:text-sm mt-2">
+                {unit.label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Scroll Down Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-[fade-in_2s_ease-out_1.5s_both]">
+      <div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        style={{
+          opacity: mounted ? 1 : 0,
+          transition: `opacity 2s ${ENTRANCE_EASING} 1.5s`,
+        }}
+      >
         <button
           onClick={() => scrollToSection("#about")}
           className="flex flex-col items-center gap-2 text-white/60 hover:text-white/90

@@ -167,8 +167,8 @@ export default function DetailsSection() {
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           {/* Date Card */}
-          <div className="reveal-left stagger-1 group p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-primary/10
-                          hover:shadow-xl hover:shadow-purple-primary/10 transition-all duration-500">
+          <div className="reveal-left stagger-1 group p-6 bg-white/80 rounded-2xl border border-purple-primary/10
+                          hover:shadow-xl hover:shadow-purple-primary/10 transition-[box-shadow] duration-500">
             <div className="w-12 h-12 bg-purple-primary/10 rounded-xl flex items-center justify-center mb-4
                             group-hover:bg-purple-primary group-hover:text-white transition-colors duration-300">
               <svg className="w-6 h-6 text-purple-primary group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -182,8 +182,8 @@ export default function DetailsSection() {
           </div>
 
           {/* Location Card */}
-          <div className="reveal stagger-2 group p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-primary/10
-                          hover:shadow-xl hover:shadow-purple-primary/10 transition-all duration-500">
+          <div className="reveal stagger-2 group p-6 bg-white/80 rounded-2xl border border-purple-primary/10
+                          hover:shadow-xl hover:shadow-purple-primary/10 transition-[box-shadow] duration-500">
             <div className="w-12 h-12 bg-pink-accent/10 rounded-xl flex items-center justify-center mb-4
                             group-hover:bg-pink-accent group-hover:text-white transition-colors duration-300">
               <svg className="w-6 h-6 text-pink-accent group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -199,8 +199,8 @@ export default function DetailsSection() {
           </div>
 
           {/* Target Card */}
-          <div className="reveal-right stagger-3 group p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-primary/10
-                          hover:shadow-xl hover:shadow-purple-primary/10 transition-all duration-500">
+          <div className="reveal-right stagger-3 group p-6 bg-white/80 rounded-2xl border border-purple-primary/10
+                          hover:shadow-xl hover:shadow-purple-primary/10 transition-[box-shadow] duration-500">
             <div className="w-12 h-12 bg-purple-primary/10 rounded-xl flex items-center justify-center mb-4
                             group-hover:bg-purple-primary group-hover:text-white transition-colors duration-300">
               <svg className="w-6 h-6 text-purple-primary group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -233,8 +233,8 @@ export default function DetailsSection() {
               >
                 {/* Content */}
                 <div className={`flex-1 ml-14 sm:ml-0 ${i % 2 === 0 ? "sm:text-right sm:pr-12" : "sm:text-left sm:pl-12"}`}>
-                  <div className="inline-block p-5 bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-primary/10
-                                  hover:shadow-lg hover:shadow-purple-primary/10 transition-all duration-300">
+                  <div className="inline-block p-5 bg-white/80 rounded-2xl border border-purple-primary/10
+                                  hover:shadow-lg hover:shadow-purple-primary/10 transition-[box-shadow] duration-300">
                     <span className="text-purple-primary text-xs font-bold uppercase tracking-wider">
                       {item.day} — {item.date}
                     </span>

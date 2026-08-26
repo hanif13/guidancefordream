@@ -136,20 +136,20 @@ export default function GallerySection() {
                 key={`gallery-${i}`}
                 onClick={() => setSelectedImage(i)}
                 className={`reveal-scale stagger-${i + 1} group relative aspect-[4/3] rounded-2xl overflow-hidden
-                           cursor-pointer border-2 border-transparent hover:border-purple-primary/30 transition-all duration-500`}
+                           cursor-pointer border-2 border-transparent hover:border-purple-primary/30 transition-colors duration-300`}
               >
                 <Image
                   src={item.src}
                   alt={item.alt}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-purple-deeper/80 via-purple-deeper/20 to-transparent
-                                opacity-0 group-hover:opacity-100 transition-opacity duration-500
+                                opacity-0 group-hover:opacity-100 transition-opacity duration-300
                                 flex items-end p-5">
-                  <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                  <div>
                     <p className="text-white font-semibold text-base">
                       {item.caption}
                     </p>
@@ -158,10 +158,6 @@ export default function GallerySection() {
                     </p>
                   </div>
                 </div>
-
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent
-                                translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
               </button>
             ))}
           </div>
