@@ -49,7 +49,7 @@ export default function Footer() {
           <div className="flex flex-col items-center md:items-start gap-4">
             <div className="flex items-center gap-4">
               <Image
-                src="/images/GFD-7.png"
+                src="/images/favicon.png"
                 alt="Guidance for Dream 7th"
                 width={60}
                 height={60}
