@@ -30,14 +30,17 @@ function getTimeLeft(): TimeLeft {
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(getTimeLeft());
+  // Initialize with zeros to avoid hydration mismatch (Date.now() differs server vs client)
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
     const mountTimer = setTimeout(() => setMounted(true), 300);
     return () => clearTimeout(mountTimer);
   }, []);
 
+  // Only start countdown on client after mount
   useEffect(() => {
+    setTimeLeft(getTimeLeft()); // set real value immediately on client
     const interval = setInterval(() => {
       setTimeLeft(getTimeLeft());
     }, 1000);
@@ -86,20 +89,23 @@ export default function HeroSection() {
       <div className="relative z-10 text-center px-4 sm:px-8 max-w-3xl mx-auto">
         {/* Coming Soon */}
         <h1
-          className="text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-4 md:mb-6 drop-shadow-lg will-change-[opacity,transform]"
+          className="text-glow-white text-[3.75rem] xs:text-[4.25rem] sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-wider uppercase select-none leading-[0.95] sm:leading-tight mb-4 md:mb-6 will-change-[opacity,transform]"
           style={{
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0)" : "translateY(32px)",
             transition: `opacity 900ms ${ENTRANCE_EASING} 400ms, transform 900ms ${ENTRANCE_EASING} 400ms`,
           }}
         >
-          Coming Soon
+          COMING
+          <br className="sm:hidden" />
+          {" "}SOON
         </h1>
 
         {/* Camp Name */}
         <p
-          className="text-white/90 text-xl sm:text-2xl md:text-3xl font-medium tracking-wide drop-shadow-md mb-8 md:mb-10 will-change-[opacity,transform]"
+          className="text-white text-xl sm:text-2xl md:text-3xl font-semibold tracking-wide mb-8 md:mb-10 will-change-[opacity,transform]"
           style={{
+            textShadow: "0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(35, 10, 60, 0.9)",
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0)" : "translateY(32px)",
             transition: `opacity 900ms ${ENTRANCE_EASING} 600ms, transform 900ms ${ENTRANCE_EASING} 600ms`,
