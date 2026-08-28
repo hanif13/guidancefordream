@@ -1,37 +1,69 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { supabase } from "../lib/supabase";
 
-const speakers = [
-  {
-    name: "วิทยากรท่านที่ 1",
-    role: "ผู้เชี่ยวชาญด้านการศึกษา",
-    desc: "แชร์ประสบการณ์การเรียนรู้และการพัฒนาตนเองสู่ความสำเร็จ",
-    image: "/images/favicon.png",
-  },
-  {
-    name: "วิทยากรท่านที่ 2",
-    role: "นักจิตวิทยาการศึกษา",
-    desc: "เทคนิคการค้นหาตัวเองและการวางแผนอนาคตอย่างมีเป้าหมาย",
-    image: "/images/favicon.png",
-  },
-  {
-    name: "วิทยากรท่านที่ 3",
-    role: "ผู้นำชุมชนมุสลิม",
-    desc: "สร้างแรงบันดาลใจในการใช้ชีวิตอย่างมีคุณค่าและเป้าหมาย",
-    image: "/images/favicon.png",
-  },
-  {
-    name: "วิทยากรท่านที่ 4",
-    role: "ศิษย์เก่า GFD",
-    desc: "ถ่ายทอดประสบการณ์จากน้องค่ายสู่การเป็นผู้นำรุ่นใหม่",
-    image: "/images/favicon.png",
-  },
-];
+interface SpeakerItem {
+  id: string;
+  name: string;
+  role: string;
+  activity?: string;
+  desc: string;
+  image: string;
+}
 
 export default function HilightSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const [speakers, setSpeakers] = useState<SpeakerItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    async function loadSpeakers() {
+      try {
+        const { data, error } = await supabase
+          .from("speakers")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true });
+
+        if (!error && data) {
+          setSpeakers(
+            data.map((item) => ({
+              id: item.id,
+              name: item.name,
+              role: item.role,
+              activity: item.activity || "",
+              desc: item.description || "",
+              image: item.image_url || "/images/favicon.png",
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Failed to load speakers from Supabase:", err);
+      } finally {
+        setLoaded(true);
+      }
+    }
+
+    loadSpeakers();
+
+    // Realtime live sync
+    const channel = supabase
+      .channel("realtime-speakers")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "speakers" },
+        () => {
+          loadSpeakers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -50,7 +82,12 @@ export default function HilightSection() {
 
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [speakers]);
+
+  // If loaded and no active speakers, hide section
+  if (loaded && speakers.length === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -83,8 +120,8 @@ export default function HilightSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {speakers.map((speaker, i) => (
             <div
-              key={speaker.name}
-              className={`reveal-scale stagger-${i + 1} group text-center`}
+              key={speaker.id}
+              className={`reveal-scale stagger-${(i % 4) + 1} group text-center`}
             >
               {/* Avatar */}
               <div className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto mb-5">
@@ -108,9 +145,14 @@ export default function HilightSection() {
                 <h3 className="text-lg font-bold text-purple-dark mb-1">
                   {speaker.name}
                 </h3>
-                <p className="text-pink-accent text-sm font-semibold mb-2">
+                <p className="text-pink-accent text-sm font-semibold mb-1">
                   {speaker.role}
                 </p>
+                {speaker.activity && (
+                  <p className="text-purple-primary text-xs font-medium mb-2">
+                    📌 {speaker.activity}
+                  </p>
+                )}
                 <p className="text-foreground/60 text-sm leading-relaxed">
                   {speaker.desc}
                 </p>

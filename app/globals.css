@@ -429,21 +429,21 @@ body {
 }
 
 /* ===== Marquee Infinite Scroll ===== */
-@keyframes marquee {
+@keyframes marquee-scroll {
   0% {
-    transform: translateX(0);
+    transform: translateX(0%);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translateX(-100%);
   }
 }
 
 .animate-marquee {
-  animation: marquee 25s linear infinite;
+  animation: marquee-scroll 30s linear infinite;
 }
 
 .animate-marquee-gallery {
-  animation: marquee 40s linear infinite;
+  animation: marquee-scroll 65s linear infinite;
 }
 
 .scrollbar-hide {
