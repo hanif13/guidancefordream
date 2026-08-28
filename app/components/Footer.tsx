@@ -75,8 +75,9 @@ export default function Footer() {
             </h4>
             {[
               { label: "เกี่ยวกับค่าย", href: "#about" },
-              { label: "ภาพกิจกรรม", href: "#gallery" },
-              { label: "วันที่/สถานที่", href: "#details" },
+              { label: "Hilight ค่ายปีที่ 7", href: "#hilight" },
+              { label: "ประชาสัมพันธ์ค่าย", href: "#promotion" },
+              { label: "ความทรงจำที่ผ่านมา", href: "#gallery" },
             ].map((link) => (
               <a
                 key={link.href}

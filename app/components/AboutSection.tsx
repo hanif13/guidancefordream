@@ -46,23 +46,58 @@ const features = [
   },
 ];
 
-const orgs = [
+const infoCards = [
   {
-    name: "Prince of Songkla University",
-    abbr: "PSU",
-    logo: "/images/psu.webp"
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ),
+    iconBg: "bg-purple-primary/10",
+    iconHoverBg: "group-hover:bg-purple-primary",
+    iconColor: "text-purple-primary",
+    title: "วันที่จัดค่าย",
+    value: "6-9 พฤศจิกายน 2569",
+    sub: "4 วัน 3 คืน",
+    animation: "reveal-left stagger-1",
   },
   {
-    name: "Muslim Student Society PSU Hatyai",
-    abbr: "MSS",
-    logo: "/images/MSS.jpg"
+    icon: (
+      <>
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </>
+    ),
+    iconBg: "bg-pink-accent/10",
+    iconHoverBg: "group-hover:bg-pink-accent",
+    iconColor: "text-pink-accent",
+    title: "สถานที่",
+    value: "มหาวิทยาลัยสงขลานครินทร์",
+    sub: "วิทยาเขตหาดใหญ่ จ.สงขลา",
+    animation: "reveal stagger-2",
   },
   {
-    name: "Muslim Young Blood",
-    abbr: "MYB",
-    logo: "/images/MYB.jpg"
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    iconBg: "bg-purple-primary/10",
+    iconHoverBg: "group-hover:bg-purple-primary",
+    iconColor: "text-purple-primary",
+    title: "กลุ่มเป้าหมาย",
+    value: "น้องๆ ม.ปลาย",
+    sub: "รับจำนวนจำกัด",
+    animation: "reveal-right stagger-3",
   },
 ];
+
 
 export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -79,7 +114,7 @@ export default function AboutSection() {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.05 }
     );
 
     if (sectionRef.current) observer.observe(sectionRef.current);
@@ -138,35 +173,25 @@ export default function AboutSection() {
           ))}
         </div>
 
-        {/* Organizers */}
-        <div className="reveal text-center">
-          <p className="text-foreground/50 text-sm font-medium mb-6 uppercase tracking-widest">
-            จัดโดย
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-            {orgs.map((org) => (
-              <div
-                key={org.abbr}
-                className="flex flex-col items-center gap-3 group"
-              >
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl shadow-md shadow-purple-primary/5
-                                p-3 flex items-center justify-center border border-purple-primary/10
-                                group-hover:shadow-xl group-hover:shadow-purple-primary/15 group-hover:scale-105 group-hover:-translate-y-1
-                                transition-all duration-300 relative overflow-hidden">
-                  <Image
-                    src={org.logo}
-                    alt={org.name}
-                    width={80}
-                    height={80}
-                    className="object-contain w-full h-full rounded-xl"
-                  />
-                </div>
-                <span className="text-foreground/60 font-medium text-xs sm:text-sm text-center max-w-[140px] leading-snug group-hover:text-purple-dark transition-colors">
-                  {org.name}
+        {/* Info Cards — Date / Location / Target */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {infoCards.map((card) => (
+            <div
+              key={card.title}
+              className={`${card.animation} group p-6 bg-white/80 rounded-2xl border border-purple-primary/10
+                          hover:shadow-xl hover:shadow-purple-primary/10 transition-[box-shadow] duration-500`}
+            >
+              <div className={`w-12 h-12 ${card.iconBg} rounded-xl flex items-center justify-center mb-4
+                              ${card.iconHoverBg} group-hover:text-white transition-colors duration-300`}>
+                <span className={`${card.iconColor} group-hover:text-white transition-colors`}>
+                  {card.icon}
                 </span>
               </div>
-            ))}
-          </div>
+              <h3 className="text-xl font-bold text-purple-dark mb-2">{card.title}</h3>
+              <p className="text-foreground/80 font-semibold text-lg">{card.value}</p>
+              <p className="text-foreground/50 text-sm mt-1">{card.sub}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

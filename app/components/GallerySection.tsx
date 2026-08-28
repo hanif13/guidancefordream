@@ -128,37 +128,50 @@ export default function GallerySection() {
               ภาพบรรยากาศกิจกรรมค่ายสานฝันเพื่อน้องที่ผ่านมา เต็มไปด้วยรอยยิ้มและความสุข
             </p>
           </div>
+        </div>
 
-          {/* Gallery Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {galleryItems.map((item, i) => (
-              <button
+        {/* Infinite Gallery Marquee */}
+        <div className="relative reveal-scale overflow-hidden">
+          {/* Edge fade gradients */}
+          <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-36 bg-gradient-to-r from-pink-pale to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-36 bg-gradient-to-l from-cream-bg to-transparent z-10 pointer-events-none" />
+
+          {/* Marquee Track */}
+          <div className="flex animate-marquee-gallery hover:[animation-play-state:paused] py-2">
+            {[...galleryItems, ...galleryItems].map((item, i) => (
+              <div
                 key={`gallery-${i}`}
-                onClick={() => setSelectedImage(i)}
-                className={`reveal-scale stagger-${i + 1} group relative aspect-[4/3] rounded-2xl overflow-hidden
-                           cursor-pointer border-2 border-transparent hover:border-purple-primary/30 transition-colors duration-300`}
+                className="flex-shrink-0 mx-3 sm:mx-4"
               >
-                <Image
-                  src={item.src}
-                  alt={item.alt}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-deeper/80 via-purple-deeper/20 to-transparent
-                                opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                                flex items-end p-5">
-                  <div>
-                    <p className="text-white font-semibold text-base">
-                      {item.caption}
-                    </p>
-                    <p className="text-white/60 text-sm mt-1">
-                      คลิกเพื่อดูรูปใหญ่
-                    </p>
+                <button
+                  onClick={() => setSelectedImage(i % galleryItems.length)}
+                  className="group relative w-64 sm:w-80 aspect-[4/3] rounded-2xl overflow-hidden
+                             cursor-pointer border border-purple-primary/15 shadow-md shadow-purple-primary/5
+                             hover:shadow-xl hover:shadow-purple-primary/15 hover:scale-105
+                             transition-[transform,box-shadow] duration-300 block"
+                >
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    sizes="(max-width: 640px) 256px, 320px"
+                  />
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-purple-deeper/85 via-purple-deeper/25 to-transparent
+                                  opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                                  flex items-end p-4 sm:p-5 text-left">
+                    <div>
+                      <p className="text-white font-semibold text-sm sm:text-base">
+                        {item.caption}
+                      </p>
+                      <p className="text-white/70 text-xs sm:text-sm mt-0.5">
+                        คลิกเพื่อดูรูปใหญ่
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
             ))}
           </div>
         </div>

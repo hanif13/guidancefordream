@@ -5,8 +5,11 @@ import Image from "next/image";
 
 const navLinks = [
   { label: "เกี่ยวกับค่าย", href: "#about" },
-  { label: "กิจกรรม", href: "#gallery" },
-  { label: "วันที่/สถานที่", href: "#details" },
+  { label: "Hilight", href: "#hilight" },
+  { label: "ประชาสัมพันธ์", href: "#promotion" },
+  { label: "Implemented by", href: "#implemented-by" },
+  { label: "Blooming Partners", href: "#partners" },
+  { label: "ความทรงจำ", href: "#gallery" },
   { label: "ติดต่อ", href: "#footer" },
 ];
 
@@ -66,12 +69,12 @@ export default function Navbar() {
         </button>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden lg:flex items-center gap-0.5">
           {navLinks.map((link) => (
             <button
               key={link.href}
               onClick={() => handleNavClick(link.href)}
-              className="px-4 py-2 text-white/80 hover:text-white text-sm font-medium rounded-full
+              className="px-3 py-2 text-white/80 hover:text-white text-xs font-medium rounded-full
                          hover:bg-white/10 transition-colors duration-300 cursor-pointer"
             >
               {link.label}
@@ -92,7 +95,7 @@ export default function Navbar() {
         <button
           id="mobile-menu-button"
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden flex flex-col gap-1.5 p-2 cursor-pointer z-10"
+          className="lg:hidden flex flex-col gap-1.5 p-2 cursor-pointer z-10"
           aria-label="Toggle menu"
         >
           <span
@@ -115,8 +118,8 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden transition-[max-height,opacity] duration-500 overflow-hidden ${
-          mobileOpen ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
+        className={`lg:hidden transition-[max-height,opacity] duration-500 overflow-hidden ${
+          mobileOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="bg-purple-deeper/90 backdrop-blur-md mx-4 mt-1 rounded-2xl p-4 flex flex-col gap-1 border border-white/10">
