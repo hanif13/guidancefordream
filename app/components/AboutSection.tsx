@@ -157,7 +157,8 @@ export default function AboutSection() {
               key={feature.title}
               className={`reveal-scale stagger-${i + 1} group p-6 bg-white/70 rounded-2xl border border-purple-primary/10
                           hover:bg-white hover:shadow-xl hover:shadow-purple-primary/10 hover:-translate-y-2
-                          transition-[background-color,box-shadow,transform] duration-500 cursor-default`}
+                          transition-[background-color,box-shadow,transform] duration-500 cursor-default
+                          flex flex-col items-center text-center sm:items-start sm:text-left`}
             >
               <div className="w-14 h-14 bg-gradient-to-br from-purple-primary to-pink-accent rounded-xl flex items-center justify-center text-white mb-4
                               group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
@@ -179,7 +180,8 @@ export default function AboutSection() {
             <div
               key={card.title}
               className={`${card.animation} group p-6 bg-white/80 rounded-2xl border border-purple-primary/10
-                          hover:shadow-xl hover:shadow-purple-primary/10 transition-[box-shadow] duration-500`}
+                          hover:shadow-xl hover:shadow-purple-primary/10 transition-[box-shadow] duration-500
+                          flex flex-col items-center text-center md:items-start md:text-left`}
             >
               <div className={`w-12 h-12 ${card.iconBg} rounded-xl flex items-center justify-center mb-4
                               ${card.iconHoverBg} group-hover:text-white transition-colors duration-300`}>
