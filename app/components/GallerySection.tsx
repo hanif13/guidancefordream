@@ -118,7 +118,7 @@ export default function GallerySection() {
             </h2>
             <div className="section-divider mb-6" />
             <p className="text-foreground/70 text-lg max-w-2xl mx-auto">
-              ภาพบรรยากาศกิจกรรมค่ายสานฝันเพื่อน้องที่ผ่านมา เต็มไปด้วยรอยยิ้มและความสุข
+              ภาพบรรยากาศกิจกรรมค่ายสานฝันเพื่อน้องปีที่ 6
             </p>
           </div>
         </div>

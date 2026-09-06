@@ -63,7 +63,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-white/40 text-sm max-w-sm text-center md:text-left">
-              ค่ายแนะแนวการศึกษาและพัฒนาศักยภาพ สำหรับน้องๆ ระดับมัธยมศึกษา
+              ค่ายแนะแนวการศึกษาและพัฒนาศักยภาพ สำหรับน้องๆ ระดับมัธยมศึกษาตอนปลาย
               จัดโดย ชมรมมุสลิม มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
             </p>
           </div>
@@ -75,9 +75,11 @@ export default function Footer() {
             </h4>
             {[
               { label: "เกี่ยวกับค่าย", href: "#about" },
-              { label: "Hilight ค่ายปีที่ 7", href: "#hilight" },
+              { label: "Hilight", href: "#hilight" },
               { label: "ประชาสัมพันธ์ค่าย", href: "#promotion" },
               { label: "ความทรงจำที่ผ่านมา", href: "#gallery" },
+
+
             ].map((link) => (
               <a
                 key={link.href}
@@ -105,7 +107,8 @@ export default function Footer() {
                   </svg>
                 </div>
                 <div className="text-left">
-                  <span className="block text-white/90 text-xs font-semibold">อมีรค่าย (ประธานค่ายฝ่ายชาย)</span>
+                  <span className="block text-white/90 text-xs font-semibold">อมีรค่าย (ประธานโครงการ)</span>
+                  <span className="block text-white/90 text-xs font-semibold">นายฮนีฟ ต่วนมีเด่น</span>
                   <span className="block text-pink-light font-mono text-xs">091-046-3361</span>
                 </div>
               </a>
@@ -120,7 +123,8 @@ export default function Footer() {
                   </svg>
                 </div>
                 <div className="text-left">
-                  <span className="block text-white/90 text-xs font-semibold">อมีเราะฮฺค่าย (ฝ่ายหญิง)</span>
+                  <span className="block text-white/90 text-xs font-semibold">อมีเราะฮฺค่าย (รองประธานโครงการ)</span>
+                  <span className="block text-white/90 text-xs font-semibold">นางสาวนัจมีย์ มะสาอิ</span>
                   <span className="block text-pink-light font-mono text-xs">062-024-9308</span>
                 </div>
               </a>

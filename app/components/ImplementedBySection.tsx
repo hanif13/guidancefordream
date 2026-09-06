@@ -61,6 +61,9 @@ export default function ImplementedBySection() {
             </span>
           </h2>
           <div className="section-divider mb-6" />
+          <p className="text-foreground/70 text-lg max-w-2xl mx-auto leading-relaxed">
+            หน่วยงานที่ร่วมดำเนินการเพื่อให้เกิดโครงการดี ๆ สำหรับพวกเราทุกคน
+          </p>
         </div>
 
         {/* 3 Logos in a row */}

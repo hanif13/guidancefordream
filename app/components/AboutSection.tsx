@@ -58,7 +58,7 @@ const infoCards = [
     iconHoverBg: "group-hover:bg-purple-primary",
     iconColor: "text-purple-primary",
     title: "วันที่จัดค่าย",
-    value: "6-9 พฤศจิกายน 2569",
+    value: "6 - 9 พฤศจิกายน 2569",
     sub: "4 วัน 3 คืน",
     animation: "reveal-left stagger-1",
   },
@@ -92,8 +92,8 @@ const infoCards = [
     iconHoverBg: "group-hover:bg-purple-primary",
     iconColor: "text-purple-primary",
     title: "กลุ่มเป้าหมาย",
-    value: "น้องๆ ม.ปลาย",
-    sub: "รับจำนวนจำกัด",
+    value: "น้อง ๆ มัธยมศึกษาตอนปลาย",
+    sub: "รับจำนวน 100 คนเท่านั้น",
     animation: "reveal-right stagger-3",
   },
 ];
@@ -146,7 +146,8 @@ export default function AboutSection() {
           <div className="section-divider mb-6" />
           <p className="text-foreground/70 text-lg max-w-2xl mx-auto leading-relaxed">
             ค่ายสานฝันเพื่อน้อง เป็นค่ายที่จัดขึ้นเพื่อแนะแนวการศึกษา สร้างแรงบันดาลใจ
-            และพัฒนาศักยภาพให้กับน้องๆ ระดับมัธยมศึกษา ก้าวสู่ปีที่ 7 ด้วยความมุ่งมั่นและตั้งใจ
+            และพัฒนาศักยภาพให้กับน้อง ๆ มุสลิมระดับชั้นมัธยมศึกษาตอนปลาย ซึ่งจัดขึ้นเป็นปีที่ 7
+            ด้วยความตั้งใจและมุ่งมั่นของทีมงานชมรมมุสลิม ม.อ. หาดใหญ่ ทุกคน
           </p>
         </div>
 

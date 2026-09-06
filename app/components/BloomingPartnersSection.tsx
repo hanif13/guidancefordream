@@ -107,7 +107,7 @@ export default function BloomingPartnersSection() {
           </h2>
           <div className="section-divider mb-6" />
           <p className="text-foreground/70 text-lg max-w-2xl mx-auto leading-relaxed">
-            ขอขอบคุณผู้สนับสนุนทุกท่านที่ร่วมเป็นส่วนหนึ่งในการสร้างฝันให้น้องๆ
+            Growing Dreams Together เพราะทุกการเดินทางสู่ยอดเขา ล้วนมีผู้ร่วมเดินทางอยู่เบื้องหลัง
           </p>
         </div>
 
