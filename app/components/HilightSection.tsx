@@ -13,6 +13,38 @@ interface SpeakerItem {
   image: string;
 }
 
+// Photo/text sizing shrinks automatically as more speakers are added,
+// so everyone always fits on the page without paging or scrolling.
+function getSizeTier(total: number) {
+  if (total <= 3) {
+    return {
+      img: "w-[170px] sm:w-[190px] h-[280px] sm:h-[380px]",
+      name: "text-xl sm:text-2xl",
+      role: "text-xs sm:text-sm",
+      gap: "gap-6 sm:gap-10 lg:gap-14",
+      showVerticalLabel: true,
+    };
+  }
+  if (total <= 6) {
+    return {
+      img: "w-[130px] sm:w-[150px] h-[220px] sm:h-[300px]",
+      name: "text-base sm:text-lg",
+      role: "text-xs",
+      gap: "gap-5 sm:gap-8",
+      showVerticalLabel: true,
+    };
+  }
+  return {
+    img: "w-[100px] sm:w-[120px] h-[170px] sm:h-[220px]",
+    name: "text-sm sm:text-base",
+    role: "text-[11px] sm:text-xs",
+    gap: "gap-4 sm:gap-6",
+    // Vertical side labels take up horizontal room per card; once cards get
+    // this small, drop them so the row stays legible.
+    showVerticalLabel: false,
+  };
+}
+
 export default function HilightSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [speakers, setSpeakers] = useState<SpeakerItem[]>([]);
@@ -48,7 +80,6 @@ export default function HilightSection() {
 
     loadSpeakers();
 
-    // Realtime live sync
     const channel = supabase
       .channel("realtime-speakers")
       .on(
@@ -84,10 +115,12 @@ export default function HilightSection() {
     return () => observer.disconnect();
   }, [speakers]);
 
-  // If loaded and no active speakers, hide section
   if (loaded && speakers.length === 0) {
     return null;
   }
+
+  const total = speakers.length;
+  const tier = getSizeTier(total);
 
   return (
     <section
@@ -95,7 +128,6 @@ export default function HilightSection() {
       ref={sectionRef}
       className="relative py-20 sm:py-28 bg-gradient-to-b from-pink-pale via-cream-bg to-pink-pale overflow-hidden"
     >
-      {/* Decorative */}
       <div className="absolute top-1/3 left-0 w-80 h-80 bg-purple-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-0 w-72 h-72 bg-pink-accent/5 rounded-full blur-3xl" />
 
@@ -107,7 +139,7 @@ export default function HilightSection() {
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-pink-accent to-purple-primary bg-clip-text text-transparent">
-              Hilight ค่ายปีที่ 7
+              Hilight Activity
             </span>
           </h2>
           <div className="section-divider mb-6" />
@@ -116,49 +148,60 @@ export default function HilightSection() {
           </p>
         </div>
 
-        {/* Speakers Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {speakers.map((speaker, i) => (
-            <div
-              key={speaker.id}
-              className={`reveal-scale stagger-${(i % 4) + 1} group text-center`}
-            >
-              {/* Avatar */}
-              <div className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto mb-5">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-primary to-pink-accent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md" />
-                <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg
-                                group-hover:border-pink-accent/50 transition-colors duration-300">
-                  <Image
-                    src={speaker.image}
-                    alt={speaker.name}
-                    fill
-                    className="object-cover"
-                    sizes="144px"
-                  />
+        {/* All speakers — wraps to additional rows and shrinks as the list grows */}
+        <div className={`reveal-scale flex flex-wrap items-start justify-center ${tier.gap}`}>
+          {speakers.map((speaker, i) => {
+            // Alternate the diagonal cut direction and a slight vertical
+            // offset so the row reads as a gentle zig-zag, like the reference.
+            const clipPath =
+              i % 2 === 0
+                ? "polygon(0 0, 100% 0, 100% 88%, 0% 100%)"
+                : "polygon(0 0, 100% 0, 100% 100%, 0% 88%)";
+            const zigzagOffset = i % 2 === 1 ? "sm:translate-y-4" : "";
+
+            return (
+              <div
+                key={speaker.id}
+                className={`flex flex-col items-center flex-shrink-0 transition-transform duration-500 hover:-translate-y-1 ${zigzagOffset}`}
+              >
+                {/* Photo + vertical name tag */}
+                <div className="relative flex items-end gap-2">
+                  <div className={`relative overflow-hidden ${tier.img}`} style={{ clipPath }}>
+                    <Image
+                      src={speaker.image}
+                      alt={speaker.name}
+                      fill
+                      className="object-cover object-top"
+                      sizes="(max-width: 640px) 140px, 190px"
+                    />
+                  </div>
+
+                  {tier.showVerticalLabel && (
+                    <span
+                      className="hidden sm:block text-[10px] tracking-[0.25em] font-bold text-purple-primary/70 whitespace-nowrap max-h-[220px] overflow-hidden"
+                      style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                      title={speaker.name}
+                    >
+                      {speaker.name}
+                    </span>
+                  )}
+                </div>
+
+                {/* Caption */}
+                <div className="mt-4 text-center px-2 max-w-[180px]">
+                  {speaker.activity && (
+                    <p className="text-foreground/50 text-xs mb-1 line-clamp-1">
+                      {speaker.activity}
+                    </p>
+                  )}
+                  <h3 className={`font-bold text-purple-dark ${tier.name}`}>{speaker.name}</h3>
+                  <p className={`text-pink-accent font-semibold mt-1 ${tier.role}`}>
+                    {speaker.role}
+                  </p>
                 </div>
               </div>
-
-              {/* Info */}
-              <div className="p-4 bg-white/60 rounded-2xl border border-purple-primary/10
-                              group-hover:bg-white group-hover:shadow-lg group-hover:shadow-purple-primary/10
-                              transition-[background-color,box-shadow] duration-500">
-                <h3 className="text-lg font-bold text-purple-dark mb-1">
-                  {speaker.name}
-                </h3>
-                <p className="text-pink-accent text-sm font-semibold mb-1">
-                  {speaker.role}
-                </p>
-                {speaker.activity && (
-                  <p className="text-purple-primary text-xs font-medium mb-2">
-                    📌 {speaker.activity}
-                  </p>
-                )}
-                <p className="text-foreground/60 text-sm leading-relaxed">
-                  {speaker.desc}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
