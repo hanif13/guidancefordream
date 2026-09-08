@@ -178,11 +178,11 @@ export default function HilightSection() {
 
                   {tier.showVerticalLabel && (
                     <span
-                      className="hidden sm:block text-[10px] tracking-[0.25em] font-bold text-purple-primary/70 whitespace-nowrap max-h-[220px] overflow-hidden"
+                      className="block text-[10px] tracking-[0.25em] font-bold text-purple-primary/70 whitespace-nowrap max-h-[220px] overflow-hidden"
                       style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-                      title={speaker.name}
+                      title={speaker.desc}
                     >
-                      {speaker.name}
+                      {speaker.desc}
                     </span>
                   )}
                 </div>
@@ -190,7 +190,7 @@ export default function HilightSection() {
                 {/* Caption */}
                 <div className="mt-4 text-center px-2 max-w-[180px]">
                   {speaker.activity && (
-                    <p className="text-foreground/50 text-xs mb-1 line-clamp-1">
+                    <p className="text-foreground/50 text-xs mb-1">
                       {speaker.activity}
                     </p>
                   )}
