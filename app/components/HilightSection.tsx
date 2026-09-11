@@ -188,9 +188,9 @@ export default function HilightSection() {
                 </div>
 
                 {/* Caption */}
-                <div className="mt-4 text-center px-2 max-w-[180px]">
+                <div className="mt-4 text-center px-2 max-w-[280px]">
                   {speaker.activity && (
-                    <p className="text-foreground/50 text-xs mb-1">
+                    <p className="text-foreground/50 text-xs mb-1 whitespace-nowrap">
                       {speaker.activity}
                     </p>
                   )}
