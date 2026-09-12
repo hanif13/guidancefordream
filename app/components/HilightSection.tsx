@@ -96,15 +96,14 @@ export default function HilightSection() {
     };
   }, []);
 
+  const [isRevealed, setIsRevealed] = useState(false);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const reveals = entry.target.querySelectorAll(
-              ".reveal, .reveal-left, .reveal-right, .reveal-scale"
-            );
-            reveals.forEach((el) => el.classList.add("revealed"));
+            setIsRevealed(true);
           }
         });
       },
@@ -113,7 +112,7 @@ export default function HilightSection() {
 
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, [speakers]);
+  }, []);
 
   if (loaded && speakers.length === 0) {
     return null;
@@ -133,7 +132,7 @@ export default function HilightSection() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-16 reveal">
+        <div className={`text-center mb-16 reveal ${isRevealed ? "revealed" : ""}`}>
           <span className="inline-block px-4 py-1.5 bg-pink-accent/10 text-pink-accent text-sm font-semibold rounded-full mb-4">
             Hilight
           </span>
@@ -149,9 +148,19 @@ export default function HilightSection() {
         </div>
 
         {/* All speakers — wraps to additional rows and shrinks as the list grows */}
-        <div className={`reveal-scale flex flex-wrap items-start justify-center ${tier.gap}`}>
-          {speakers.map((speaker, i) => {
-            // Alternate the diagonal cut direction and a slight vertical
+        <div className={`reveal-scale ${isRevealed ? "revealed" : ""} flex flex-wrap items-start justify-center ${tier.gap}`}>
+          {!loaded ? (
+            /* Skeleton Loader */
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center flex-shrink-0 animate-pulse">
+                <div className={`bg-purple-primary/10 rounded-2xl ${tier.img}`} />
+                <div className="mt-4 w-24 h-5 bg-purple-primary/10 rounded" />
+                <div className="mt-2 w-16 h-4 bg-purple-primary/10 rounded" />
+              </div>
+            ))
+          ) : (
+            speakers.map((speaker, i) => {
+              // Alternate the diagonal cut direction and a slight vertical
             // offset so the row reads as a gentle zig-zag, like the reference.
             const clipPath =
               i % 2 === 0
