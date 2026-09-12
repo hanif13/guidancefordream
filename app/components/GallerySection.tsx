@@ -62,15 +62,14 @@ export default function GallerySection() {
     };
   }, []);
 
+  const [isRevealed, setIsRevealed] = useState(false);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const reveals = entry.target.querySelectorAll(
-              ".reveal, .reveal-scale"
-            );
-            reveals.forEach((el) => el.classList.add("revealed"));
+            setIsRevealed(true);
           }
         });
       },
@@ -79,7 +78,7 @@ export default function GallerySection() {
 
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, [galleryItems]);
+  }, []);
 
   // Close lightbox on Escape
   useEffect(() => {
@@ -107,7 +106,7 @@ export default function GallerySection() {
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Section Header */}
-          <div className="text-center mb-16 reveal">
+          <div className={`text-center mb-16 reveal ${isRevealed ? "revealed" : ""}`}>
             <span className="inline-block px-4 py-1.5 bg-pink-accent/10 text-pink-accent text-sm font-semibold rounded-full mb-4">
               ภาพกิจกรรม
             </span>
@@ -124,17 +123,28 @@ export default function GallerySection() {
         </div>
 
         {/* Infinite Gallery Marquee */}
-        <div className="relative reveal-scale overflow-hidden">
+        <div className={`relative reveal-scale ${isRevealed ? "revealed" : ""} overflow-hidden`}>
           {/* Edge fade gradients */}
           <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-36 bg-gradient-to-r from-pink-pale to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-36 bg-gradient-to-l from-cream-bg to-transparent z-10 pointer-events-none" />
 
-          {/* Marquee Track (Double tracks for 100% seamless scroll through all images) */}
+          {/* Marquee Track */}
           <div className="flex w-max group py-2">
-            {/* Track 1 */}
-            <div className="flex shrink-0 animate-marquee-gallery group-hover:[animation-play-state:paused] gap-6 pr-6">
-              {galleryItems.map((item, i) => (
-                <div key={`g1-${item.id || i}`} className="flex-shrink-0">
+            {!loaded ? (
+              /* Skeleton Loader */
+              <div className="flex shrink-0 gap-6 px-4 sm:px-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex-shrink-0 animate-pulse">
+                    <div className="w-64 sm:w-80 aspect-[4/3] rounded-2xl bg-purple-primary/10" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                {/* Track 1 */}
+                <div className="flex shrink-0 animate-marquee-gallery group-hover:[animation-play-state:paused] gap-6 pr-6">
+                  {galleryItems.map((item, i) => (
+                    <div key={`g1-${item.id || i}`} className="flex-shrink-0">
                   <button
                     onClick={() => setSelectedImage(i)}
                     className="group/btn relative w-64 sm:w-80 aspect-[4/3] rounded-2xl overflow-hidden
@@ -202,6 +212,8 @@ export default function GallerySection() {
                 </div>
               ))}
             </div>
+            </>
+            )}
           </div>
         </div>
       </section>

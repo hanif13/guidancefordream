@@ -61,15 +61,14 @@ export default function BloomingPartnersSection() {
     };
   }, []);
 
+  const [isRevealed, setIsRevealed] = useState(false);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const reveals = entry.target.querySelectorAll(
-              ".reveal, .reveal-scale"
-            );
-            reveals.forEach((el) => el.classList.add("revealed"));
+            setIsRevealed(true);
           }
         });
       },
@@ -78,7 +77,7 @@ export default function BloomingPartnersSection() {
 
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, [partners]);
+  }, []);
 
   // If loaded and no partners, hide section
   if (loaded && partners.length === 0) {
@@ -96,7 +95,7 @@ export default function BloomingPartnersSection() {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-12 reveal">
+        <div className={`text-center mb-12 reveal ${isRevealed ? "revealed" : ""}`}>
           <span className="inline-block px-4 py-1.5 bg-pink-accent/10 text-pink-accent text-sm font-semibold rounded-full mb-4">
             ผู้สนับสนุน
           </span>
@@ -112,20 +111,31 @@ export default function BloomingPartnersSection() {
         </div>
 
         {/* Infinite Marquee */}
-        <div className="relative reveal-scale overflow-hidden">
+        <div className={`relative reveal-scale ${isRevealed ? "revealed" : ""} overflow-hidden`}>
           {/* Edge fade */}
           <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-pink-pale to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-pink-pale to-transparent z-10 pointer-events-none" />
 
-          {/* Marquee track (Dual tracks for 100% seamless scroll) */}
+          {/* Marquee track */}
           <div className="flex w-max group py-2">
-            {/* Track 1 */}
-            <div className="flex shrink-0 animate-marquee group-hover:[animation-play-state:paused] gap-6 pr-6">
-              {partners.map((partner, i) => (
-                <div
-                  key={`p1-${partner.id || i}`}
-                  className="flex-shrink-0"
-                >
+            {!loaded ? (
+              /* Skeleton Loader */
+              <div className="flex shrink-0 gap-6 px-4 sm:px-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex-shrink-0 animate-pulse">
+                    <div className="w-28 h-28 sm:w-32 sm:h-32 bg-purple-primary/10 rounded-2xl" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                {/* Track 1 */}
+                <div className="flex shrink-0 animate-marquee group-hover:[animation-play-state:paused] gap-6 pr-6">
+                  {partners.map((partner, i) => (
+                    <div
+                      key={`p1-${partner.id || i}`}
+                      className="flex-shrink-0"
+                    >
                   <div className="w-28 h-28 sm:w-32 sm:h-32 bg-white rounded-2xl shadow-md shadow-purple-primary/5
                                   border border-purple-primary/10 flex items-center justify-center p-3 sm:p-4
                                   hover:shadow-lg hover:shadow-purple-primary/10 hover:scale-105
@@ -180,6 +190,8 @@ export default function BloomingPartnersSection() {
                 </div>
               ))}
             </div>
+            </>
+            )}
           </div>
         </div>
       </div>

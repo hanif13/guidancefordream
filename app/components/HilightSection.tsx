@@ -210,7 +210,8 @@ export default function HilightSection() {
                 </div>
               </div>
             );
-          })}
+          })
+        )}
         </div>
       </div>
     </section>
