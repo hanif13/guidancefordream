@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 
 const ENTRANCE_EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
-const VIDEO_URL =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260819_212700_3bb9329b-5c50-4257-a09b-ca85cf3654a3.mp4";
 
-// วันเปิดรับสมัคร: 16 กันยายน 2569 (พ.ศ.) = 16 Sep 2026 (ค.ศ.)
-const TARGET_DATE = new Date("2026-09-16T00:00:00+07:00").getTime();
+// วันปิดรับสมัคร: 22 กันยายน 2569 (พ.ศ.) = 22 Sep 2026 (ค.ศ.) เวลา 23:59 น.
+const DEADLINE = new Date("2026-09-22T23:59:00+07:00").getTime();
 
 interface TimeLeft {
   days: number;
@@ -18,7 +17,7 @@ interface TimeLeft {
 
 function getTimeLeft(): TimeLeft {
   const now = Date.now();
-  const diff = Math.max(0, TARGET_DATE - now);
+  const diff = Math.max(0, DEADLINE - now);
 
   return {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
@@ -52,6 +51,8 @@ export default function HeroSection() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  const isExpired = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
+
   const countdownUnits = [
     { value: timeLeft.days, label: "วัน" },
     { value: timeLeft.hours, label: "ชั่วโมง" },
@@ -64,7 +65,7 @@ export default function HeroSection() {
       id="hero"
       className="relative w-full h-screen overflow-hidden flex items-center justify-center"
     >
-      {/* Background Video — use will-change + GPU layer for smooth playback */}
+      {/* Background Image */}
       <div
         className="absolute inset-0 will-change-transform"
         style={{
@@ -72,38 +73,38 @@ export default function HeroSection() {
           transition: `opacity 1400ms ${ENTRANCE_EASING}`,
         }}
       >
-        <video
-          src={VIDEO_URL}
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="w-full h-full object-cover"
+        <Image
+          src="/images/hero-bg.jpg"
+          alt="Guidance For Dream SS7 Background"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
         />
       </div>
 
-      {/* Gradient Overlay — simple, no blur */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-purple-light/40 via-purple-primary/25 to-purple-deeper/80" />
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/30 via-black/20 to-purple-deeper/70" />
 
       {/* Content — centered */}
       <div className="relative z-10 text-center px-4 sm:px-8 max-w-3xl mx-auto">
-        {/* Coming Soon */}
+        {/* Title */}
         <h1
-          className="text-glow-white text-[3.75rem] xs:text-[4.25rem] sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-wider uppercase select-none leading-[0.95] sm:leading-tight mb-4 md:mb-6 will-change-[opacity,transform]"
+          className="text-glow-white text-[2.75rem] xs:text-[3.25rem] sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-wider uppercase select-none leading-[1.1] sm:leading-tight mb-3 md:mb-5 will-change-[opacity,transform]"
           style={{
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0)" : "translateY(32px)",
             transition: `opacity 900ms ${ENTRANCE_EASING} 400ms, transform 900ms ${ENTRANCE_EASING} 400ms`,
           }}
         >
-          COMING
-          <br className="sm:hidden" />
-          {" "}SOON
+          Guidance For Dream
+          <br />
+          <span className="text-pink-light">SS7</span>
         </h1>
 
         {/* Camp Name */}
         <p
-          className="text-white text-xl sm:text-2xl md:text-3xl font-semibold tracking-wide mb-8 md:mb-10 will-change-[opacity,transform]"
+          className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-2 md:mb-3 will-change-[opacity,transform]"
           style={{
             textShadow: "0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(35, 10, 60, 0.9)",
             opacity: mounted ? 1 : 0,
@@ -111,33 +112,69 @@ export default function HeroSection() {
             transition: `opacity 900ms ${ENTRANCE_EASING} 600ms, transform 900ms ${ENTRANCE_EASING} 600ms`,
           }}
         >
-          ค่ายสานฝันเพื่อน้อง ครั้งที่ 7
+          ค่ายสานฝันเพื่อน้อง ปีที่ 7
         </p>
 
-        {/* Countdown Label */}
+        {/* Open Registration */}
         <p
-          className="text-white/70 text-sm sm:text-base tracking-wide mb-4 will-change-[opacity,transform]"
+          className="text-white/90 text-base sm:text-lg md:text-xl font-medium tracking-wide mb-6 md:mb-8 will-change-[opacity,transform]"
+          style={{
+            textShadow: "0 2px 8px rgba(0, 0, 0, 0.6)",
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(32px)",
+            transition: `opacity 900ms ${ENTRANCE_EASING} 700ms, transform 900ms ${ENTRANCE_EASING} 700ms`,
+          }}
+        >
+          เปิดรับสมัครแล้ววันนี้
+        </p>
+
+        {/* Register Button */}
+        <div
+          className="mb-8 md:mb-10 will-change-[opacity,transform]"
           style={{
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0)" : "translateY(32px)",
-            transition: `opacity 900ms ${ENTRANCE_EASING} 750ms, transform 900ms ${ENTRANCE_EASING} 750ms`,
+            transition: `opacity 900ms ${ENTRANCE_EASING} 800ms, transform 900ms ${ENTRANCE_EASING} 800ms`,
           }}
         >
-          นับถอยหลังวันเปิดรับสมัคร
-        </p>
+          <a
+            href="https://forms.gle/TYCKm5ZazkK2wEFu5"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block px-8 py-3.5 sm:px-10 sm:py-4 bg-gradient-to-r from-purple-primary to-pink-accent
+                       text-white text-base sm:text-lg font-bold rounded-full
+                       hover:scale-105 hover:shadow-xl hover:shadow-purple-primary/40
+                       active:scale-95 transition-all duration-300 cursor-pointer
+                       border border-white/20"
+          >
+            สมัครเข้าร่วมค่าย
+          </a>
+        </div>
 
-        {/* Countdown Timer — no backdrop-blur for mobile performance */}
-        <div
-          className="flex items-center justify-center gap-3 sm:gap-5 will-change-[opacity,transform]"
+        {/* Countdown Label */}
+        <p
+          className="text-white/80 text-sm sm:text-base tracking-wide mb-4 will-change-[opacity,transform]"
           style={{
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0)" : "translateY(32px)",
             transition: `opacity 900ms ${ENTRANCE_EASING} 900ms, transform 900ms ${ENTRANCE_EASING} 900ms`,
           }}
         >
+          {isExpired ? "ปิดรับสมัครแล้ว" : "นับถอยหลังวันปิดรับสมัคร"}
+        </p>
+
+        {/* Countdown Timer */}
+        <div
+          className="flex items-center justify-center gap-3 sm:gap-5 will-change-[opacity,transform]"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(32px)",
+            transition: `opacity 900ms ${ENTRANCE_EASING} 1000ms, transform 900ms ${ENTRANCE_EASING} 1000ms`,
+          }}
+        >
           {countdownUnits.map((unit) => (
             <div key={unit.label} className="flex flex-col items-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center rounded-2xl bg-white/15 border border-white/20">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center rounded-2xl bg-white/15 border border-white/20 backdrop-blur-sm">
                 <span className="text-white text-2xl sm:text-3xl md:text-4xl font-bold tabular-nums drop-shadow-md">
                   {String(unit.value).padStart(2, "0")}
                 </span>

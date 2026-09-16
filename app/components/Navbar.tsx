@@ -80,15 +80,17 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
-          <button
-            onClick={() => handleNavClick("#hero")}
+          <a
+            href="https://forms.gle/TYCKm5ZazkK2wEFu5"
+            target="_blank"
+            rel="noopener noreferrer"
             className="ml-3 px-5 py-2 bg-gradient-to-r from-purple-primary to-pink-accent
                        text-white text-sm font-semibold rounded-full
                        hover:scale-105 hover:shadow-lg hover:shadow-purple-primary/30
-                       transition-all duration-300 cursor-pointer"
+                       transition-all duration-300 cursor-pointer inline-block text-center"
           >
             สมัครเข้าร่วม
-          </button>
+          </a>
         </div>
 
         {/* Mobile Hamburger */}
@@ -99,28 +101,24 @@ export default function Navbar() {
           aria-label="Toggle menu"
         >
           <span
-            className={`block w-6 h-0.5 bg-white transition-transform duration-300 ${
-              mobileOpen ? "rotate-45 translate-y-2" : ""
-            }`}
+            className={`block w-6 h-0.5 bg-white transition-transform duration-300 ${mobileOpen ? "rotate-45 translate-y-2" : ""
+              }`}
           />
           <span
-            className={`block w-6 h-0.5 bg-white transition-opacity duration-300 ${
-              mobileOpen ? "opacity-0" : ""
-            }`}
+            className={`block w-6 h-0.5 bg-white transition-opacity duration-300 ${mobileOpen ? "opacity-0" : ""
+              }`}
           />
           <span
-            className={`block w-6 h-0.5 bg-white transition-transform duration-300 ${
-              mobileOpen ? "-rotate-45 -translate-y-2" : ""
-            }`}
+            className={`block w-6 h-0.5 bg-white transition-transform duration-300 ${mobileOpen ? "-rotate-45 -translate-y-2" : ""
+              }`}
           />
         </button>
       </div>
 
       {/* Mobile Menu */}
       <div
-        className={`lg:hidden transition-[max-height,opacity] duration-500 overflow-hidden ${
-          mobileOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
-        }`}
+        className={`lg:hidden transition-[max-height,opacity] duration-500 overflow-hidden ${mobileOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+          }`}
       >
         <div className="bg-purple-deeper/90 backdrop-blur-md mx-4 mt-1 rounded-2xl p-4 flex flex-col gap-1 border border-white/10">
           {navLinks.map((link) => (
@@ -133,13 +131,15 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
-          <button
-            onClick={() => handleNavClick("#hero")}
+          <a
+            href="https://forms.gle/TYCKm5ZazkK2wEFu5"
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-2 px-4 py-3 bg-gradient-to-r from-purple-primary to-pink-accent
-                       text-white text-sm font-semibold rounded-xl text-center cursor-pointer"
+                       text-white text-sm font-semibold rounded-xl text-center cursor-pointer block"
           >
             สมัครเข้าร่วม
-          </button>
+          </a>
         </div>
       </div>
     </nav>
