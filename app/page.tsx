@@ -3,6 +3,7 @@ import HeroSection from "./components/HeroSection";
 import AboutSection from "./components/AboutSection";
 import HilightSection from "./components/HilightSection";
 import PromotionSection from "./components/PromotionSection";
+import VideoSection from "./components/VideoSection";
 import ImplementedBySection from "./components/ImplementedBySection";
 import BloomingPartnersSection from "./components/BloomingPartnersSection";
 import GallerySection from "./components/GallerySection";
@@ -16,6 +17,7 @@ export default function Home() {
       <AboutSection />
       <HilightSection />
       <PromotionSection />
+      <VideoSection />
       <ImplementedBySection />
       <BloomingPartnersSection />
       <GallerySection />
@@ -23,3 +25,4 @@ export default function Home() {
     </main>
   );
 }
+

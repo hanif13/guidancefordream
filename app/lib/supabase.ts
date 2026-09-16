@@ -19,7 +19,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
  */
 export async function uploadMedia(
   file: File,
-  folder: "speakers" | "posters" | "partners" | "gallery"
+  folder: "speakers" | "posters" | "partners" | "gallery" | "videos"
 ): Promise<{ url: string | null; error?: string }> {
   try {
     const rawExt = file.name.split(".").pop() || "png";

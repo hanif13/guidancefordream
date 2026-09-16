@@ -46,6 +46,17 @@ interface GalleryImage {
   isActive: boolean;
 }
 
+interface Video {
+  id: string;
+  title: string;
+  description: string;
+  videoType: "youtube" | "upload";
+  videoUrl: string;
+  thumbnailUrl: string;
+  order: number;
+  isActive: boolean;
+}
+
 export default function AdminPage() {
   // Auth State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -55,7 +66,7 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState<string | null>(null);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"overview" | "speakers" | "posters" | "partners" | "gallery">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "speakers" | "posters" | "partners" | "gallery" | "videos">("overview");
 
   // Loading States
   const [loading, setLoading] = useState(true);
@@ -66,6 +77,7 @@ export default function AdminPage() {
   const [posters, setPosters] = useState<Poster[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
+  const [videos, setVideos] = useState<Video[]>([]);
 
   // Notification Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -90,6 +102,10 @@ export default function AdminPage() {
   // Gallery Modal State
   const [editingGallery, setEditingGallery] = useState<GalleryImage | null>(null);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+
+  // Video Modal State
+  const [editingVideo, setEditingVideo] = useState<Video | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   // Check Auth on Mount
   useEffect(() => {
@@ -209,6 +225,26 @@ export default function AdminPage() {
           }))
         );
       }
+
+      // 5. Fetch Videos
+      const { data: vidData } = await supabase
+        .from("videos")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (vidData) {
+        setVideos(
+          vidData.map((v) => ({
+            id: v.id,
+            title: v.title || "",
+            description: v.description || "",
+            videoType: (v.video_type as "youtube" | "upload") || "youtube",
+            videoUrl: v.video_url || "",
+            thumbnailUrl: v.thumbnail_url || "",
+            order: v.sort_order || 0,
+            isActive: v.is_active ?? true,
+          }))
+        );
+      }
     } catch (err) {
       console.error("Error fetching admin data:", err);
     } finally {
@@ -219,19 +255,27 @@ export default function AdminPage() {
   // File Upload Handlers
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    folder: "speakers" | "posters" | "partners" | "gallery",
+    folder: "speakers" | "posters" | "partners" | "gallery" | "videos",
     onSuccess: (url: string) => void
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Check file size (limit to 50MB)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    if (file.size > MAX_FILE_SIZE) {
+      showToast("ขนาดไฟล์เกิน 50MB กรุณาใช้ไฟล์ขนาดเล็กกว่านี้ หรือใช้ลิงก์ YouTube แทนสำหรับวิดีโอขนาดใหญ่");
+      return;
+    }
+
+
     setIsUploading(true);
-    showToast("กำลังอัปโหลดรูปภาพ...");
+    showToast("กำลังอัปโหลดไฟล์...");
     try {
       const res = await uploadMedia(file, folder);
       if (res && res.url) {
         onSuccess(res.url);
-        showToast("อัปโหลดรูปภาพสำเร็จ! ✅");
+        showToast("อัปโหลดสำเร็จ! ✅");
       } else {
         showToast("อัปโหลดไม่สำเร็จ: " + (res?.error || "เกิดข้อผิดพลาด"));
       }
@@ -489,6 +533,23 @@ export default function AdminPage() {
               </div>
               <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold">{gallery.length}</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab("videos")}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                activeTab === "videos"
+                  ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-lg shadow-purple-primary/20"
+                  : "text-slate-400 hover:text-white hover:bg-slate-900"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span>คลิปวิดีโอประชาสัมพันธ์</span>
+              </div>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold">{videos.length}</span>
+            </button>
           </nav>
 
           {/* Connected Status */}
@@ -532,7 +593,7 @@ export default function AdminPage() {
               </div>
 
               {/* Stat Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div onClick={() => setActiveTab("speakers")} className="p-5 bg-slate-950/60 hover:bg-slate-950/90 rounded-2xl border border-slate-800 cursor-pointer transition-all hover:border-purple-primary/40 hover:-translate-y-0.5">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-semibold text-slate-400">วิทยากร (Hilight)</span>
@@ -575,6 +636,17 @@ export default function AdminPage() {
                   </div>
                   <div className="text-3xl font-extrabold text-white">{gallery.length}</div>
                   <p className="text-xs text-slate-500 mt-1">รูปภาพในดาต้าเบส</p>
+                </div>
+
+                <div onClick={() => setActiveTab("videos")} className="p-5 bg-slate-950/60 hover:bg-slate-950/90 rounded-2xl border border-slate-800 cursor-pointer transition-all hover:border-purple-primary/40 hover:-translate-y-0.5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-slate-400">คลิปวิดีโอ</span>
+                    <div className="w-8 h-8 rounded-xl bg-red-500/20 text-red-300 flex items-center justify-center">
+                      🎬
+                    </div>
+                  </div>
+                  <div className="text-3xl font-extrabold text-white">{videos.length}</div>
+                  <p className="text-xs text-slate-500 mt-1">แสดงผล {videos.filter(v => v.isActive).length} คลิป</p>
                 </div>
               </div>
             </div>
@@ -995,6 +1067,155 @@ export default function AdminPage() {
                     <div className="p-3">
                       <p className="text-xs font-semibold text-white truncate">{item.caption}</p>
                       <span className="text-[10px] text-slate-500 block mt-0.5">หมวด: {item.category}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* VIDEOS TAB */}
+          {!loading && activeTab === "videos" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-bold text-white">จัดการคลิปวิดีโอประชาสัมพันธ์</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">เพิ่มคลิปวิดีโอจาก YouTube หรืออัปโหลดไฟล์วิดีโอเพื่อแสดงในหน้าเว็บหลัก</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingVideo({
+                      id: "",
+                      title: "",
+                      description: "",
+                      videoType: "youtube",
+                      videoUrl: "",
+                      thumbnailUrl: "",
+                      order: videos.length + 1,
+                      isActive: true,
+                    });
+                    setIsVideoModalOpen(true);
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-primary to-pink-accent hover:opacity-95 text-white text-sm font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-purple-primary/25 cursor-pointer self-start"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>เพิ่มวิดีโอใหม่</span>
+                </button>
+              </div>
+
+              {videos.length === 0 && (
+                <div className="p-12 text-center text-slate-500 bg-slate-950/40 rounded-2xl border border-slate-800">
+                  ยังไม่มีคลิปวิดีโอในระบบ (กดปุ่ม &quot;เพิ่มวิดีโอใหม่&quot; ด้านบนเพื่อเพิ่ม)
+                </div>
+              )}
+
+              {/* Videos Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {videos.map((vid) => (
+                  <div key={vid.id} className="bg-slate-950/70 rounded-2xl border border-slate-800 overflow-hidden flex flex-col">
+                    <div className="relative aspect-video bg-slate-900">
+                      {vid.videoType === "youtube" && vid.videoUrl ? (
+                        (() => {
+                          const match = vid.videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+                          const ytId = match ? match[1] : null;
+                          return ytId ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={vid.thumbnailUrl || `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
+                              alt={vid.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-600 text-xs">ลิงก์ไม่ถูกต้อง</div>
+                          );
+                        })()
+                      ) : vid.thumbnailUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={vid.thumbnailUrl} alt={vid.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-600">
+                          <svg className="w-12 h-12 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
+                      {/* Type badge */}
+                      <div className="absolute top-3 left-3">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          vid.videoType === "youtube"
+                            ? "bg-red-600/90 text-white"
+                            : "bg-purple-primary/90 text-white"
+                        }`}>
+                          {vid.videoType === "youtube" ? "▶ Link" : "📁 อัปโหลด"}
+                        </span>
+                      </div>
+                      <div className="absolute top-3 right-3">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${vid.isActive ? "bg-emerald-500/80 text-white" : "bg-red-500/80 text-white"}`}>
+                          {vid.isActive ? "กำลังแสดง" : "ซ่อนอยู่"}
+                        </span>
+                      </div>
+                      {/* Play icon overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                          <svg className="w-6 h-6 text-white ml-1" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-white text-sm line-clamp-1">{vid.title || "(ไม่มีชื่อ)"}</h3>
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-2">{vid.description || "-"}</p>
+                        <p className="text-[10px] text-slate-600 mt-1 truncate font-mono">{vid.videoUrl}</p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+                        <span className="text-slate-500 font-mono">ลำดับ #{vid.order}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={async () => {
+                              const newStatus = !vid.isActive;
+                              const { error } = await supabase.from("videos").update({ is_active: newStatus }).eq("id", vid.id);
+                              if (error) {
+                                showToast("แก้ไขไม่สำเร็จ: " + error.message);
+                              } else {
+                                await fetchData();
+                                showToast(newStatus ? "เปิดแสดงผลแล้ว" : "ซ่อนวิดีโอแล้ว");
+                              }
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+                          >
+                            {vid.isActive ? "ซ่อน" : "แสดง"}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingVideo({ ...vid });
+                              setIsVideoModalOpen(true);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-purple-primary/30 hover:bg-purple-primary/50 text-purple-light transition-colors cursor-pointer"
+                          >
+                            แก้ไข
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (confirm(`ยืนยันการลบวิดีโอ ${vid.title}?`)) {
+                                const { error } = await supabase.from("videos").delete().eq("id", vid.id);
+                                if (error) {
+                                  showToast("ลบไม่สำเร็จ: " + error.message);
+                                } else {
+                                  await fetchData();
+                                  showToast("ลบวิดีโอเรียบร้อยแล้ว");
+                                }
+                              }
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-400 transition-colors cursor-pointer"
+                          >
+                            ลบ
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1511,6 +1732,252 @@ export default function AdminPage() {
                   </>
                 ) : (
                   <span>บันทึกรูปภาพ</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VIDEO MODAL */}
+      {isVideoModalOpen && editingVideo && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold text-white">
+              {editingVideo.id ? "แก้ไขวิดีโอ" : "เพิ่มวิดีโอใหม่"}
+            </h3>
+            
+            <div className="space-y-3 text-sm">
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">ชื่อวิดีโอ</label>
+                <input
+                  type="text"
+                  value={editingVideo.title}
+                  onChange={(e) => setEditingVideo({ ...editingVideo, title: e.target.value })}
+                  placeholder="เช่น คลิปแนะนำค่ายสานฝัน 7th"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-purple-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">คำอธิบาย (ไม่บังคับ)</label>
+                <textarea
+                  rows={2}
+                  value={editingVideo.description}
+                  onChange={(e) => setEditingVideo({ ...editingVideo, description: e.target.value })}
+                  placeholder="รายละเอียดสั้นๆ เกี่ยวกับวิดีโอ..."
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-purple-primary text-xs"
+                />
+              </div>
+
+              {/* Video Type Selection */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-2">ประเภทวิดีโอ</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingVideo({ ...editingVideo, videoType: "youtube", videoUrl: "" })}
+                    className={`p-3 rounded-xl border-2 text-center text-xs font-semibold transition-all cursor-pointer ${
+                      editingVideo.videoType === "youtube"
+                        ? "border-red-500 bg-red-950/40 text-red-300"
+                        : "border-slate-700 bg-slate-950 text-slate-400 hover:border-slate-600"
+                    }`}
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
+                        <path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill={editingVideo.videoType === "youtube" ? "#fca5a5" : "#94a3b8"}/>
+                      </svg>
+                      <span>ลิงก์ภายนอก</span>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingVideo({ ...editingVideo, videoType: "upload", videoUrl: "" })}
+                    className={`p-3 rounded-xl border-2 text-center text-xs font-semibold transition-all cursor-pointer ${
+                      editingVideo.videoType === "upload"
+                        ? "border-purple-primary bg-purple-primary/20 text-purple-light"
+                        : "border-slate-700 bg-slate-950 text-slate-400 hover:border-slate-600"
+                    }`}
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <span>อัปโหลดไฟล์</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Link URL Input */}
+              {editingVideo.videoType === "youtube" && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">ลิงก์วิดีโอ (YouTube หรือ Google Drive)</label>
+                  <input
+                    type="text"
+                    value={editingVideo.videoUrl}
+                    onChange={(e) => setEditingVideo({ ...editingVideo, videoUrl: e.target.value })}
+                    placeholder="https://youtube.com/... หรือ https://drive.google.com/file/d/..."
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-purple-primary text-xs"
+                  />
+                  {editingVideo.videoUrl && (() => {
+                    const ytMatch = editingVideo.videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+                    const ytId = ytMatch ? ytMatch[1] : null;
+                    
+                    const driveMatch = editingVideo.videoUrl.match(/(?:\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]+)/);
+                    const driveId = driveMatch ? driveMatch[1] : null;
+
+                    return ytId ? (
+                      <div className="mt-2 rounded-xl overflow-hidden border border-slate-800 aspect-video">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${ytId}`}
+                          title="YouTube Preview"
+                          className="w-full h-full"
+                          allowFullScreen
+                        />
+                      </div>
+                    ) : driveId ? (
+                      <div className="mt-2 rounded-xl overflow-hidden border border-slate-800 aspect-video">
+                        <iframe
+                          src={`https://drive.google.com/file/d/${driveId}/preview`}
+                          title="Google Drive Preview"
+                          className="w-full h-full"
+                          allowFullScreen
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-red-400 mt-1">⚠️ ลิงก์ไม่ถูกต้อง กรุณาใช้ลิงก์ YouTube หรือ Google Drive</p>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* Video File Upload */}
+              {editingVideo.videoType === "upload" && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-slate-400">อัปโหลดไฟล์วิดีโอ (.mp4, .webm, .mov)</label>
+                    {isUploading && (
+                      <span className="text-[11px] text-amber-400 font-medium animate-pulse flex items-center gap-1">
+                        <span>⏳</span> กำลังอัปโหลด...
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime,video/*"
+                    onChange={(e) => handleFileUpload(e, "videos", (url) => setEditingVideo({ ...editingVideo, videoUrl: url }))}
+                    className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-primary/30 file:text-purple-light hover:file:bg-purple-primary/50 cursor-pointer"
+                  />
+                  {editingVideo.videoUrl && (
+                    <div className="mt-2.5 p-2.5 bg-slate-950/80 rounded-xl border border-slate-800">
+                      <span className="text-[11px] text-emerald-400 font-medium block">✓ วิดีโอพร้อมบันทึก</span>
+                      <span className="text-[10px] text-slate-500 font-mono truncate block max-w-full mt-0.5">{editingVideo.videoUrl}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Thumbnail Upload (optional) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-400">ภาพปก Thumbnail (ไม่บังคับ — YouTube จะดึงภาพอัตโนมัติ)</label>
+                  {isUploading && (
+                    <span className="text-[11px] text-amber-400 font-medium animate-pulse flex items-center gap-1">
+                      <span>⏳</span> กำลังอัปโหลด...
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload(e, "videos", (url) => setEditingVideo({ ...editingVideo, thumbnailUrl: url }))}
+                  className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-primary/30 file:text-purple-light hover:file:bg-purple-primary/50 cursor-pointer"
+                />
+                {editingVideo.thumbnailUrl && (
+                  <div className="mt-2.5 flex items-center gap-3 p-2 bg-slate-950/80 rounded-xl border border-slate-800">
+                    <div className="w-16 h-10 relative rounded-lg overflow-hidden border border-slate-700 flex-shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={editingVideo.thumbnailUrl} alt="Thumbnail Preview" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[11px] text-emerald-400 font-medium block">✓ ภาพปกพร้อมบันทึก</span>
+                      <span className="text-[10px] text-slate-500 font-mono truncate block max-w-xs">{editingVideo.thumbnailUrl}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sort Order */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">ลำดับการแสดง</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={editingVideo.order}
+                  onChange={(e) => setEditingVideo({ ...editingVideo, order: parseInt(e.target.value) || 1 })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-purple-primary"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+              <button
+                onClick={() => setIsVideoModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm font-medium cursor-pointer"
+              >
+                ยกเลิก
+              </button>
+              <button
+                disabled={isUploading}
+                onClick={async () => {
+                  if (!editingVideo.title) {
+                    alert("กรุณากรอกชื่อวิดีโอ");
+                    return;
+                  }
+                  if (!editingVideo.videoUrl) {
+                    alert("กรุณาใส่ลิงก์หรืออัปโหลดวิดีโอ");
+                    return;
+                  }
+
+                  const row = {
+                    title: editingVideo.title,
+                    description: editingVideo.description,
+                    video_type: editingVideo.videoType,
+                    video_url: editingVideo.videoUrl,
+                    thumbnail_url: editingVideo.thumbnailUrl,
+                    sort_order: editingVideo.order,
+                    is_active: editingVideo.isActive,
+                  };
+
+                  if (editingVideo.id) {
+                    const { error } = await supabase.from("videos").update(row).eq("id", editingVideo.id);
+                    if (error) {
+                      showToast("บันทึกไม่สำเร็จ: " + error.message);
+                      return;
+                    }
+                  } else {
+                    const { error } = await supabase.from("videos").insert([row]);
+                    if (error) {
+                      showToast("บันทึกไม่สำเร็จ: " + error.message);
+                      return;
+                    }
+                  }
+
+                  await fetchData();
+                  setIsVideoModalOpen(false);
+                  showToast("บันทึกวิดีโอสำเร็จ! 🎬");
+                }}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-primary to-pink-accent text-white text-sm font-semibold shadow-lg shadow-purple-primary/30 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {isUploading ? (
+                  <>
+                    <span className="animate-spin text-xs">🌀</span>
+                    <span>กำลังอัปโหลด...</span>
+                  </>
+                ) : (
+                  <span>บันทึกวิดีโอ</span>
                 )}
               </button>
             </div>
