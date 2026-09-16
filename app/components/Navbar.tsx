@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const navLinks = [
   { label: "เกี่ยวกับค่าย", href: "#about" },
-  { label: "Hilight", href: "#hilight" },
+  { label: "Highlight", href: "#hilight" },
   { label: "ประชาสัมพันธ์", href: "#promotion" },
   { label: "Implemented by", href: "#implemented-by" },
   { label: "Blooming Partners", href: "#partners" },

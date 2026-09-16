@@ -134,7 +134,7 @@ export default function HilightSection() {
         {/* Section Header */}
         <div className={`text-center mb-16 reveal ${isRevealed ? "revealed" : ""}`}>
           <span className="inline-block px-4 py-1.5 bg-pink-accent/10 text-pink-accent text-sm font-semibold rounded-full mb-4">
-            Hilight
+            Highlight
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-pink-accent to-purple-primary bg-clip-text text-transparent">
@@ -161,57 +161,57 @@ export default function HilightSection() {
           ) : (
             speakers.map((speaker, i) => {
               // Alternate the diagonal cut direction and a slight vertical
-            // offset so the row reads as a gentle zig-zag, like the reference.
-            const clipPath =
-              i % 2 === 0
-                ? "polygon(0 0, 100% 0, 100% 88%, 0% 100%)"
-                : "polygon(0 0, 100% 0, 100% 100%, 0% 88%)";
-            const zigzagOffset = i % 2 === 1 ? "sm:translate-y-4" : "";
+              // offset so the row reads as a gentle zig-zag, like the reference.
+              const clipPath =
+                i % 2 === 0
+                  ? "polygon(0 0, 100% 0, 100% 88%, 0% 100%)"
+                  : "polygon(0 0, 100% 0, 100% 100%, 0% 88%)";
+              const zigzagOffset = i % 2 === 1 ? "sm:translate-y-4" : "";
 
-            return (
-              <div
-                key={speaker.id}
-                className={`flex flex-col items-center flex-shrink-0 transition-transform duration-500 hover:-translate-y-1 ${zigzagOffset}`}
-              >
-                {/* Photo + vertical name tag */}
-                <div className="relative flex items-end gap-2">
-                  <div className={`relative overflow-hidden ${tier.img}`} style={{ clipPath }}>
-                    <Image
-                      src={speaker.image}
-                      alt={speaker.name}
-                      fill
-                      className="object-cover object-top"
-                      sizes="(max-width: 640px) 140px, 190px"
-                    />
+              return (
+                <div
+                  key={speaker.id}
+                  className={`flex flex-col items-center flex-shrink-0 transition-transform duration-500 hover:-translate-y-1 ${zigzagOffset}`}
+                >
+                  {/* Photo + vertical name tag */}
+                  <div className="relative flex items-end gap-2">
+                    <div className={`relative overflow-hidden ${tier.img}`} style={{ clipPath }}>
+                      <Image
+                        src={speaker.image}
+                        alt={speaker.name}
+                        fill
+                        className="object-cover object-top"
+                        sizes="(max-width: 640px) 140px, 190px"
+                      />
+                    </div>
+
+                    {tier.showVerticalLabel && (
+                      <span
+                        className="block text-[10px] tracking-[0.25em] font-bold text-purple-primary/70 whitespace-nowrap max-h-[220px] overflow-hidden"
+                        style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                        title={speaker.desc}
+                      >
+                        {speaker.desc}
+                      </span>
+                    )}
                   </div>
 
-                  {tier.showVerticalLabel && (
-                    <span
-                      className="block text-[10px] tracking-[0.25em] font-bold text-purple-primary/70 whitespace-nowrap max-h-[220px] overflow-hidden"
-                      style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-                      title={speaker.desc}
-                    >
-                      {speaker.desc}
-                    </span>
-                  )}
-                </div>
-
-                {/* Caption */}
-                <div className="mt-4 text-center px-2 max-w-[280px]">
-                  {speaker.activity && (
-                    <p className="text-foreground/50 text-xs mb-1 whitespace-nowrap">
-                      {speaker.activity}
+                  {/* Caption */}
+                  <div className="mt-4 text-center px-2 max-w-[280px]">
+                    {speaker.activity && (
+                      <p className="text-foreground/50 text-xs mb-1 whitespace-nowrap">
+                        {speaker.activity}
+                      </p>
+                    )}
+                    <h3 className={`font-bold text-purple-dark ${tier.name}`}>{speaker.name}</h3>
+                    <p className={`text-pink-accent font-semibold mt-1 ${tier.role}`}>
+                      {speaker.role}
                     </p>
-                  )}
-                  <h3 className={`font-bold text-purple-dark ${tier.name}`}>{speaker.name}</h3>
-                  <p className={`text-pink-accent font-semibold mt-1 ${tier.role}`}>
-                    {speaker.role}
-                  </p>
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        )}
+              );
+            })
+          )}
         </div>
       </div>
     </section>
