@@ -75,7 +75,7 @@ export default function Footer() {
             </h4>
             {[
               { label: "เกี่ยวกับค่าย", href: "#about" },
-              { label: "Hilight", href: "#hilight" },
+              { label: "Highlight", href: "#hilight" },
               { label: "ประชาสัมพันธ์ค่าย", href: "#promotion" },
               { label: "ความทรงจำที่ผ่านมา", href: "#gallery" },
 
