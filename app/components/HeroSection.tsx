@@ -5,8 +5,8 @@ import Image from "next/image";
 
 const ENTRANCE_EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
 
-// วันปิดรับสมัคร: 22 กันยายน 2569 (พ.ศ.) = 22 Sep 2026 (ค.ศ.) เวลา 23:59 น.
-const DEADLINE = new Date("2026-09-22T23:59:00+07:00").getTime();
+// วันค่าย: 6 พฤศจิกายน 2569 (พ.ศ.) = 6 Nov 2026 (ค.ศ.) เวลา 00:00 น.
+const DEADLINE = new Date("2026-11-06T00:00:00+07:00").getTime();
 
 interface TimeLeft {
   days: number;
@@ -114,42 +114,20 @@ export default function HeroSection() {
         >
           ค่ายสานฝันเพื่อน้อง ปีที่ 7
         </p>
-
-        {/* Open Registration */}
         <p
-          className="text-white/90 text-base sm:text-lg md:text-xl font-medium tracking-wide mb-6 md:mb-8 will-change-[opacity,transform]"
+          className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-2 md:mb-3 will-change-[opacity,transform]"
           style={{
-            textShadow: "0 2px 8px rgba(0, 0, 0, 0.6)",
+            textShadow: "0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(35, 10, 60, 0.9)",
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0)" : "translateY(32px)",
-            transition: `opacity 900ms ${ENTRANCE_EASING} 700ms, transform 900ms ${ENTRANCE_EASING} 700ms`,
+            transition: `opacity 900ms ${ENTRANCE_EASING} 600ms, transform 900ms ${ENTRANCE_EASING} 600ms`,
           }}
         >
-          เปิดรับสมัครแล้ววันนี้
+          วันที่  6 - 7 พฤศจิกายน 2569
         </p>
 
-        {/* Register Button */}
-        <div
-          className="mb-8 md:mb-10 will-change-[opacity,transform]"
-          style={{
-            opacity: mounted ? 1 : 0,
-            transform: mounted ? "translateY(0)" : "translateY(32px)",
-            transition: `opacity 900ms ${ENTRANCE_EASING} 800ms, transform 900ms ${ENTRANCE_EASING} 800ms`,
-          }}
-        >
-          <a
-            href="https://forms.gle/TYCKm5ZazkK2wEFu5"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block px-8 py-3.5 sm:px-10 sm:py-4 bg-gradient-to-r from-purple-primary to-pink-accent
-                       text-white text-base sm:text-lg font-bold rounded-full
-                       hover:scale-105 hover:shadow-xl hover:shadow-purple-primary/40
-                       active:scale-95 transition-all duration-300 cursor-pointer
-                       border border-white/20"
-          >
-            สมัครเข้าร่วมค่าย
-          </a>
-        </div>
+        {/* Spacer */}
+        <div className="mb-8 md:mb-10" />
 
         {/* Countdown Label */}
         <p
@@ -160,7 +138,7 @@ export default function HeroSection() {
             transition: `opacity 900ms ${ENTRANCE_EASING} 900ms, transform 900ms ${ENTRANCE_EASING} 900ms`,
           }}
         >
-          {isExpired ? "ปิดรับสมัครแล้ว" : "นับถอยหลังวันปิดรับสมัคร"}
+          {isExpired ? "ถึงวันค่ายแล้ว!" : "นับถอยหลังวันค่าย"}
         </p>
 
         {/* Countdown Timer */}

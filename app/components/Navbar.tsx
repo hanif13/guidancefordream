@@ -80,17 +80,7 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
-          <a
-            href="https://forms.gle/TYCKm5ZazkK2wEFu5"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-3 px-5 py-2 bg-gradient-to-r from-purple-primary to-pink-accent
-                       text-white text-sm font-semibold rounded-full
-                       hover:scale-105 hover:shadow-lg hover:shadow-purple-primary/30
-                       transition-all duration-300 cursor-pointer inline-block text-center"
-          >
-            สมัครเข้าร่วม
-          </a>
+
         </div>
 
         {/* Mobile Hamburger */}
@@ -131,15 +121,7 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
-          <a
-            href="https://forms.gle/TYCKm5ZazkK2wEFu5"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 px-4 py-3 bg-gradient-to-r from-purple-primary to-pink-accent
-                       text-white text-sm font-semibold rounded-xl text-center cursor-pointer block"
-          >
-            สมัครเข้าร่วม
-          </a>
+
         </div>
       </div>
     </nav>
