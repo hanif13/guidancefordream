@@ -123,7 +123,7 @@ export default function HeroSection() {
             transition: `opacity 900ms ${ENTRANCE_EASING} 600ms, transform 900ms ${ENTRANCE_EASING} 600ms`,
           }}
         >
-          วันที่  6 - 7 พฤศจิกายน 2569
+          วันที่  6 - 9 พฤศจิกายน 2569
         </p>
 
         {/* Spacer */}
