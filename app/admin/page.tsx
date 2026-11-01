@@ -1689,12 +1689,11 @@ export default function AdminPage() {
                     target="_blank"
                     className="px-3.5 py-2 rounded-xl bg-white hover:bg-zinc-100 text-zinc-800 text-xs font-semibold transition-colors flex items-center gap-1.5 border border-zinc-200 shadow-xs"
                   >
-                    <span>🌐</span>
                     <span>เปิดดูหน้าเอกสารจริง</span>
                   </Link>
                   <button
                     onClick={handleOpenNewDocument}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-primary to-pink-accent hover:opacity-90 text-white text-xs sm:text-sm font-semibold transition-all shadow-lg shadow-purple-primary/30 flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                   >
                     <span>+ เพิ่มเอกสารใหม่</span>
                   </button>
@@ -1704,10 +1703,10 @@ export default function AdminPage() {
               {/* Category Filter Pills */}
               <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white rounded-2xl border border-zinc-200 shadow-xs">
                 {[
-                  { id: "all" as const, label: "ทั้งหมด", icon: "📚", count: documents.length },
-                  { id: "academic" as const, label: "เอกสารวิชาการ", icon: "📖", count: documents.filter(d => d.category === "academic").length },
-                  { id: "faculty_slides" as const, label: "สไลด์นำเสนอ 16 คณะ", icon: "🩺", count: documents.filter(d => d.category === "faculty_slides").length },
-                  { id: "camp_docs" as const, label: "เอกสารค่าย", icon: "📋", count: documents.filter(d => d.category === "camp_docs").length },
+                  { id: "all" as const, label: "ทั้งหมด", count: documents.length },
+                  { id: "academic" as const, label: "เอกสารวิชาการ", count: documents.filter(d => d.category === "academic").length },
+                  { id: "faculty_slides" as const, label: "สไลด์นำเสนอ 16 คณะ", count: documents.filter(d => d.category === "faculty_slides").length },
+                  { id: "camp_docs" as const, label: "เอกสารค่าย", count: documents.filter(d => d.category === "camp_docs").length },
                 ].map((cat) => (
                   <button
                     key={cat.id}
@@ -1718,7 +1717,6 @@ export default function AdminPage() {
                         : "text-zinc-600 hover:text-black hover:bg-zinc-100"
                     }`}
                   >
-                    <span>{cat.icon}</span>
                     <span>{cat.label}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                       docCategoryFilter === cat.id
@@ -1734,7 +1732,11 @@ export default function AdminPage() {
               {/* Document Cards Grid */}
               {documents.filter(d => docCategoryFilter === "all" || d.category === docCategoryFilter).length === 0 ? (
                 <div className="p-12 text-center bg-white rounded-2xl border border-zinc-200 space-y-4">
-                  <div className="text-4xl">📚</div>
+                  <div className="w-12 h-12 mx-auto rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-500">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
                   <h3 className="text-base font-bold text-black">ยังไม่มีเอกสารในหมวดนี้</h3>
                   <p className="text-xs text-zinc-500 max-w-md mx-auto">
                     คุณสามารถกดปุ่ม &quot;+ เพิ่มเอกสารใหม่&quot; เพื่อเริ่มต้นเพิ่มเอกสารวิชาการ สไลด์นำเสนอ หรือเอกสารค่าย
@@ -1785,8 +1787,10 @@ export default function AdminPage() {
                                 </span>
                               </div>
                               <div className="flex items-start gap-3">
-                                <div className="w-12 h-12 rounded-xl bg-purple-50 border border-purple-100 text-purple-700 text-2xl flex items-center justify-center shrink-0 shadow-xs">
-                                  {doc.icon || "📖"}
+                                <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 text-purple-700 flex items-center justify-center shrink-0 shadow-xs">
+                                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                  </svg>
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <h3 className="font-bold text-black text-base leading-snug line-clamp-1">
@@ -1829,7 +1833,7 @@ export default function AdminPage() {
                                   className="block p-2.5 rounded-xl bg-purple-50 hover:bg-purple-100/80 border border-purple-200 text-[11px] text-purple-800 transition-colors truncate font-medium"
                                   title="คลิกเพื่อเปิดดูไฟล์ที่อัปโหลดไว้"
                                 >
-                                  📎 มีไฟล์แนบ: <span className="font-mono font-bold text-purple-900">{doc.fileUrl.split("/").pop()}</span>
+                                  ไฟล์แนบ: <span className="font-mono font-bold text-purple-900">{doc.fileUrl.split("/").pop()}</span>
                                 </a>
                               ) : (
                                 <div className="p-2.5 rounded-xl bg-zinc-50 border border-dashed border-zinc-200 text-[11px] text-zinc-400 italic">
@@ -1845,18 +1849,16 @@ export default function AdminPage() {
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <button
                                 onClick={() => handleOpenQrModal(doc)}
-                                className="px-2.5 py-1.5 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200 transition-colors cursor-pointer flex items-center gap-1 font-bold text-[11px]"
+                                className="px-2.5 py-1.5 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200 transition-colors cursor-pointer flex items-center font-bold text-[11px]"
                                 title="ดูและดาวน์โหลด QR Code สำหรับพิมพ์ลงเล่มจริง"
                               >
-                                <span>📱</span>
                                 <span>QR Code</span>
                               </button>
                               <button
                                 onClick={() => handleCopyDirectLink(doc)}
-                                className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-zinc-100 text-zinc-800 border border-zinc-200 transition-colors cursor-pointer font-medium flex items-center gap-1 text-[11px]"
+                                className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-zinc-100 text-zinc-800 border border-zinc-200 transition-colors cursor-pointer font-medium flex items-center text-[11px]"
                                 title="คัดลอกลิงก์ตรงไปยังเล่มนี้"
                               >
-                                <span>🔗</span>
                                 <span>คัดลอกลิงก์</span>
                               </button>
                               <button

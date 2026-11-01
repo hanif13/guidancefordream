@@ -767,12 +767,10 @@ export default function PdfSpreadReader({
             <p className="text-xs text-slate-400 mt-1">ไฟล์ PDF คุณภาพสูง กำลังเตรียมหน้าคู่</p>
           </div>
         )}
-        )}
 
         {/* Load Error Notification */}
         {loadError && !isLoading && viewMode !== "embed" && (
           <div className="text-center p-6 bg-red-950/80 rounded-3xl border border-red-800/50 max-w-md text-white space-y-3">
-            <span className="text-3xl">⚠️</span>
             <p className="text-sm font-semibold">{loadError}</p>
             <button
               onClick={() => setViewMode("embed")}
