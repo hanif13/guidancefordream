@@ -12,18 +12,18 @@ const supabaseAnonKey =
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
- * Upload image file directly to Supabase storage bucket `gfd-media`
+ * Upload image or document file directly to Supabase storage bucket `gfd-media`
  * @param file File object from input
- * @param folder 'speakers' | 'posters' | 'partners' | 'gallery'
- * @returns Public URL of uploaded image or null on error
+ * @param folder 'speakers' | 'posters' | 'partners' | 'gallery' | 'videos' | 'documents'
+ * @returns Public URL of uploaded file or null on error
  */
 export async function uploadMedia(
   file: File,
-  folder: "speakers" | "posters" | "partners" | "gallery" | "videos"
+  folder: "speakers" | "posters" | "partners" | "gallery" | "videos" | "documents"
 ): Promise<{ url: string | null; error?: string }> {
   try {
-    const rawExt = file.name.split(".").pop() || "png";
-    const fileExt = rawExt.toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+    const rawExt = file.name.split(".").pop() || "pdf";
+    const fileExt = rawExt.toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
     const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage

@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const socialLinks = [
   {
@@ -33,6 +35,13 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hide footer on admin dashboard pages
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer
       id="footer"
@@ -74,20 +83,20 @@ export default function Footer() {
               ลิงก์ด่วน
             </h4>
             {[
-              { label: "เกี่ยวกับค่าย", href: "#about" },
-              { label: "Highlight", href: "#hilight" },
-              { label: "ประชาสัมพันธ์ค่าย", href: "#promotion" },
-              { label: "ความทรงจำที่ผ่านมา", href: "#gallery" },
-
-
+              { label: "หน้าแรก", href: "/" },
+              { label: "กำหนดการค่าย", href: "/schedule" },
+              { label: "กิจกรรมฐาน 16 คณะ", href: "/activities" },
+              { label: "เอกสารค่าย", href: "/documents" },
+              { label: "ประชาสัมพันธ์ค่าย", href: "/#promotion" },
+              { label: "ความทรงจำที่ผ่านมา", href: "/#gallery" },
             ].map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 className="text-white/50 hover:text-pink-light text-sm transition-colors duration-300"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
 

@@ -2,6 +2,8 @@
 
 /* ===== CI Color System ===== */
 :root {
+  --font-noto-sans-thai: 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --purple-primary: #7B5EA7;
   --purple-dark: #5A3D7A;
   --purple-deeper: #3D2259;
