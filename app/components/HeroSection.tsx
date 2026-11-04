@@ -33,13 +33,8 @@ export default function HeroSection() {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    const mountTimer = setTimeout(() => setMounted(true), 300);
-    return () => clearTimeout(mountTimer);
-  }, []);
-
-  // Only start countdown on client after mount
-  useEffect(() => {
-    setTimeLeft(getTimeLeft()); // set real value immediately on client
+    setMounted(true);
+    setTimeLeft(getTimeLeft());
     const interval = setInterval(() => {
       setTimeLeft(getTimeLeft());
     }, 1000);
@@ -66,13 +61,7 @@ export default function HeroSection() {
       className="relative w-full h-screen overflow-hidden flex items-center justify-center"
     >
       {/* Background Image */}
-      <div
-        className="absolute inset-0 will-change-transform"
-        style={{
-          opacity: mounted ? 1 : 0,
-          transition: `opacity 1400ms ${ENTRANCE_EASING}`,
-        }}
-      >
+      <div className="absolute inset-0">
         <Image
           src="/images/hero-bg.jpg"
           alt="Guidance For Dream SS7 Background"
@@ -89,14 +78,7 @@ export default function HeroSection() {
       {/* Content — centered */}
       <div className="relative z-10 text-center px-4 sm:px-8 max-w-3xl mx-auto">
         {/* Title */}
-        <h1
-          className="text-glow-white text-[2.75rem] xs:text-[3.25rem] sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-wider uppercase select-none leading-[1.1] sm:leading-tight mb-3 md:mb-5 will-change-[opacity,transform]"
-          style={{
-            opacity: mounted ? 1 : 0,
-            transform: mounted ? "translateY(0)" : "translateY(32px)",
-            transition: `opacity 900ms ${ENTRANCE_EASING} 400ms, transform 900ms ${ENTRANCE_EASING} 400ms`,
-          }}
-        >
+        <h1 className="text-glow-white text-[2.75rem] xs:text-[3.25rem] sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-wider uppercase select-none leading-[1.1] sm:leading-tight mb-3 md:mb-5">
           Guidance For Dream
           <br />
           <span className="text-pink-light">SS7</span>
@@ -104,23 +86,17 @@ export default function HeroSection() {
 
         {/* Camp Name */}
         <p
-          className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-2 md:mb-3 will-change-[opacity,transform]"
+          className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-2 md:mb-3"
           style={{
             textShadow: "0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(35, 10, 60, 0.9)",
-            opacity: mounted ? 1 : 0,
-            transform: mounted ? "translateY(0)" : "translateY(32px)",
-            transition: `opacity 900ms ${ENTRANCE_EASING} 600ms, transform 900ms ${ENTRANCE_EASING} 600ms`,
           }}
         >
           ค่ายสานฝันเพื่อน้อง ปีที่ 7
         </p>
         <p
-          className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-2 md:mb-3 will-change-[opacity,transform]"
+          className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-2 md:mb-3"
           style={{
             textShadow: "0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(35, 10, 60, 0.9)",
-            opacity: mounted ? 1 : 0,
-            transform: mounted ? "translateY(0)" : "translateY(32px)",
-            transition: `opacity 900ms ${ENTRANCE_EASING} 600ms, transform 900ms ${ENTRANCE_EASING} 600ms`,
           }}
         >
           วันที่  6 - 9 พฤศจิกายน 2569
@@ -130,26 +106,12 @@ export default function HeroSection() {
         <div className="mb-8 md:mb-10" />
 
         {/* Countdown Label */}
-        <p
-          className="text-white/80 text-sm sm:text-base tracking-wide mb-4 will-change-[opacity,transform]"
-          style={{
-            opacity: mounted ? 1 : 0,
-            transform: mounted ? "translateY(0)" : "translateY(32px)",
-            transition: `opacity 900ms ${ENTRANCE_EASING} 900ms, transform 900ms ${ENTRANCE_EASING} 900ms`,
-          }}
-        >
+        <p className="text-white/80 text-sm sm:text-base tracking-wide mb-4">
           {isExpired ? "ถึงวันค่ายแล้ว!" : "นับถอยหลังวันค่าย"}
         </p>
 
         {/* Countdown Timer */}
-        <div
-          className="flex items-center justify-center gap-3 sm:gap-5 will-change-[opacity,transform]"
-          style={{
-            opacity: mounted ? 1 : 0,
-            transform: mounted ? "translateY(0)" : "translateY(32px)",
-            transition: `opacity 900ms ${ENTRANCE_EASING} 1000ms, transform 900ms ${ENTRANCE_EASING} 1000ms`,
-          }}
-        >
+        <div className="flex items-center justify-center gap-3 sm:gap-5">
           {countdownUnits.map((unit) => (
             <div key={unit.label} className="flex flex-col items-center">
               <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center rounded-2xl bg-white/15 border border-white/20 backdrop-blur-sm">
@@ -166,13 +128,7 @@ export default function HeroSection() {
       </div>
 
       {/* Scroll Down Indicator */}
-      <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-        style={{
-          opacity: mounted ? 1 : 0,
-          transition: `opacity 2s ${ENTRANCE_EASING} 1.5s`,
-        }}
-      >
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
         <button
           onClick={() => scrollToSection("#about")}
           className="flex flex-col items-center gap-2 text-white/60 hover:text-white/90
