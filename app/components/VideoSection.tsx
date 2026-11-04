@@ -248,7 +248,7 @@ export default function VideoSection() {
         {/* Section Header */}
         <div className="text-center mb-10 reveal">
           <span className="inline-block px-4 py-1.5 bg-purple-primary/10 text-purple-primary text-sm font-semibold rounded-full mb-4">
-            🎬 คลิปวิดีโอ
+            คลิปวิดีโอ
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-purple-primary to-pink-accent bg-clip-text text-transparent">

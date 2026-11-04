@@ -302,7 +302,7 @@ export default function PromotionSection() {
                 {/* Tag Badge */}
                 <div className="flex items-center gap-2 mb-3">
                   <span className="px-3 py-1 bg-gradient-to-r from-purple-primary/30 to-pink-accent/30 text-pink-light text-xs font-semibold rounded-full border border-purple-primary/40">
-                    📢 ประชาสัมพันธ์โครงการ
+                    ประชาสัมพันธ์โครงการ
                   </span>
                   <span className="text-xs text-slate-500 font-mono">
                     Guidance for Dream 7th

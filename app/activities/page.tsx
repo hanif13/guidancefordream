@@ -5,16 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import SubpageHero from "../components/SubpageHero";
 
-interface ActivitySubItem {
+export interface ActivitySubItem {
   title: string;
   desc: string;
 }
 
-interface FacultyStation {
+export interface FacultyStation {
   id: string;
   order: number;
-  emoji: string;
-  sticker: string;
+    sticker: string;
   nameTh: string;
   nameEn: string;
   theme: string;
@@ -31,12 +30,11 @@ interface FacultyStation {
   docId: string;
 }
 
-const facultiesData: FacultyStation[] = [
+export const facultiesData: FacultyStation[] = [
   {
     id: "med",
     order: 1,
-    emoji: "🩺",
-    sticker: "/images/stickers/med.png",
+        sticker: "/images/stickers/med.png",
     nameTh: "คณะแพทยศาสตร์",
     nameEn: "Faculty of Medicine",
     theme: "Lifeline Ridge — สันเขาแห่งชีวิต",
@@ -68,8 +66,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "dent",
     order: 2,
-    emoji: "🦷",
-    sticker: "/images/stickers/dent.png",
+        sticker: "/images/stickers/dent.png",
     nameTh: "คณะทันตแพทยศาสตร์",
     nameEn: "Faculty of Dentistry",
     theme: "Smile Creek — ลำธารแห่งรอยยิ้ม",
@@ -97,8 +94,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "pharm",
     order: 3,
-    emoji: "💊",
-    sticker: "/images/stickers/pharm.png",
+        sticker: "/images/stickers/pharm.png",
     nameTh: "คณะเภสัชศาสตร์",
     nameEn: "Faculty of Pharmaceutical Sciences",
     theme: "Nature's Remedy — สวนยากลางไพร",
@@ -130,8 +126,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "nurse",
     order: 4,
-    emoji: "💉",
-    sticker: "/images/stickers/nurse.png",
+        sticker: "/images/stickers/nurse.png",
     nameTh: "คณะพยาบาลศาสตร์",
     nameEn: "Faculty of Nursing",
     theme: "A Place to Heal — พื้นที่แห่งการเยียวยา",
@@ -159,8 +154,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "medtech",
     order: 5,
-    emoji: "🔬",
-    sticker: "/images/stickers/medtech.png",
+        sticker: "/images/stickers/medtech.png",
     nameTh: "คณะเทคนิคการแพทย์",
     nameEn: "Faculty of Medical Technology",
     theme: "Hidden Clues — นักสืบหลังเลนส์",
@@ -196,8 +190,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "thaimed",
     order: 6,
-    emoji: "🌿",
-    sticker: "/images/stickers/thaimed.png",
+        sticker: "/images/stickers/thaimed.png",
     nameTh: "คณะการแพทย์แผนไทย",
     nameEn: "Faculty of Traditional Thai Medicine",
     theme: "สวนสมุนไพรกลางเขา",
@@ -229,8 +222,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "vet",
     order: 7,
-    emoji: "🐾",
-    sticker: "/images/stickers/vet.png",
+        sticker: "/images/stickers/vet.png",
     nameTh: "คณะสัตวแพทยศาสตร์",
     nameEn: "Faculty of Veterinary Science",
     theme: "Wildlife Trail — เส้นทางสู่โลกของสัตว์",
@@ -262,8 +254,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "eng",
     order: 8,
-    emoji: "⚙️",
-    sticker: "/images/stickers/eng.png",
+        sticker: "/images/stickers/eng.png",
     nameTh: "คณะวิศวกรรมศาสตร์",
     nameEn: "Faculty of Engineering",
     theme: "Build the Way — นักประดิษฐ์กลางป่า",
@@ -295,8 +286,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "sci",
     order: 9,
-    emoji: "🧪",
-    sticker: "/images/stickers/sci.png",
+        sticker: "/images/stickers/sci.png",
     nameTh: "คณะวิทยาศาสตร์",
     nameEn: "Faculty of Science",
     theme: "Wonder Woods — นักวิทย์สำรวจเขา",
@@ -324,8 +314,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "natres",
     order: 10,
-    emoji: "🌱",
-    sticker: "/images/stickers/natres.png",
+        sticker: "/images/stickers/natres.png",
     nameTh: "คณะทรัพยากรธรรมชาติ",
     nameEn: "Faculty of Natural Resources",
     theme: "Forest Guardians — หน่วยพิทักษ์ธรรมชาติ",
@@ -353,8 +342,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "agro",
     order: 11,
-    emoji: "🌾",
-    sticker: "/images/stickers/agro.png",
+        sticker: "/images/stickers/agro.png",
     nameTh: "คณะอุตสาหกรรมเกษตร",
     nameEn: "Faculty of Agro-Industry",
     theme: "Harvest Valley — หุบเขาแห่งผลผลิต",
@@ -390,8 +378,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "fms",
     order: 12,
-    emoji: "💼",
-    sticker: "/images/stickers/fms.png",
+        sticker: "/images/stickers/fms.png",
     nameTh: "คณะวิทยาการจัดการ",
     nameEn: "Faculty of Management Sciences",
     theme: "Make It Count — นักวางแผนพิชิตเขา",
@@ -419,8 +406,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "econ",
     order: 13,
-    emoji: "📈",
-    sticker: "/images/stickers/econ.png",
+        sticker: "/images/stickers/econ.png",
     nameTh: "คณะเศรษฐศาสตร์",
     nameEn: "Faculty of Economics",
     theme: "Make It Count — นักวางแผนพิชิตเขา",
@@ -448,8 +434,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "law",
     order: 14,
-    emoji: "⚖️",
-    sticker: "/images/stickers/law.png",
+        sticker: "/images/stickers/law.png",
     nameTh: "คณะนิติศาสตร์",
     nameEn: "Faculty of Law",
     theme: "The Right Path — เส้นทางแห่งความเป็นธรรม",
@@ -477,8 +462,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "libarts",
     order: 15,
-    emoji: "🎭",
-    sticker: "/images/stickers/libarts.png",
+        sticker: "/images/stickers/libarts.png",
     nameTh: "คณะศิลปศาสตร์",
     nameEn: "Faculty of Liberal Arts",
     theme: "Many Voices, One World — ต่างภาษา ต่างมุมมอง โลกใบเดียวกัน",
@@ -506,8 +490,7 @@ const facultiesData: FacultyStation[] = [
   {
     id: "psuic",
     order: 16,
-    emoji: "🌐",
-    sticker: "/images/stickers/psuic.png",
+        sticker: "/images/stickers/psuic.png",
     nameTh: "วิทยาลัยนานาชาติ (PSUIC)",
     nameEn: "PSU International College",
     theme: "Many Voices, One World — ต่างภาษา ต่างมุมมอง โลกใบเดียวกัน",

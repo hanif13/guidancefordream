@@ -246,8 +246,8 @@ export default function DocumentsPage() {
     <main className="relative min-h-screen bg-cream-bg">
       {/* Hero Banner — Exact Home Page Style */}
       <SubpageHero
-        badge="คลังเอกสาร & E-Book ค่าย"
-        titleMain="เอกสารค่าย"
+        badge="คลังความรู้ดิจิทัล"
+        titleMain="KNOWLEDGE"
         titleHighlight="Guidance 7th"
         subtitle1="ค่ายสานฝันเพื่อน้อง ปีที่ 7"
         subtitle2="เอกสารวิชาการ • สไลด์นำเสนอ 16 คณะ • คู่มือและเอกสารค่าย"
@@ -267,11 +267,11 @@ export default function DocumentsPage() {
           {/* Section Header */}
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-1.5 bg-purple-primary/10 text-purple-primary text-sm font-semibold rounded-full mb-4 border border-purple-primary/15">
-              คลังเอกสารดิจิทัล
+              KNOWLEDGE REPOSITORY
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
               <span className="bg-gradient-to-r from-purple-primary to-pink-accent bg-clip-text text-transparent">
-                E-Book & เอกสารประกอบค่าย
+                KNOWLEDGE & E-Book ค่าย
               </span>
             </h2>
             <div className="section-divider mb-6" />

@@ -80,23 +80,35 @@ export default function Footer() {
           {/* Quick Links */}
           <div className="flex flex-col items-center md:items-start gap-3">
             <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-1">
-              ลิงก์ด่วน
+              ลิงก์เมนู
             </h4>
             {[
-              { label: "หน้าแรก", href: "/" },
-              { label: "กำหนดการค่าย", href: "/schedule" },
-              { label: "กิจกรรมฐาน 16 คณะ", href: "/activities" },
-              { label: "เอกสารค่าย", href: "/documents" },
-              { label: "ประชาสัมพันธ์ค่าย", href: "/#promotion" },
-              { label: "ความทรงจำที่ผ่านมา", href: "/#gallery" },
+              { label: "HOME", href: "/" },
+              { label: "ABOUT", href: "/about" },
+              { label: "CAMP", href: "/camp" },
+              { label: "KNOWLEDGE", href: "/documents" },
+              { label: "MEMORIES", href: "/memories" },
+              { label: "RUPRAO ↗", href: "https://ruprao.com", isExternal: true },
             ].map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-white/50 hover:text-pink-light text-sm transition-colors duration-300"
-              >
-                {link.label}
-              </Link>
+              link.isExternal ? (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/50 hover:text-pink-light text-sm transition-colors duration-300"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-white/50 hover:text-pink-light text-sm transition-colors duration-300"
+                >
+                  {link.label}
+                </Link>
+              )
             ))}
           </div>
 
