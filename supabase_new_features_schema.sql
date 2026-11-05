@@ -48,13 +48,20 @@ CREATE TABLE IF NOT EXISTS public.future_letters (
   dream_faculty TEXT DEFAULT '',
   letter_content TEXT NOT NULL,
   delivery_timing TEXT NOT NULL,
+  target_date DATE,
+  delivered_at TIMESTAMPTZ,
   is_delivered BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Ensure columns exist for existing tables
+ALTER TABLE public.future_letters ADD COLUMN IF NOT EXISTS target_date DATE;
+ALTER TABLE public.future_letters ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ;
+
 -- Indexing
 CREATE INDEX IF NOT EXISTS idx_future_letters_created_at ON public.future_letters(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_future_letters_email ON public.future_letters(email);
+CREATE INDEX IF NOT EXISTS idx_future_letters_target_date ON public.future_letters(target_date);
 
 -- RLS
 ALTER TABLE public.future_letters ENABLE ROW LEVEL SECURITY;

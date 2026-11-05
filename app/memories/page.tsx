@@ -49,6 +49,7 @@ export default function MemoriesPage() {
   const [capsuleDreamFaculty, setCapsuleDreamFaculty] = useState("");
   const [capsuleLetter, setCapsuleLetter] = useState("");
   const [capsuleOpenDate, setCapsuleOpenDate] = useState("");
+  const [capsuleTargetDate, setCapsuleTargetDate] = useState("");
   const [capsuleSubmitted, setCapsuleSubmitted] = useState(false);
 
   // Wall of memories filter & dynamic data
@@ -364,6 +365,18 @@ export default function MemoriesPage() {
     e.preventDefault();
     if (!capsuleName || !capsuleLetter || !capsuleEmail) return;
 
+    // คำนวณ target_date หากยังไม่ได้ระบุ ให้เป็น 1 ปีข้างหน้า
+    let finalTargetDate = capsuleTargetDate;
+    if (!finalTargetDate) {
+      const nextYear = new Date();
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+      finalTargetDate = nextYear.toISOString().split("T")[0];
+    }
+
+    const fullTimingStr = capsuleOpenDate
+      ? capsuleOpenDate.trim()
+      : `วันที่ ${finalTargetDate}`;
+
     const newLetterObj = {
       id: `letter-${Date.now()}`,
       name: capsuleName.trim(),
@@ -371,7 +384,8 @@ export default function MemoriesPage() {
       school: capsuleSchool.trim(),
       dream_faculty: capsuleDreamFaculty.trim(),
       letter_content: capsuleLetter.trim(),
-      delivery_timing: capsuleOpenDate.trim(),
+      delivery_timing: fullTimingStr.trim(),
+      target_date: finalTargetDate,
       is_delivered: false,
       created_at: new Date().toISOString(),
     };
@@ -388,18 +402,61 @@ export default function MemoriesPage() {
 
     // บันทึกจดหมายลง Supabase Database (future_letters)
     try {
-      await supabase.from("future_letters").insert([
+      const basePayload = {
+        name: capsuleName.trim(),
+        email: capsuleEmail.trim(),
+        school: capsuleSchool.trim(),
+        dream_faculty: capsuleDreamFaculty.trim(),
+        letter_content: capsuleLetter.trim(),
+        delivery_timing: fullTimingStr.trim(),
+      };
+
+      // ลองบันทึกพร้อม target_date ก่อน
+      const { error: insertErr } = await supabase.from("future_letters").insert([
         {
-          name: capsuleName.trim(),
-          email: capsuleEmail.trim(),
-          school: capsuleSchool.trim(),
-          dream_faculty: capsuleDreamFaculty.trim(),
-          letter_content: capsuleLetter.trim(),
-          delivery_timing: capsuleOpenDate.trim(),
+          ...basePayload,
+          target_date: finalTargetDate,
         },
       ]);
+
+      // หาก Supabase แจ้งว่ายังไม่มีคอลัมน์ target_date ให้บันทึกแบบไม่ใส่ target_date สำรอง
+      if (insertErr && (insertErr.code === "PGRST204" || insertErr.message?.includes("target_date"))) {
+        await supabase.from("future_letters").insert([basePayload]);
+      }
     } catch (err) {
       console.warn("Supabase future_letters insert offline fallback:", err);
+    }
+
+    // หากกำหนดเวลาส่งคือ 'วันนี้หรือในอดีต' ให้สั่งส่งเข้าอีเมลทันทีอัตโนมัติ!
+    const now = new Date();
+    const todayStr = now.toISOString().split("T")[0];
+    const isDueImmediately = finalTargetDate <= todayStr;
+
+    if (isDueImmediately) {
+      try {
+        fetch("/api/letters/send-single", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ letterData: newLetterObj }),
+        }).then((res) => {
+          if (res.ok) {
+            try {
+              const stored = localStorage.getItem("gfd_user_letters");
+              if (stored) {
+                const list = JSON.parse(stored);
+                if (Array.isArray(list)) {
+                  const updated = list.map((l: any) =>
+                    l.id === newLetterObj.id ? { ...l, is_delivered: true } : l
+                  );
+                  localStorage.setItem("gfd_user_letters", JSON.stringify(updated));
+                }
+              }
+            } catch {}
+          }
+        });
+      } catch (err) {
+        console.warn("Auto-send immediate letter error:", err);
+      }
     }
 
     setCapsuleSubmitted(true);
@@ -857,41 +914,80 @@ export default function MemoriesPage() {
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-xs font-bold text-zinc-700">
-                          กำหนดเวลาหรือวันที่ส่งจดหมายฉบับนี้กลับไปหาคุณ:
+                          ระบุวันที่ต้องการให้ระบบส่งจดหมายฉบับนี้กลับไปหาคุณ:
                         </label>
-                        <span className="text-[11px] text-purple-700 font-medium hidden sm:inline">
-                          พิมพ์ระบุวันที่ หรือช่วงเวลาได้ตามใจชอบ
+                        <span className="text-[11px] text-purple-700 font-semibold hidden sm:inline">
+                          ส่งอัตโนมัติเมื่อถึงวันที่กำหนด
                         </span>
                       </div>
-                      <input
-                        type="text"
-                        required
-                        placeholder="เช่น 1 พฤษภาคม 2568, วันประกาศผล TCAS รอบ 3, วันเกิดอายุ 19 ปี หรือช่วงเวลาที่ต้องการ..."
-                        value={capsuleOpenDate}
-                        onChange={(e) => setCapsuleOpenDate(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-primary/30"
-                      />
-                      {/* แท็กตัวเลือกด่วน ช่วยพิมพ์อัตโนมัติ */}
-                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                        <span className="text-[11px] text-zinc-500 mr-1">หรือคลิกเลือกตัวอย่าง:</span>
-                        {[
-                          "วันประกาศผล TCAS",
-                          "อีก 1 ปีข้างหน้า",
-                          "ก่อนสอบ A-Level",
-                          "วันเปิดค่าย Guidance 8th",
-                          "1 พฤษภาคม 2568",
-                        ].map((preset) => (
-                          <button
-                            key={preset}
-                            type="button"
-                            onClick={() => setCapsuleOpenDate(preset)}
-                            className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-deeper text-[11px] font-medium border border-purple-200/60 transition-all cursor-pointer"
-                          >
-                            + {preset}
-                          </button>
-                        ))}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* 1. Date Picker */}
+                        <div>
+                          <label className="block text-[11px] text-zinc-500 mb-1 font-medium">
+                            วันที่ส่งในปฏิทิน:
+                          </label>
+                          <input
+                            type="date"
+                            required
+                            min={new Date().toISOString().split("T")[0]}
+                            value={capsuleTargetDate}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setCapsuleTargetDate(val);
+                              if (val) {
+                                const [y, m, d] = val.split("-");
+                                const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+                                const formatted = dateObj.toLocaleDateString("th-TH", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                });
+                                setCapsuleOpenDate(`วันที่ ${formatted}`);
+                              }
+                            }}
+                            className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-primary/30"
+                          />
+                        </div>
+
+                        {/* 2. Event / Label */}
+                        <div>
+                          <label className="block text-[11px] text-zinc-500 mb-1 font-medium">
+                            โอกาส / คำอธิบาย (ถ้ามี):
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="เช่น วันประกาศผล TCAS, อีก 1 ปีข้างหน้า..."
+                            value={capsuleOpenDate}
+                            onChange={(e) => setCapsuleOpenDate(e.target.value)}
+                            className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-primary/30"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Live Preview Notification Badge */}
+                      <div className="mt-3 p-3 rounded-xl bg-purple-50/70 border border-purple-200/80 flex items-start gap-2 text-xs text-purple-950">
+                        <span className="text-base shrink-0 mt-0.5">📬</span>
+                        <div className="leading-relaxed">
+                          <strong>กำหนดการส่งอัตโนมัติ:</strong>{" "}
+                          จดหมายจะถูกส่งเข้าอีเมล{" "}
+                          <span className="font-mono font-bold text-purple-800">
+                            {capsuleEmail ? capsuleEmail : "อีเมลที่คุณระบุ"}
+                          </span>{" "}
+                          ในวันที่{" "}
+                          <span className="font-bold text-purple-900">
+                            {capsuleTargetDate
+                              ? new Date(capsuleTargetDate).toLocaleDateString("th-TH", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })
+                              : "1 ปีข้างหน้า"}
+                          </span>{" "}
+                          {capsuleOpenDate ? `(${capsuleOpenDate})` : ""}
+                        </div>
                       </div>
                     </div>
 

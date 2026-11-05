@@ -954,13 +954,13 @@ export default function AboutPage() {
             <div className="pt-8 sm:pt-12 border-t border-purple-100">
               <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
                 <span className="text-xs font-bold text-pink-accent uppercase tracking-wider bg-pink-pale px-3 py-1 rounded-full border border-pink-light">
-                  ผู้นำค่ายแห่งการสานฝัน
+                  Guidance for Dream
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-purple-deeper mt-2">
                   ทำเนียบประธานค่าย (รุ่นที่ 3 – 7)
                 </h3>
                 <p className="text-zinc-600 text-sm mt-1">
-                  ผู้นำและอมีรค่ายสานฝันเพื่อน้อง ตั้งแต่เริ่มจัดในรั้วมหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
+                  อมีรค่ายสานฝันเพื่อน้อง Guidance for Dream
                 </p>
               </div>
 

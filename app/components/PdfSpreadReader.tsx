@@ -687,35 +687,76 @@ export default function PdfSpreadReader({
       `}} />
 
       {/* ========================================================
-          TOP HEADER BAR (RESPONSIVE)
+          TOP HEADER BAR (RESPONSIVE FOR MOBILE & DESKTOP)
           ======================================================== */}
       <header
-        className="w-full max-w-6xl flex items-center justify-between text-white z-40 py-2 px-2.5 sm:px-4 bg-black/75 backdrop-blur-lg rounded-2xl border border-white/15 shadow-2xl pointer-events-auto gap-2"
+        className="w-full max-w-6xl text-white z-40 bg-black/85 backdrop-blur-lg rounded-2xl border border-white/15 shadow-2xl pointer-events-auto p-2 sm:px-4 sm:py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Document Title & Badge */}
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="min-w-0">
-            <h2 className="font-bold text-xs sm:text-sm truncate text-white max-w-[140px] xs:max-w-[200px] sm:max-w-md">
-              {title}
-            </h2>
-            <p className="text-[9px] sm:text-[10px] text-emerald-400 flex items-center gap-1 font-mono truncate">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-              <span className="hidden xs:inline">หนังสือจริง 3D</span> (PDF {totalPages} หน้า)
-            </p>
+        {/* ROW 1: Document Title & File Info + Mobile Close/Download Action */}
+        <div className="flex items-center justify-between gap-2 min-w-0 w-full sm:w-auto">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center text-xs sm:text-sm shrink-0 font-bold font-mono shadow-sm">
+              PDF
+            </span>
+            <div className="min-w-0 flex-1">
+              {/* Document Title / File Name */}
+              <h2
+                className="font-bold text-xs sm:text-sm text-white truncate leading-tight tracking-tight"
+                title={title}
+              >
+                {title}
+              </h2>
+              <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-zinc-400 font-mono mt-0.5 truncate">
+                <span className="text-emerald-400 font-bold flex items-center gap-1 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                  E-Book 3D
+                </span>
+                <span>•</span>
+                <span className="shrink-0">{totalPages} หน้า</span>
+                {subtitle && (
+                  <>
+                    <span>•</span>
+                    <span className="text-zinc-300 truncate">{subtitle}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Right Quick Actions (Download & Close - Always visible and accessible) */}
+          <div className="flex items-center gap-1.5 sm:hidden shrink-0">
+            {onDownload && (
+              <button
+                onClick={onDownload}
+                className="w-7 h-7 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-400/40 flex items-center justify-center text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                title="ดาวน์โหลด PDF"
+                aria-label="ดาวน์โหลด"
+              >
+                ↓
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="w-7 h-7 rounded-xl bg-red-950/80 hover:bg-red-900 text-red-300 flex items-center justify-center text-xs font-bold border border-red-800/50 transition-all cursor-pointer shadow-md active:scale-95"
+              aria-label="ปิดสมุด"
+              title="ปิดสมุด"
+            >
+              ✕
+            </button>
           </div>
         </div>
 
-        {/* View Mode & Page Status Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        {/* ROW 2 (Mobile) / Right Side (Desktop): View Mode, Pages & Controls */}
+        <div className="flex items-center justify-between sm:justify-end gap-1 sm:gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar pt-1.5 sm:pt-0 border-t border-white/10 sm:border-t-0">
           {/* Mode Switcher: Single vs Spread vs PDF */}
-          <div className="flex items-center bg-slate-900/90 rounded-xl p-0.5 border border-white/15 text-[11px] sm:text-xs">
+          <div className="flex items-center bg-slate-900/90 rounded-xl p-0.5 border border-white/15 text-[10px] sm:text-xs shrink-0">
             <button
               onClick={() => {
                 setUserSelectedMode(true);
                 setViewMode("single");
               }}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-medium ${
+              className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg transition-all cursor-pointer font-medium ${
                 viewMode === "single"
                   ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white font-bold shadow-md"
                   : "text-slate-400 hover:text-white"
@@ -729,7 +770,7 @@ export default function PdfSpreadReader({
                 setUserSelectedMode(true);
                 setViewMode("spread");
               }}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-medium ${
+              className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg transition-all cursor-pointer font-medium ${
                 viewMode === "spread"
                   ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white font-bold shadow-md"
                   : "text-slate-400 hover:text-white"
@@ -743,7 +784,7 @@ export default function PdfSpreadReader({
                 setUserSelectedMode(true);
                 setViewMode("embed");
               }}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-medium ${
+              className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg transition-all cursor-pointer font-medium ${
                 viewMode === "embed"
                   ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white font-bold shadow-md"
                   : "text-slate-400 hover:text-white"
@@ -754,8 +795,8 @@ export default function PdfSpreadReader({
             </button>
           </div>
 
-          {/* Page Counter Badge: STRICTLY CLAMPED TO totalPages */}
-          <span className="bg-white/10 px-2 sm:px-3 py-1 rounded-xl text-[10px] sm:text-[11px] font-mono text-purple-light border border-white/10 whitespace-nowrap">
+          {/* Page Counter Badge */}
+          <span className="bg-white/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-xl text-[10px] sm:text-[11px] font-mono text-purple-light border border-white/10 whitespace-nowrap shrink-0">
             {viewMode === "single"
               ? `${Math.min(totalPages, Math.max(1, currentPage))}/${totalPages}`
               : currentSpreadStart === currentSpreadEnd
@@ -763,9 +804,9 @@ export default function PdfSpreadReader({
               : `${currentSpreadStart}-${currentSpreadEnd}/${totalPages}`}
           </span>
 
-          {/* Zoom Controls */}
+          {/* Zoom Controls (Desktop only) */}
           {viewMode !== "embed" && (
-            <div className="hidden md:flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded-xl border border-white/10">
+            <div className="hidden md:flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded-xl border border-white/10 shrink-0">
               <button
                 onClick={() => setScale((s) => Math.max(0.75, Number((s - 0.15).toFixed(2))))}
                 className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center justify-center cursor-pointer"
@@ -789,7 +830,7 @@ export default function PdfSpreadReader({
           {/* Sound Toggle Button */}
           <button
             onClick={() => setSoundEnabled((prev) => !prev)}
-            className={`px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer text-xs font-semibold flex items-center gap-1 ${
+            className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-xl border transition-all cursor-pointer text-[10px] sm:text-xs font-semibold flex items-center gap-1 shrink-0 ${
               soundEnabled
                 ? "bg-purple-primary/25 text-purple-light border-purple-primary/40 hover:bg-purple-primary/40"
                 : "bg-white/5 text-slate-400 border-white/10 hover:bg-white/10"
@@ -808,7 +849,7 @@ export default function PdfSpreadReader({
                 setTimeout(() => setCopiedLink(false), 2000);
               }
             }}
-            className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer text-xs font-semibold ${
+            className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-xl border transition-all cursor-pointer text-[10px] sm:text-xs font-semibold shrink-0 ${
               copiedLink
                 ? "bg-emerald-500/30 text-emerald-300 border-emerald-500/50"
                 : "bg-white/10 hover:bg-white/20 text-white border-white/15"
@@ -818,21 +859,21 @@ export default function PdfSpreadReader({
             <span>{copiedLink ? "คัดลอกแล้ว" : "แชร์"}</span>
           </button>
 
-          {/* Download Original PDF Button */}
+          {/* Download Original PDF Button (Desktop only here, Mobile in Row 1) */}
           {onDownload && (
             <button
               onClick={onDownload}
-              className="px-3 py-1.5 rounded-xl bg-purple-primary/30 hover:bg-purple-primary/50 text-purple-light border border-purple-primary/40 transition-colors cursor-pointer text-xs font-semibold"
+              className="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-purple-primary/30 hover:bg-purple-primary/50 text-purple-light border border-purple-primary/40 transition-colors cursor-pointer text-xs font-semibold shrink-0"
               title="ดาวน์โหลดไฟล์ PDF ต้นฉบับ"
             >
               <span>ดาวน์โหลด</span>
             </button>
           )}
 
-          {/* Close Modal Button */}
+          {/* Close Modal Button (Desktop only here, Mobile in Row 1) */}
           <button
             onClick={onClose}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-red-950/60 hover:bg-red-900/80 text-red-300 flex items-center justify-center text-sm font-bold transition-all border border-red-800/40 cursor-pointer shadow-lg hover:scale-105"
+            className="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-red-950/60 hover:bg-red-900/80 text-red-300 items-center justify-center text-sm font-bold transition-all border border-red-800/40 cursor-pointer shadow-lg hover:scale-105 shrink-0"
             aria-label="ปิดสมุด"
           >
             ✕

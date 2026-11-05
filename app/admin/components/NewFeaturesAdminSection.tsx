@@ -22,6 +22,8 @@ interface FutureLetter {
   dream_faculty: string;
   letter_content: string;
   delivery_timing: string;
+  target_date?: string;
+  delivered_at?: string;
   is_delivered: boolean;
   created_at: string;
 }
@@ -132,6 +134,13 @@ export default function NewFeaturesAdminSection({
   const [editingMeal, setEditingMeal] = useState<CampMealAdmin | null>(null);
   const [mealModalOpen, setMealModalOpen] = useState(false);
 
+  // Mail Automation state
+  const [isSendingDueMail, setIsSendingDueMail] = useState(false);
+  const [isTestingMail, setIsTestingMail] = useState(false);
+  const [testModalOpen, setTestModalOpen] = useState(false);
+  const [testEmailAddress, setTestEmailAddress] = useState("");
+  const [sendingSingleId, setSendingSingleId] = useState<string | null>(null);
+
   // Fetch Feedbacks
   const fetchFeedbacks = async () => {
     setLoadingFeedbacks(true);
@@ -215,6 +224,8 @@ export default function NewFeaturesAdminSection({
           dream_faculty: ll.dream_faculty || "",
           letter_content: ll.letter_content || "",
           delivery_timing: ll.delivery_timing || "",
+          target_date: ll.target_date,
+          delivered_at: ll.delivered_at,
           is_delivered: ll.is_delivered || false,
           created_at: ll.created_at || new Date().toISOString(),
         });
@@ -223,6 +234,148 @@ export default function NewFeaturesAdminSection({
 
     setLetters(combined);
     setLoadingLetters(false);
+  };
+
+  const handleTestEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testEmailAddress.trim()) return;
+    setIsTestingMail(true);
+    try {
+      const res = await fetch("/api/letters/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: testEmailAddress.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "ส่งอีเมลทดสอบไม่สำเร็จ");
+      showToast(data.message || "ส่งอีเมลทดสอบสำเร็จแล้ว!");
+      setTestModalOpen(false);
+    } catch (err: any) {
+      showToast(err.message);
+    } finally {
+      setIsTestingMail(false);
+    }
+  };
+
+  const handleSendSingleLetter = async (letter: FutureLetter) => {
+    if (!confirm(`ยืนยันการส่งจดหมาย Time Capsule ฉบับนี้ไปยัง ${letter.email} ทันที?`)) return;
+    setSendingSingleId(letter.id);
+    try {
+      const res = await fetch("/api/letters/send-single", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ letterId: letter.id, letterData: letter }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "เกิดข้อผิดพลาดในการส่งจดหมาย");
+      showToast(data.message || "ส่งจดหมายสำเร็จแล้ว!");
+      setLetters((prev) =>
+        prev.map((l) => (l.id === letter.id ? { ...l, is_delivered: true } : l))
+      );
+      if (selectedLetter && selectedLetter.id === letter.id) {
+        setSelectedLetter({ ...selectedLetter, is_delivered: true });
+      }
+    } catch (err: any) {
+      showToast(err.message);
+    } finally {
+      setSendingSingleId(null);
+    }
+  };
+
+  const handleSendDueLetters = async (forceAll: boolean = false) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const dueCount = letters.filter(
+      (l) => !l.is_delivered && (forceAll || !l.target_date || l.target_date <= todayStr)
+    ).length;
+
+    if (dueCount === 0) {
+      showToast("ไม่มีจดหมายที่ถึงกำหนดส่งในวันนี้");
+      return;
+    }
+
+    if (
+      !confirm(
+        forceAll
+          ? `ต้องการส่งจดหมายที่ยังไม่ได้ส่งทั้งหมด (${dueCount} ฉบับ) ทันทีใช่หรือไม่?`
+          : `พบจดหมายที่ถึงกำหนดส่ง ${dueCount} ฉบับ ยืนยันการส่งตอนนี้เลยหรือไม่?`
+      )
+    )
+      return;
+
+    setIsSendingDueMail(true);
+    try {
+      const res = await fetch("/api/letters/send-due", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ forceAll, letters }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "เกิดข้อผิดพลาดในการส่งจดหมาย");
+      showToast(data.message || `ส่งจดหมายสำเร็จแล้ว ${data.sent} ฉบับ`);
+      fetchLetters();
+    } catch (err: any) {
+      showToast(err.message);
+    } finally {
+      setIsSendingDueMail(false);
+    }
+  };
+
+  const deleteLetter = async (id: string) => {
+    if (!confirm("ต้องการลบจดหมายฉบับนี้ใช่หรือไม่?")) return;
+    setLetters((prev) => prev.filter((l) => l.id !== id));
+    if (selectedLetter && selectedLetter.id === id) {
+      setSelectedLetter(null);
+    }
+
+    // 1. Remove from localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("gfd_user_letters");
+        if (stored) {
+          const list = JSON.parse(stored);
+          if (Array.isArray(list)) {
+            const updated = list.filter((l: any) => l.id !== id);
+            localStorage.setItem("gfd_user_letters", JSON.stringify(updated));
+          }
+        }
+      } catch {}
+    }
+
+    // 2. Delete from Supabase Database
+    try {
+      if (!id.startsWith("letter-")) {
+        await supabase.from("future_letters").delete().eq("id", id);
+      }
+    } catch (e) {
+      console.warn("Delete letter error:", e);
+    }
+
+    showToast("ลบจดหมายเรียบร้อยแล้ว");
+  };
+
+  const clearAllLetters = async () => {
+    if (!confirm("ต้องการลบจดหมายทั้งหมดในระบบให้โล่งใช่หรือไม่?")) return;
+    setLetters([]);
+    setSelectedLetter(null);
+
+    // 1. Clear localStorage
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("gfd_user_letters");
+      } catch {}
+    }
+
+    // 2. Clear Supabase
+    try {
+      await supabase
+        .from("future_letters")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+    } catch (e) {
+      console.warn("Clear all letters error:", e);
+    }
+
+    showToast("เคลียร์จดหมายทั้งหมดเรียบร้อยแล้ว");
   };
 
   // Fetch Staff
@@ -259,7 +412,19 @@ export default function NewFeaturesAdminSection({
 
   useEffect(() => {
     if (activeSubTab === "feedbacks") fetchFeedbacks();
-    if (activeSubTab === "letters") fetchLetters();
+    if (activeSubTab === "letters") {
+      fetchLetters();
+      // Auto check and send due letters every 20s while admin is on letters tab
+      const interval = setInterval(() => {
+        fetch("/api/letters/send-due")
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.sent > 0) fetchLetters();
+          })
+          .catch(() => {});
+      }, 20000);
+      return () => clearInterval(interval);
+    }
     if (activeSubTab === "staff") fetchStaff();
     if (activeSubTab === "meals") fetchMeals();
   }, [activeSubTab]);
@@ -466,26 +631,97 @@ export default function NewFeaturesAdminSection({
       )}
 
       {/* ========================================================
-          SUBTAB 2: LETTERS (จดหมายถึงตัวฉันในอนาคต)
+          SUBTAB 2: LETTERS (จดหมายถึงตัวฉันในอนาคต & Auto Mail)
           ======================================================== */}
       {activeSubTab === "letters" && (
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-zinc-200">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-zinc-100">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-zinc-200 space-y-6">
+          {/* Header & Global Actions */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-zinc-100">
             <div>
-              <h3 className="text-lg font-bold text-zinc-900">
-                จดหมาย Time Capsule (จดหมายถึงตัวฉันในอนาคต)
+              <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+                <span>จดหมาย Time Capsule (จดหมายถึงตัวฉันในอนาคต)</span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 border border-purple-200">
+                  Gmail Auto Mail
+                </span>
               </h3>
               <p className="text-xs text-zinc-500 mt-0.5">
-                กล่องเก็บฝันและข้อความที่น้องๆ ส่งถึงตัวเองในอนาคต
+                กล่องเก็บฝันและระบบส่งอีเมลอัตโนมัติถึงน้องตามวันเวลาที่กำหนด
               </p>
             </div>
-            <button
-              onClick={fetchLetters}
-              className="px-4 py-2 rounded-xl bg-purple-50 text-purple-700 text-xs font-bold hover:bg-purple-100 transition-colors"
-            >
-              รีเฟรชข้อมูล
-            </button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setTestModalOpen(true)}
+                className="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200 transition-colors cursor-pointer"
+              >
+                ✉️ ทดสอบระบบส่งอีเมล
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSendDueLetters(false)}
+                disabled={isSendingDueMail}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-primary to-pink-accent hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all disabled:opacity-50 cursor-pointer"
+              >
+                {isSendingDueMail ? "กำลังส่งจดหมาย..." : "🚀 สั่งส่งจดหมายที่ถึงกำหนดทันที"}
+              </button>
+
+              {letters.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAllLetters}
+                  className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 transition-colors cursor-pointer"
+                >
+                  🗑️ ล้างทั้งหมด
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={fetchLetters}
+                className="px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold transition-colors cursor-pointer"
+              >
+                รีเฟรชข้อมูล
+              </button>
+            </div>
           </div>
+
+          {/* Quick Stats Summary */}
+          {(() => {
+            const todayStr = new Date().toISOString().split("T")[0];
+            const total = letters.length;
+            const delivered = letters.filter((l) => l.is_delivered).length;
+            const dueNow = letters.filter(
+              (l) => !l.is_delivered && (!l.target_date || l.target_date <= todayStr)
+            ).length;
+            const waiting = total - delivered;
+
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                  <span className="text-zinc-500 block mb-0.5 font-medium">จดหมายทั้งหมด:</span>
+                  <span className="text-xl font-black text-zinc-900">{total}</span>
+                  <span className="text-[10px] text-zinc-400 block mt-0.5">ฉบับในกล่องฝัน</span>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
+                  <span className="text-amber-700 block mb-0.5 font-medium">ถึงกำหนดส่งแล้ว:</span>
+                  <span className="text-xl font-black text-amber-900">{dueNow}</span>
+                  <span className="text-[10px] text-amber-600 block mt-0.5">พร้อมส่งวันนี้</span>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200">
+                  <span className="text-purple-700 block mb-0.5 font-medium">รอส่งตามกำหนด:</span>
+                  <span className="text-xl font-black text-purple-900">{waiting}</span>
+                  <span className="text-[10px] text-purple-600 block mt-0.5">ยังไม่ถึงเวลาส่ง</span>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+                  <span className="text-emerald-700 block mb-0.5 font-medium">ส่งออกสำเร็จแล้ว:</span>
+                  <span className="text-xl font-black text-emerald-900">{delivered}</span>
+                  <span className="text-[10px] text-emerald-600 block mt-0.5">ส่งถึงมือน้องแล้ว</span>
+                </div>
+              </div>
+            );
+          })()}
 
           {loadingLetters ? (
             <div className="py-12 text-center text-sm text-zinc-400">กำลังโหลดจดหมาย...</div>
@@ -496,40 +732,86 @@ export default function NewFeaturesAdminSection({
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200 text-zinc-500 font-semibold">
-                    <th className="p-3">วันที่ส่ง</th>
+                    <th className="p-3">วันที่เขียน</th>
                     <th className="p-3">ชื่อน้องค่าย</th>
-                    <th className="p-3">อีเมล</th>
+                    <th className="p-3">อีเมลปลายทาง</th>
                     <th className="p-3">โรงเรียน/คณะในฝัน</th>
                     <th className="p-3">กำหนดส่งกลับ</th>
+                    <th className="p-3">สถานะส่งเมล</th>
                     <th className="p-3 text-right">การจัดการ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
-                  {letters.map((ltr) => (
-                    <tr key={ltr.id} className="hover:bg-zinc-50 transition-colors">
-                      <td className="p-3 font-mono text-zinc-400">
-                        {new Date(ltr.created_at).toLocaleDateString("th-TH")}
-                      </td>
-                      <td className="p-3 font-bold text-zinc-900">{ltr.name}</td>
-                      <td className="p-3 font-mono text-purple-700">{ltr.email}</td>
-                      <td className="p-3 text-zinc-600">
-                        {ltr.school} {ltr.dream_faculty ? `(${ltr.dream_faculty})` : ""}
-                      </td>
-                      <td className="p-3 text-zinc-700 font-medium">
-                        <span className="px-2 py-1 rounded bg-purple-50 text-purple-800 text-[11px]">
-                          {ltr.delivery_timing}
-                        </span>
-                      </td>
-                      <td className="p-3 text-right">
-                        <button
-                          onClick={() => setSelectedLetter(ltr)}
-                          className="px-3 py-1.5 rounded-xl bg-purple-deeper text-white text-[11px] font-bold hover:bg-purple-900 transition-colors"
-                        >
-                          อ่านจดหมาย
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {letters.map((ltr) => {
+                    const todayStr = new Date().toISOString().split("T")[0];
+                    const isDue =
+                      !ltr.is_delivered && (!ltr.target_date || ltr.target_date <= todayStr);
+
+                    return (
+                      <tr key={ltr.id} className="hover:bg-zinc-50 transition-colors">
+                        <td className="p-3 font-mono text-zinc-400 whitespace-nowrap">
+                          {new Date(ltr.created_at).toLocaleDateString("th-TH")}
+                        </td>
+                        <td className="p-3 font-bold text-zinc-900">{ltr.name}</td>
+                        <td className="p-3 font-mono text-purple-700">{ltr.email}</td>
+                        <td className="p-3 text-zinc-600">
+                          {ltr.school} {ltr.dream_faculty ? `(${ltr.dream_faculty})` : ""}
+                        </td>
+                        <td className="p-3 text-zinc-700 font-medium">
+                          <span className="px-2 py-1 rounded bg-purple-50 text-purple-800 text-[11px] block truncate max-w-[200px]">
+                            {ltr.delivery_timing}
+                          </span>
+                          {ltr.target_date && (
+                            <span className="text-[10px] text-zinc-400 font-mono block mt-0.5">
+                              📅 {ltr.target_date}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          {ltr.is_delivered ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] border border-emerald-200">
+                              <span>✓</span> ส่งแล้ว
+                            </span>
+                          ) : isDue ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px] border border-amber-200 animate-pulse">
+                              <span>!</span> ถึงกำหนดส่ง
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-600 font-medium text-[10px]">
+                              <span>⏳</span> รอตามกำหนด
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-3 text-right">
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedLetter(ltr)}
+                              className="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-800 hover:bg-purple-100 text-[11px] font-bold border border-purple-200 transition-colors cursor-pointer"
+                            >
+                              อ่าน
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSendSingleLetter(ltr)}
+                              disabled={sendingSingleId === ltr.id}
+                              className="px-3 py-1.5 rounded-xl bg-purple-deeper text-white text-[11px] font-bold hover:bg-purple-900 transition-colors disabled:opacity-50 cursor-pointer"
+                            >
+                              {sendingSingleId === ltr.id ? "กำลังส่ง..." : "ส่งทันที"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteLetter(ltr.id)}
+                              className="px-2.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-[11px] font-bold border border-red-200 transition-colors cursor-pointer"
+                              title="ลบจดหมายฉบับนี้"
+                            >
+                              ลบ
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -538,7 +820,7 @@ export default function NewFeaturesAdminSection({
           {/* Modal Read Letter */}
           {selectedLetter && (
             <div
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
               onClick={() => setSelectedLetter(null)}
             >
               <div
@@ -556,24 +838,117 @@ export default function NewFeaturesAdminSection({
                   </div>
                   <button
                     onClick={() => setSelectedLetter(null)}
-                    className="w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 flex items-center justify-center font-bold text-sm"
+                    className="w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 flex items-center justify-center font-bold text-sm cursor-pointer"
                   >
                     ✕
                   </button>
                 </div>
-                <div className="my-5 p-4 rounded-2xl bg-purple-50/50 border border-purple-100">
-                  <p className="text-xs sm:text-sm text-zinc-800 whitespace-pre-wrap leading-relaxed">
+
+                <div className="my-5 p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 shadow-xs">
+                  <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider block mb-2">
+                    เนื้อความในจดหมาย Time Capsule:
+                  </span>
+                  <p className="text-xs sm:text-sm text-zinc-800 whitespace-pre-wrap leading-relaxed font-sans">
                     {selectedLetter.letter_content}
                   </p>
                 </div>
-                <div className="text-right">
+
+                <div className="flex items-center justify-between pt-2">
+                  <div>
+                    {selectedLetter.is_delivered ? (
+                      <span className="text-xs text-emerald-600 font-bold">✓ ส่งอีเมลแล้ว</span>
+                    ) : (
+                      <span className="text-xs text-amber-600 font-medium">⏳ ยังไม่ได้ส่ง</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => deleteLetter(selectedLetter.id)}
+                      className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 transition-colors cursor-pointer"
+                    >
+                      ลบจดหมายนี้
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLetter(null)}
+                      className="px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-xs font-bold text-zinc-700 cursor-pointer"
+                    >
+                      ปิดหน้าต่าง
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSendSingleLetter(selectedLetter)}
+                      disabled={sendingSingleId === selectedLetter.id}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-primary to-pink-accent text-white text-xs font-bold shadow-md hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                    >
+                      {sendingSingleId === selectedLetter.id
+                        ? "กำลังส่งอีเมล..."
+                        : "ส่งอีเมลฉบับนี้ทันที"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal Test Email */}
+          {testModalOpen && (
+            <div
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+              onClick={() => setTestModalOpen(false)}
+            >
+              <div
+                className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-purple-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between pb-3 border-b border-zinc-100 mb-4">
+                  <h4 className="font-bold text-base text-purple-deeper">
+                    ทดสอบการส่งอีเมลผ่าน Gmail SMTP
+                  </h4>
                   <button
-                    onClick={() => setSelectedLetter(null)}
-                    className="px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-xs font-bold text-zinc-700"
+                    onClick={() => setTestModalOpen(false)}
+                    className="w-7 h-7 rounded-full bg-zinc-100 text-zinc-600 font-bold text-xs cursor-pointer"
                   >
-                    ปิดหน้าต่าง
+                    ✕
                   </button>
                 </div>
+
+                <form onSubmit={handleTestEmail} className="space-y-4 text-xs">
+                  <div>
+                    <label className="block font-bold text-zinc-700 mb-1.5">
+                      ใส่อีเมลปลายทางที่ต้องการรับเมลทดสอบ:
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="เช่น your-email@gmail.com"
+                      value={testEmailAddress}
+                      onChange={(e) => setTestEmailAddress(e.target.value)}
+                      className="w-full p-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs focus:outline-none focus:ring-2 focus:ring-purple-primary/30"
+                    />
+                    <p className="text-[11px] text-zinc-400 mt-1.5">
+                      ระบบจะลองยิงข้อความทดสอบจาก Gmail ของค่ายไปยังอีเมลนี้ เพื่อยืนยันว่ารหัสผ่านแอปถูกต้อง
+                    </p>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTestModalOpen(false)}
+                      className="px-4 py-2 rounded-xl bg-zinc-100 text-zinc-700 font-bold cursor-pointer"
+                    >
+                      ยกเลิก
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isTestingMail}
+                      className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-primary to-pink-accent text-white font-bold shadow-md hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                    >
+                      {isTestingMail ? "กำลังส่ง..." : "ส่งอีเมลทดสอบ"}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}
