@@ -150,39 +150,114 @@ const DAILY_HIGHLIGHTS = [
     dayNum: 1,
     badge: "ไฮไลท์วันแรก (6 พ.ย.)",
     title: "ก้าวแรกสู่ค่ายสานฝัน: รายงานตัว ต้อนรับ และเปิดม่าน Season 7",
-    desc: "เปิดประตูรั้วสีบลู ม.อ. ต้อนรับน้องๆ นักเรียนมัธยมปลายจากทั่วประเทศ รายงานตัว รับอุปกรณ์ประจำค่าย ถ่ายภาพที่ระลึก และเข้าสู่พิธีเปิดสุดยิ่งใหญ่อลังการ",
-    location: "ศูนย์ประชุมนานาชาติฉลองสิริราชสมบัติครบ ๖๐ ปี ม.อ. หาดใหญ่",
+    desc: "เปิดประตูรั้วสีบลู ม.อ. ต้อนรับน้องๆ นักปีนเขาทุกคน รายงานตัว รับอุปกรณ์ประจำค่าย และเข้าสู่นักปีนเขาอย่างเต็มตัว",
+    location: "อาคารเรียนรวม REG , อาคารร่มศรีตรัง , บริเวณหอพัก",
     time: "13:00 - 21:00 น.",
-    keyPoints: ["พิธีเปิดและเปิดตัวคอนเซ็ปต์ Season 7", "Ice Breaking ละลายพฤติกรรม", "พบปะพี่เลี้ยงประจำบ้าน"],
+    keyPoints: ["พิธีเปิดและเปิดตัวคอนเซ็ปต์ Season 7", "Ice Breaking ละลายพฤติกรรม", "ฮัลเกาะฮ์ เริ่มต้นด้วยเจตนาที่บริสุทธิ์", "พบปะพี่เลี้ยง"],
   },
   {
     dayNum: 2,
     badge: "ไฮไลท์วันที่สอง (7 พ.ย.)",
     title: "เจาะลึก 5 ฐานกลุ่มวิทยาศาสตร์สุขภาพ: ปูทางสู่บุคลากรทางการแพทย์",
-    desc: "สัมผัสห้องแล็บและเครื่องมือแพทย์ของจริง Workshop การกู้ชีพเบื้องต้น CPR หูฟังแพทย์ Stethoscope การตรวจแล็บเทคนิค และการปรุงยา",
-    location: "กลุ่มอาคารคณะแพทยศาสตร์, เภสัชศาสตร์, ทันตแพทยศาสตร์, พยาบาลศาสตร์ และเทคนิคการแพทย์",
-    time: "08:30 - 17:00 น.",
-    keyPoints: ["5 ฐานวิทย์สุขภาพภาคปฏิบัติ", "จำลองเคสผู้ป่วยและตรวจวินิจฉัย", "Q&A เส้นทางสอบแพทย์/ทันตะ/เภสัช"],
+    desc: "สัมผัสห้องแล็บและเครื่องมือแพทย์ของจริง Workshop การกู้ชีพเบื้องต้น CPR หูฟังแพทย์ Stethoscope และการตรวจแล็บเทคนิค",
+    location: "ตึกแดงคณะแพทยศาสตร์",
+    time: "08:00 - 22:00 น.",
+    keyPoints: ["7 ฐานวิทย์สุขภาพพร้อมภาคปฏิบัติ", "แนะแนวระบบ TCAS รอบ 1-4", "จำลองเคสผู้ป่วยและตรวจวินิจฉัย", "Q&A เส้นทางสอบแพทย์/ทันตะ/เภสัช"],
   },
   {
     dayNum: 3,
     badge: "ไฮไลท์วันที่สาม (8 พ.ย.)",
     title: "ตะลุย 11 ฐานวิทย์-เทคโน & มนุษย์-สังคม พร้อมค่ำคืนบายเนียร์แสนอบอุ่น",
     desc: "เปิดโลกนวัตกรรมวิศวกรรม หุ่นยนต์ AI ทรัพยากรธรรมชาติ สถาปัตย์ ศิลปศาสตร์ รัฐศาสตร์ นิติศาสตร์ และวิทยาการจัดการ พร้อมค่ำคืนบายเนียร์รอบกองไฟในบรรยากาศซึ้งกินใจ",
-    location: "อาคารเรียนรวม ศูนย์คอมพิวเตอร์ และลานกิจกรรม ม.อ.",
-    time: "08:30 - 21:30 น.",
-    keyPoints: ["11 ฐานการเรียนรู้ครบทุกมิติ", "แนะแนวระบบ TCAS รอบ 1-4", "ค่ำคืนบายเนียร์ สานสายใยพี่น้อง"],
+    location: "อาคารเรียนรวม คณะวิศวกรรมศาสตร์ คณะวิทยาศาสตร์ ศาลจำลอง คณะอุตสหกรรมการเกษตร และลานกิจกรรม บริเวณหอพัก",
+    time: "07:30 - 22:00 น.",
+    keyPoints: ["7 ฐานการเรียนรู้ครบทุกมิติ", "ถอดบทเรียนนักปีนเขาและสานสายใยพี่น้อง"],
   },
   {
     dayNum: 4,
     badge: "ไฮไลท์วันสุดท้าย (9 พ.ย.)",
     title: "เวทีเสวนาวิชาการ 'Bloom into Your Summit' และพิธีปิดค่าย",
-    desc: "รับฟังประสบการณ์ตรงจากรุ่นพี่ศิษย์เก่าที่ประสบความสำเร็จ พิธีมอบประกาศนียบัตร และการส่งต่อพลังความฝันให้น้องๆ บินสู่ยอดเขาแห่งเป้าหมายด้วยความภาคภูมิ",
-    location: "ห้องประชุมทองจันทร์ หงศ์ลดารมภ์ ม.อ.",
-    time: "08:30 - 15:30 น.",
-    keyPoints: ["เสวนาโดยวิทยากรชื่อดัง", "พิธีมอบเกียรติบัตร", "เปิดกล่อง Time Capsule บันทึกฝัน"],
+    desc: "รับฟังประสบการณ์ตรงจากวิทยากรผู้มากประสบการณ์และมีบทบาทในสังคมมุสลิมไทย",
+    location: "อาคารเรียนรวม REG",
+    time: "08:00 - 13:00 น.",
+    keyPoints: ["เสวนาโดยวิทยากรชื่อดัง", "นาศีหัตปิดท้ายโดยประธานค่าย"],
   },
 ];
+
+/* ================================================================
+   CAMP ROADMAP POSTERS DATA (2 DAYS: 7 Nov & 8 Nov)
+   Each day has 2 posters: Left = Male (มุสลีมีน), Right = Female (มุสลิมะฮ์)
+   ================================================================ */
+
+interface RoadmapPosterItem {
+  src: string;
+  title: string;
+  gender: "male" | "female";
+  genderLabel: string;
+  badge: string;
+  theme: string;
+  desc: string;
+}
+
+interface RoadmapDayData {
+  dayNum: number;
+  dateStr: string;
+  dayTitle: string;
+  description: string;
+  male: RoadmapPosterItem;
+  female: RoadmapPosterItem;
+}
+
+const ROADMAP_DAYS: Record<7 | 8, RoadmapDayData> = {
+  7: {
+    dayNum: 2,
+    dateStr: "เสาร์ 7 พ.ย. 2569",
+    dayTitle: "กิจกรรมฐานกลุ่มวิทยาศาสตร์สุขภาพ (Health Sciences)",
+    description: "ผังการหมุนเวียนเข้าศึกษาฐานกลุ่มวิทยาศาสตร์สุขภาพ (แพทยศาสตร์, ทันตแพทย์, เภสัชศาสตร์, พยาบาลศาสตร์, เทคนิคการแพทย์, การแพทย์แผนไทย, สัตวแพทยศาสตร์ และคลินิกหัวใจ)",
+    male: {
+      src: "/images/roadmap/roadmap-day7-male.png",
+      title: "ผังฐานกิจกรรมมุสลีมีน (7 พ.ย.)",
+      gender: "male",
+      genderLabel: "มุสลีมีน (ฝ่ายชาย)",
+      badge: "Muslimeen • 7 Nov. 2026",
+      theme: "ฐานกลุ่มวิทยาศาสตร์สุขภาพ (Muslimeen G.1 - G.6)",
+      desc: "ผังเส้นทางและตารางรอบเวลาเข้าฐานช่วงเช้าและช่วงบ่ายสำหรับกลุ่ม มุสลีมีน",
+    },
+    female: {
+      src: "/images/roadmap/roadmap-day7-female.png",
+      title: "ผังฐานกิจกรรมมุสลิมะฮ์ (7 พ.ย.)",
+      gender: "female",
+      genderLabel: "มุสลิมะฮ์ (ฝ่ายหญิง)",
+      badge: "Muslimah • 7 Nov. 2026",
+      theme: "ฐานกลุ่มวิทยาศาสตร์สุขภาพ (Muslimah G.1 - G.8)",
+      desc: "ผังเส้นทางและตารางรอบเวลาเข้าฐานช่วงเช้าและช่วงบ่ายสำหรับกลุ่ม มุสลิมะฮ์",
+    },
+  },
+  8: {
+    dayNum: 3,
+    dateStr: "อาทิตย์ 8 พ.ย. 2569",
+    dayTitle: "กิจกรรมฐานวิทย์-เทคโน และ มนุษย์-สังคม (Sci-Tech & Humanities)",
+    description: "ผังและตารางเวลาการหมุนเวียนฐานกลุ่มวิทยาศาสตร์-เทคโนโลยี และกลุ่มมนุษยศาสตร์-สังคมศาสตร์ พร้อมจุดนัดพบและการเดินรถบัสรับ-ส่ง",
+    male: {
+      src: "/images/roadmap/roadmap-day8-male.png",
+      title: "ผังฐานกิจกรรมมุสลีมีน (8 พ.ย.)",
+      gender: "male",
+      genderLabel: "มุสลีมีน (ฝ่ายชาย)",
+      badge: "Muslimeen • 8 Nov. 2026",
+      theme: "ฐานวิทย์-เทคโน & มนุษย์-สังคม (กลุ่ม B1 - B4)",
+      desc: "ผังตารางเวลาหมุนเวียนฐานเช้าและบ่าย จุดเดินเท้า และจุดขึ้นรถบัสกลุ่มมุสลีมีน",
+    },
+    female: {
+      src: "/images/roadmap/roadmap-day8-female.png",
+      title: "ผังฐานกิจกรรมมุสลิมะฮ์ (8 พ.ย.)",
+      gender: "female",
+      genderLabel: "มุสลิมะฮ์ (ฝ่ายหญิง)",
+      badge: "Muslimah • 8 Nov. 2026",
+      theme: "ฐานวิทย์-เทคโน & มนุษย์-สังคม (กลุ่ม G1 - G3)",
+      desc: "ผังตารางเวลาหมุนเวียนฐานเช้าและบ่าย จุดเดินเท้า และจุดขึ้นรถบัสกลุ่มมุสลิมะฮ์",
+    },
+  },
+};
 
 /* ================================================================
    MAIN CAMP PAGE
@@ -193,6 +268,8 @@ export default function CampPage() {
 
   // State for Overview Tab
   const [selectedDayHighlight, setSelectedDayHighlight] = useState<number>(1);
+  const [selectedRoadmapDay, setSelectedRoadmapDay] = useState<7 | 8>(7);
+  const [previewPoster, setPreviewPoster] = useState<{ src: string; title: string; subtitle: string } | null>(null);
 
   // State for Faculties Tab
   const [selectedCategory, setSelectedCategory] = useState<"all" | "health" | "sci_tech" | "social">("all");
@@ -398,31 +475,28 @@ export default function CampPage() {
           <div className="inline-flex p-1.5 rounded-2xl bg-purple-deeper/10 border border-purple-primary/20 backdrop-blur-md shadow-inner gap-1 sm:gap-2">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${
-                activeTab === "overview"
-                  ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
-                  : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
-              }`}
+              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${activeTab === "overview"
+                ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
+                : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
+                }`}
             >
               ไฮไลท์ • แผนที่ • มื้ออาหาร
             </button>
             <button
               onClick={() => setActiveTab("faculties")}
-              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${
-                activeTab === "faculties"
-                  ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
-                  : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
-              }`}
+              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${activeTab === "faculties"
+                ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
+                : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
+                }`}
             >
               กิจกรรมฐาน 16 คณะ
             </button>
             <button
               onClick={() => setActiveTab("schedule")}
-              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${
-                activeTab === "schedule"
-                  ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
-                  : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
-              }`}
+              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${activeTab === "schedule"
+                ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
+                : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
+                }`}
             >
               กำหนดการค่าย
             </button>
@@ -456,11 +530,10 @@ export default function CampPage() {
                       <button
                         key={d}
                         onClick={() => setSelectedDayHighlight(d)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                          selectedDayHighlight === d
-                            ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md"
-                            : "text-white/70 hover:text-white hover:bg-white/10"
-                        }`}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${selectedDayHighlight === d
+                          ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md"
+                          : "text-white/70 hover:text-white hover:bg-white/10"
+                          }`}
                       >
                         วันที่ {d} (6-9 พ.ย.)
                       </button>
@@ -506,75 +579,204 @@ export default function CampPage() {
               </div>
             </section>
 
-            {/* 1.2 CAMP MAP POSTER (แผนที่ค่าย คล้ายโปสเตอร์หน้าแรก) */}
+            {/* 1.2 CAMP MAP & ACTIVITY ROADMAP (ผังกิจกรรม 4 โปสเตอร์: ขึ้น 1 วัน 2 โปสเตอร์ ซ้าย ชาย ขวา หญิง) */}
             <section className="p-6 sm:p-10 rounded-3xl bg-white shadow-xl border border-zinc-200 relative overflow-hidden">
               <div className="text-center max-w-2xl mx-auto mb-8">
                 <span className="text-xs font-bold text-purple-primary uppercase tracking-wider bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
-                  ผังสถานที่ & แผนที่ค่าย
+                  ผังสถานที่ & แผนที่เส้นทางค่าย
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-purple-deeper mt-2">
-                  Camp Map (แผนที่การเดินทางภายในค่าย)
+                  Camp Map & Activity Roadmap
                 </h3>
                 <p className="text-zinc-600 text-sm mt-1">
-                  แผนที่แสดงจุดจัดกิจกรรม หอพัก อาคารเรียน และสิ่งอำนวยความสะดวก ม.อ. หาดใหญ่
+                  ผังเส้นทางการหมุนเวียนฐานกิจกรรม 16 คณะ (ขึ้นแสดงวันละ 2 โปสเตอร์: ซ้าย ชาย • ขวา หญิง)
                 </p>
+
+                {/* Day Switcher Buttons (วันที่ 7 พ.ย. / วันที่ 8 พ.ย.) */}
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                  <button
+                    onClick={() => setSelectedRoadmapDay(7)}
+                    className={`px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${selectedRoadmapDay === 7
+                      ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20 scale-105"
+                      : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200"
+                      }`}
+                  >
+                    <span>เสาร์ 7 พ.ย.</span>
+                    <span className="opacity-80 font-normal text-xs">(ฐานวิทยาศาสตร์สุขภาพ)</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedRoadmapDay(8)}
+                    className={`px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${selectedRoadmapDay === 8
+                      ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20 scale-105"
+                      : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200"
+                      }`}
+                  >
+                    <span>อาทิตย์ 8 พ.ย.</span>
+                    <span className="opacity-80 font-normal text-xs">(ฐานวิทย์-เทคโน & มนุษย์-สังคม)</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Poster Frame */}
-              <div className="relative rounded-3xl overflow-hidden border-2 border-purple-primary/25 shadow-2xl bg-gradient-to-br from-purple-950 via-slate-900 to-indigo-950 text-white p-6 sm:p-10">
-                {/* Background Decor */}
-                <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
-
-                <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className="inline-block px-4 py-1.5 rounded-full bg-pink-accent/20 border border-pink-accent/30 text-pink-light text-xs font-bold mb-4">
-                    MAP OF GUIDANCE FOR DREAM 7TH
-                  </div>
-                  <h4 className="text-2xl sm:text-4xl font-black tracking-wide mb-2 text-glow-white">
-                    แผนที่ผังค่ายและจุดสำคัญ (Camp Map)
+              {/* Day Header Banner */}
+              <div className="mb-6 p-4 rounded-2xl bg-purple-50/70 border border-purple-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                <div>
+                  <span className="text-xs font-bold text-pink-accent block font-mono">
+                    {ROADMAP_DAYS[selectedRoadmapDay].dateStr}
+                  </span>
+                  <h4 className="text-base sm:text-lg font-black text-purple-deeper">
+                    {ROADMAP_DAYS[selectedRoadmapDay].dayTitle}
                   </h4>
-                  <p className="text-xs sm:text-sm text-purple-light max-w-xl mb-8">
-                    มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่ (PSU Hatyai Campus)
+                  <p className="text-xs text-zinc-600 mt-0.5">
+                    {ROADMAP_DAYS[selectedRoadmapDay].description}
                   </p>
+                </div>
+                <div className="text-xs text-purple-800 font-semibold bg-white px-3 py-1.5 rounded-xl border border-purple-200 shrink-0">
+                  คลิกที่ภาพเพื่อขยายเต็มจอ
+                </div>
+              </div>
 
-                  {/* Visual Map Grid / Key Checkpoints */}
-                  <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
-                    <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
-                      <span className="text-xl font-bold text-pink-light block mb-1">01</span>
-                      <h5 className="font-bold text-sm text-white">ศูนย์ประชุมนานาชาติฯ</h5>
-                      <p className="text-xs text-white/70 mt-1">
-                        จุดรายงานตัว พิธีเปิด พิธีปิด และกิจกรรมรวมทุกกลุ่ม
-                      </p>
+              {/* 2-Column Side-by-Side: Left = Male (ชาย) | Right = Female (หญิง) */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                {/* LEFT: MALE (มุสลีมีน / ฝ่ายชาย) */}
+                <div className="rounded-3xl bg-indigo-50/30 border-2 border-indigo-200/80 p-5 sm:p-6 flex flex-col justify-between shadow-md hover:shadow-xl transition-all">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="px-3 py-1 rounded-full bg-indigo-600 text-white text-xs font-bold shadow-xs">
+                        {ROADMAP_DAYS[selectedRoadmapDay].male.genderLabel}
+                      </span>
+                      <span className="text-xs font-mono text-zinc-500 font-bold">
+                        {ROADMAP_DAYS[selectedRoadmapDay].male.badge}
+                      </span>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
-                      <span className="text-xl font-bold text-pink-light block mb-1">02</span>
-                      <h5 className="font-bold text-sm text-white">กลุ่มอาคารคณะแพทย์ & สุขภาพ</h5>
-                      <p className="text-xs text-white/70 mt-1">
-                        สถานที่จัดกิจกรรม 5 ฐานกลุ่มวิทยาศาสตร์สุขภาพและแล็บทดลอง
-                      </p>
-                    </div>
+                    <h5 className="font-black text-base sm:text-lg text-indigo-950 mb-1">
+                      {ROADMAP_DAYS[selectedRoadmapDay].male.title}
+                    </h5>
+                    <p className="text-xs text-zinc-600 mb-4">
+                      {ROADMAP_DAYS[selectedRoadmapDay].male.desc}
+                    </p>
 
-                    <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
-                      <span className="text-xl font-bold text-pink-light block mb-1">03</span>
-                      <h5 className="font-bold text-sm text-white">อาคารเรียนรวม & ศูนย์คอมพิวเตอร์</h5>
-                      <p className="text-xs text-white/70 mt-1">
-                        สถานที่จัดกิจกรรม 11 ฐานวิทย์-เทคโน มนุษย์-สังคม และ Workshop
-                      </p>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
-                      <span className="text-xl font-bold text-pink-light block mb-1">04</span>
-                      <h5 className="font-bold text-sm text-white">มัสยิด ม.อ. & โรงอาหารกลาง</h5>
-                      <p className="text-xs text-white/70 mt-1">
-                        จุดละหมาดรวม 5 เวลา จุดรับประทานอาหารฮาลาล และที่พัก
-                      </p>
+                    {/* Poster Image Frame */}
+                    <div
+                      onClick={() =>
+                        setPreviewPoster({
+                          src: ROADMAP_DAYS[selectedRoadmapDay].male.src,
+                          title: ROADMAP_DAYS[selectedRoadmapDay].male.title,
+                          subtitle: `${ROADMAP_DAYS[selectedRoadmapDay].dateStr} • ${ROADMAP_DAYS[selectedRoadmapDay].male.theme}`,
+                        })
+                      }
+                      className="group relative rounded-2xl overflow-hidden border border-indigo-200 bg-white shadow-inner cursor-pointer"
+                    >
+                      <img
+                        src={ROADMAP_DAYS[selectedRoadmapDay].male.src}
+                        alt={ROADMAP_DAYS[selectedRoadmapDay].male.title}
+                        className="w-full h-auto object-contain group-hover:scale-102 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-indigo-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="px-4 py-2 rounded-xl bg-white/95 text-indigo-950 text-xs font-bold shadow-lg backdrop-blur-xs flex items-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                          </svg>
+                          <span>คลิกดูภาพขยายเต็มจอ</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                    <span className="text-xs text-white/60">
-                      *มีพี่เลี้ยงและทีมงานฝ่ายประสานงานคอยดูแลนำทางตลอดทุกจุดกิจกรรม
-                    </span>
+                  <div className="mt-4 pt-3 border-t border-indigo-100 flex items-center justify-between">
+                    <button
+                      onClick={() =>
+                        setPreviewPoster({
+                          src: ROADMAP_DAYS[selectedRoadmapDay].male.src,
+                          title: ROADMAP_DAYS[selectedRoadmapDay].male.title,
+                          subtitle: `${ROADMAP_DAYS[selectedRoadmapDay].dateStr} • ${ROADMAP_DAYS[selectedRoadmapDay].male.theme}`,
+                        })
+                      }
+                      className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      เปิดดูภาพขยาย
+                    </button>
+                    <a
+                      href={ROADMAP_DAYS[selectedRoadmapDay].male.src}
+                      download={`Roadmap-Day${selectedRoadmapDay}-Muslimeen.png`}
+                      className="text-xs text-indigo-700 font-bold hover:underline inline-flex items-center gap-1"
+                    >
+                      <span>ดาวน์โหลดไฟล์</span>
+                      <span>↓</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* RIGHT: FEMALE (มุสลิมะฮ์ / ฝ่ายหญิง) */}
+                <div className="rounded-3xl bg-pink-50/30 border-2 border-pink-200/80 p-5 sm:p-6 flex flex-col justify-between shadow-md hover:shadow-xl transition-all">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="px-3 py-1 rounded-full bg-pink-600 text-white text-xs font-bold shadow-xs">
+                        {ROADMAP_DAYS[selectedRoadmapDay].female.genderLabel}
+                      </span>
+                      <span className="text-xs font-mono text-zinc-500 font-bold">
+                        {ROADMAP_DAYS[selectedRoadmapDay].female.badge}
+                      </span>
+                    </div>
+
+                    <h5 className="font-black text-base sm:text-lg text-pink-950 mb-1">
+                      {ROADMAP_DAYS[selectedRoadmapDay].female.title}
+                    </h5>
+                    <p className="text-xs text-zinc-600 mb-4">
+                      {ROADMAP_DAYS[selectedRoadmapDay].female.desc}
+                    </p>
+
+                    {/* Poster Image Frame */}
+                    <div
+                      onClick={() =>
+                        setPreviewPoster({
+                          src: ROADMAP_DAYS[selectedRoadmapDay].female.src,
+                          title: ROADMAP_DAYS[selectedRoadmapDay].female.title,
+                          subtitle: `${ROADMAP_DAYS[selectedRoadmapDay].dateStr} • ${ROADMAP_DAYS[selectedRoadmapDay].female.theme}`,
+                        })
+                      }
+                      className="group relative rounded-2xl overflow-hidden border border-pink-200 bg-white shadow-inner cursor-pointer"
+                    >
+                      <img
+                        src={ROADMAP_DAYS[selectedRoadmapDay].female.src}
+                        alt={ROADMAP_DAYS[selectedRoadmapDay].female.title}
+                        className="w-full h-auto object-contain group-hover:scale-102 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-pink-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="px-4 py-2 rounded-xl bg-white/95 text-pink-950 text-xs font-bold shadow-lg backdrop-blur-xs flex items-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                          </svg>
+                          <span>คลิกดูภาพขยายเต็มจอ</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-pink-100 flex items-center justify-between">
+                    <button
+                      onClick={() =>
+                        setPreviewPoster({
+                          src: ROADMAP_DAYS[selectedRoadmapDay].female.src,
+                          title: ROADMAP_DAYS[selectedRoadmapDay].female.title,
+                          subtitle: `${ROADMAP_DAYS[selectedRoadmapDay].dateStr} • ${ROADMAP_DAYS[selectedRoadmapDay].female.theme}`,
+                        })
+                      }
+                      className="px-3.5 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      เปิดดูภาพขยาย
+                    </button>
+                    <a
+                      href={ROADMAP_DAYS[selectedRoadmapDay].female.src}
+                      download={`Roadmap-Day${selectedRoadmapDay}-Muslimah.png`}
+                      className="text-xs text-pink-700 font-bold hover:underline inline-flex items-center gap-1"
+                    >
+                      <span>ดาวน์โหลดไฟล์</span>
+                      <span>↓</span>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -733,11 +935,10 @@ export default function CampPage() {
                 <button
                   key={c.key}
                   onClick={() => setSelectedCategory(c.key as any)}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                    selectedCategory === c.key
-                      ? "bg-purple-primary text-white shadow-md shadow-purple-primary/30"
-                      : "bg-white text-zinc-600 hover:text-purple-dark hover:bg-zinc-100 border border-zinc-200"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${selectedCategory === c.key
+                    ? "bg-purple-primary text-white shadow-md shadow-purple-primary/30"
+                    : "bg-white text-zinc-600 hover:text-purple-dark hover:bg-zinc-100 border border-zinc-200"
+                    }`}
                 >
                   {c.label}
                 </button>
@@ -890,11 +1091,10 @@ export default function CampPage() {
                 <button
                   key={d.dayNum}
                   onClick={() => setSelectedDay(d.dayNum)}
-                  className={`px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                    selectedDay === d.dayNum
-                      ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
-                      : "bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200"
-                  }`}
+                  className={`px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${selectedDay === d.dayNum
+                    ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
+                    : "bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200"
+                    }`}
                 >
                   <span className="block font-bold">{d.title}</span>
                   <span className="block text-[10px] opacity-80">{d.subtitle}</span>
@@ -909,31 +1109,28 @@ export default function CampPage() {
                 <span className="text-xs font-bold text-zinc-500 mr-1 hidden sm:inline">กลุ่มผู้เข้าร่วม:</span>
                 <button
                   onClick={() => setScheduleGender("all")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    scheduleGender === "all"
-                      ? "bg-purple-deeper text-white shadow-xs"
-                      : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${scheduleGender === "all"
+                    ? "bg-purple-deeper text-white shadow-xs"
+                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                    }`}
                 >
                   ทั้งหมด
                 </button>
                 <button
                   onClick={() => setScheduleGender("male")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    scheduleGender === "male"
-                      ? "bg-indigo-600 text-white shadow-xs"
-                      : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${scheduleGender === "male"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                    }`}
                 >
                   มุสลีมีน (ชาย)
                 </button>
                 <button
                   onClick={() => setScheduleGender("female")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    scheduleGender === "female"
-                      ? "bg-pink-600 text-white shadow-xs"
-                      : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${scheduleGender === "female"
+                    ? "bg-pink-600 text-white shadow-xs"
+                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                    }`}
                 >
                   มุสลิมะฮ์ (หญิง)
                 </button>
@@ -999,23 +1196,21 @@ export default function CampPage() {
                     return (
                       <div
                         key={`${item.dayNum}-${item.startTime}-${item.title}-${idx}`}
-                        className={`rounded-2xl border transition-all duration-300 p-2.5 sm:p-3.5 ${
-                          isCurrent
-                            ? "bg-emerald-50/90 border-2 border-emerald-400 shadow-md ring-2 ring-emerald-400/20"
-                            : isPast
+                        className={`rounded-2xl border transition-all duration-300 p-2.5 sm:p-3.5 ${isCurrent
+                          ? "bg-emerald-50/90 border-2 border-emerald-400 shadow-md ring-2 ring-emerald-400/20"
+                          : isPast
                             ? "bg-white/60 border-zinc-200/60 opacity-60 hover:opacity-100 transition-opacity"
                             : "bg-white hover:bg-zinc-50/80 border-zinc-200/80 shadow-xs hover:border-purple-200 hover:shadow-sm"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between gap-2.5 sm:gap-4">
                           {/* Column 1: เวลา (Time & Duration) */}
                           <div className="w-[84px] sm:w-[130px] flex-shrink-0 flex flex-col items-center justify-center">
                             <div
-                              className={`w-full py-1 sm:py-1.5 px-1 sm:px-2 rounded-xl font-mono text-[11px] sm:text-xs font-bold text-center tracking-tight border transition-colors ${
-                                isCurrent
-                                  ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                                  : "bg-purple-50 text-purple-950 border-purple-100/80"
-                              }`}
+                              className={`w-full py-1 sm:py-1.5 px-1 sm:px-2 rounded-xl font-mono text-[11px] sm:text-xs font-bold text-center tracking-tight border transition-colors ${isCurrent
+                                ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                                : "bg-purple-50 text-purple-950 border-purple-100/80"
+                                }`}
                             >
                               {item.time}
                             </div>
@@ -1036,11 +1231,10 @@ export default function CampPage() {
                             )}
 
                             <h4
-                              className={`text-xs sm:text-sm md:text-base font-bold leading-snug line-clamp-2 sm:line-clamp-none ${
-                                isCurrent
-                                  ? "text-emerald-950 font-extrabold"
-                                  : "text-zinc-900"
-                              }`}
+                              className={`text-xs sm:text-sm md:text-base font-bold leading-snug line-clamp-2 sm:line-clamp-none ${isCurrent
+                                ? "text-emerald-950 font-extrabold"
+                                : "text-zinc-900"
+                                }`}
                             >
                               {item.desc || item.title}
                             </h4>
@@ -1077,11 +1271,10 @@ export default function CampPage() {
                             {item.location && item.location !== "-" ? (
                               <span
                                 title={item.location}
-                                className={`inline-flex items-center px-2 sm:px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-semibold border text-right transition-colors ${
-                                  isCurrent
-                                    ? "bg-emerald-100/90 text-emerald-900 border-emerald-300 font-bold"
-                                    : "bg-purple-50/60 text-purple-900 border-purple-100/80"
-                                }`}
+                                className={`inline-flex items-center px-2 sm:px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-semibold border text-right transition-colors ${isCurrent
+                                  ? "bg-emerald-100/90 text-emerald-900 border-emerald-300 font-bold"
+                                  : "bg-purple-50/60 text-purple-900 border-purple-100/80"
+                                  }`}
                               >
                                 <span className="max-w-[85px] sm:max-w-[170px] truncate">{item.location}</span>
                               </span>
@@ -1110,6 +1303,53 @@ export default function CampPage() {
           </div>
         )}
       </main>
+
+      {/* Lightbox Modal for Full Poster Preview */}
+      {previewPoster && (
+        <div
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-3 sm:p-6 animate-fade-in"
+          onClick={() => setPreviewPoster(null)}
+        >
+          <div
+            className="relative max-w-5xl w-full max-h-[95vh] flex flex-col bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-white/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 bg-slate-950/90 border-b border-white/10 flex items-center justify-between text-white shrink-0">
+              <div className="pr-4 min-w-0">
+                <h3 className="font-bold text-sm sm:text-base text-white truncate">{previewPoster.title}</h3>
+                <p className="text-xs text-purple-200/80 mt-0.5 truncate">{previewPoster.subtitle}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={previewPoster.src}
+                  download
+                  className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-colors inline-flex items-center gap-1.5"
+                >
+                  <span>ดาวน์โหลด</span>
+                  <span>↓</span>
+                </a>
+                <button
+                  onClick={() => setPreviewPoster(null)}
+                  className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
+                  aria-label="ปิดหน้าต่าง"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Image Area */}
+            <div className="p-3 sm:p-6 flex-1 overflow-auto flex items-center justify-center bg-black/40">
+              <img
+                src={previewPoster.src}
+                alt={previewPoster.title}
+                className="max-h-[80vh] w-auto object-contain rounded-xl shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

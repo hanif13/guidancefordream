@@ -164,8 +164,8 @@ export const MALE_MEMBERS: TeamMember[] = [
     "studentId": "6810510064",
     "phone": "082-417-2033",
     "facebook": "Shaban Nawahasan",
-    "position": "หัวหน้าฝ่าย (อมีรฝ่ายสถานที่และคมนาคม)",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "หัวหน้าฝ่าย (อมีรฝ่ายสถานที่)",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 23
   },
   {
@@ -178,8 +178,8 @@ export const MALE_MEMBERS: TeamMember[] = [
     "studentId": "6810110804",
     "phone": "062-893-7440",
     "facebook": "Nabil Mbh",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 24
   },
   {
@@ -192,8 +192,8 @@ export const MALE_MEMBERS: TeamMember[] = [
     "studentId": "6910610119",
     "phone": "",
     "facebook": "",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 25
   },
   {
@@ -206,8 +206,8 @@ export const MALE_MEMBERS: TeamMember[] = [
     "studentId": "6910613043",
     "phone": "",
     "facebook": "",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 26
   },
   {
@@ -220,8 +220,8 @@ export const MALE_MEMBERS: TeamMember[] = [
     "studentId": "6910515058",
     "phone": "",
     "facebook": "",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 27
   },
   {
@@ -234,8 +234,8 @@ export const MALE_MEMBERS: TeamMember[] = [
     "studentId": "6810110425",
     "phone": "086-387-9410",
     "facebook": "ADill Hayeedeng",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 28
   },
   {
@@ -853,8 +853,8 @@ export const FEMALE_MEMBERS: TeamMember[] = [
     "studentId": "6810110628",
     "phone": "061-430-9292",
     "facebook": "Nada Ninada",
-    "position": "หัวหน้าฝ่าย (อมีเราะฮฺฝ่ายสถานที่และคมนาคม)",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "หัวหน้าฝ่าย (อมีเราะฮฺฝ่ายสถานที่)",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 29
   },
   {
@@ -867,8 +867,8 @@ export const FEMALE_MEMBERS: TeamMember[] = [
     "studentId": "6710410222",
     "phone": "085-520-3431",
     "facebook": "Rosnanee Yalo",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 30
   },
   {
@@ -881,8 +881,8 @@ export const FEMALE_MEMBERS: TeamMember[] = [
     "studentId": "6610410219",
     "phone": "062-319-0459",
     "facebook": "Tuan Tasneem",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 31
   },
   {
@@ -895,8 +895,8 @@ export const FEMALE_MEMBERS: TeamMember[] = [
     "studentId": "6810310084",
     "phone": "",
     "facebook": "Ameena Da-oh",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 32
   },
   {
@@ -909,8 +909,8 @@ export const FEMALE_MEMBERS: TeamMember[] = [
     "studentId": "",
     "phone": "",
     "facebook": "",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 33
   },
   {
@@ -923,8 +923,8 @@ export const FEMALE_MEMBERS: TeamMember[] = [
     "studentId": "6910210214",
     "phone": "063-120-6416",
     "facebook": "Nikfairusah Yee-arsae",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 34
   },
   {
@@ -937,8 +937,8 @@ export const FEMALE_MEMBERS: TeamMember[] = [
     "studentId": "6910515116",
     "phone": "098-719-8373",
     "facebook": "Nisreen Ardae",
-    "position": "ทีมงานฝ่ายสถานที่และคมนาคม",
-    "department": "ฝ่ายสถานที่และคมนาคม",
+    "position": "ทีมงานฝ่ายสถานที่",
+    "department": "ฝ่ายสถานที่",
     "sortOrder": 35
   },
   {

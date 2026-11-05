@@ -14,10 +14,16 @@ import { TeamMember, MALE_MEMBERS, FEMALE_MEMBERS } from "./campStaffData";
 interface CampEdition {
   generation: number;
   roman: string;
+  seasonBadge: string;
   yearTh: string;
   yearEn: string;
+  dates: string;
+  location: string;
+  locationType: "tour" | "campus";
+  themeName: string;
   themeTh: string;
   themeEn: string;
+  posterSrc: string;
   colorGradient: string;
   borderColor: string;
   hasSpecialNote?: boolean;
@@ -31,101 +37,235 @@ const CAMP_EDITIONS: CampEdition[] = [
   {
     generation: 1,
     roman: "1st",
-    yearTh: "2563",
-    yearEn: "2020",
+    seasonBadge: "Season 1",
+    yearTh: "2562",
+    yearEn: "2019",
+    dates: "6 - 8 ธันวาคม 2562",
+    location: "โรงเรียนมุสลิมศึกษา จ.สตูล",
+    locationType: "tour",
+    themeName: "ค่ายสานฝันสัญจร สตูล",
     themeTh: "จุดเริ่มต้นแห่งการสานฝัน สู่เส้นทางแห่งศรัทธา",
     themeEn: "The Genesis of Guiding Dreams",
-    colorGradient: "from-purple-900 via-indigo-900 to-purple-800",
-    borderColor: "border-purple-500/40",
+    posterSrc: "/images/editions/ss1.jpg",
+    colorGradient: "from-sky-900 via-indigo-900 to-purple-900",
+    borderColor: "border-sky-500/40",
     hasSpecialNote: true,
-    specialNoteTitle: "คำอธิบายพิเศษ: ปฐมบทแห่งการริเริ่ม (The Genesis)",
+    specialNoteTitle: "ค่ายสัญจรรุ่นแรก (The Genesis)",
     specialNoteBody:
-      "ค่ายสานฝันเพื่อน้อง ครั้งที่ 1 เกิดขึ้นจากเจตนารมณ์อันแน่วแน่ของชมรมมุสลิม ม.อ. หาดใหญ่ ที่เล็งเห็นว่าเยาวชนมุสลิมในพื้นที่ภาคใต้เผชิญกับข้อจำกัดในการเข้าถึงข้อมูลการศึกษาต่อระดับอุดมศึกษา และขาดพื้นที่แนะนำแนวทางที่บูรณาการมิติด้านคุณธรรมและหลักการศาสนาอิสลามอย่างแท้จริง รุ่นที่ 1 จึงเป็นปฐมบทสำคัญในการวางรากฐาน สร้างคอนเซ็ปต์การแนะแนวที่ไม่เพียงชี้แนะคณะในฝัน แต่ร่วมปลูกฝังอุดมการณ์การเป็น 'ปัญญาชนมุสลิม' ที่ใช้วิชาชีพรับใช้สังคมและพระผู้เป็นเจ้า",
+      "ค่ายสานฝันเพื่อน้อง รุ่นที่ 1 จัดขึ้นในรูปแบบ 'ค่ายสัญจร' ณ โรงเรียนมุสลิมศึกษา จ.สตูล โดยพี่น้องนักศึกษาชมรมมุสลิม ม.อ. หาดใหญ่ ออกเดินทางไปจัดกิจกรรมแนะแนวการศึกษาและสร้างแรงบันดาลใจให้แก่น้องๆ ในพื้นที่",
     description:
-      "รุ่นริเริ่มสร้างประวัติศาสตร์ รวบรวมพี่น้องนักศึกษาจากหลากหลายคณะมาร่วมสร้างพื้นที่เรียนรู้ แนะนำ TCAS และการเตรียมตัวสอบเข้ามหาวิทยาลัยเป็นครั้งแรก",
-    highlights: ["เปิดตัวโครงการครั้งแรก", "บูรณาการคุณธรรมสู่การศึกษา", "ริเริ่มฐานแนะแนวคณะหลัก"],
+      "รุ่นริเริ่มสร้างประวัติศาสตร์ในรูปแบบค่ายสัญจร มุ่งสร้างพื้นที่เรียนรู้ แนะนำ TCAS และแนวทางการเตรียมตัวสอบเข้ามหาวิทยาลัย",
+    highlights: ["เปิดตัวโครงการครั้งแรกในรูปแบบค่ายสัญจร", "แนะแนวคณะและระบบ TCAS", "สร้างแรงบันดาลใจสู่รั้วมหาวิทยาลัย"],
   },
   {
     generation: 2,
     roman: "2nd",
-    yearTh: "2564",
-    yearEn: "2021",
+    seasonBadge: "Season 2",
+    yearTh: "2563",
+    yearEn: "2020",
+    dates: "27 - 29 พฤศจิกายน 2563",
+    location: "โรงเรียนหาดใหญ่วิทยาคาร จ.สงขลา",
+    locationType: "tour",
+    themeName: "ค่ายสานฝันสัญจร หาดใหญ่วิทยาคาร",
     themeTh: "ก้าวแห่งการเติบโต สานต่อสายใยแห่งความหวัง",
     themeEn: "Stepping Stones of Growth & Hope",
-    colorGradient: "from-indigo-900 via-purple-900 to-pink-900",
-    borderColor: "border-pink-500/40",
+    posterSrc: "/images/editions/ss2.jpg",
+    colorGradient: "from-amber-900 via-rose-900 to-purple-900",
+    borderColor: "border-amber-500/40",
     hasSpecialNote: true,
-    specialNoteTitle: "คำอธิบายพิเศษ: ก้าวแห่งการต่อยอดและการขยายฐานวิชาการ (The Expansion)",
+    specialNoteTitle: "ค่ายสัญจรรุ่นที่ 2 ต่อยอดสู่ชุมชน",
     specialNoteBody:
-      "ค่ายสานฝันเพื่อน้อง ครั้งที่ 2 คือก้าวสำคัญแห่งการเรียนรู้และยกระดับอย่างก้าวกระโดด ท่ามกลางบริบทความท้าทายของการศึกษาที่เปลี่ยนแปลง ค่ายรุ่นที่ 2 ได้ขยายขอบเขตการแนะแนวให้ครอบคลุมสาขาวิชาชีพที่หลากหลายยิ่งขึ้น พร้อมทั้งริเริ่มระบบพี่เลี้ยงประจำกลุ่ม (Murabbi / Mentor) เพื่อดูแลและรับฟังเสียงสะท้อนของน้องๆ อย่างใกล้ชิดแบบตัวต่อตัว การต่อยอดในรุ่นที่ 2 นี้เองที่กลายเป็นต้นแบบโครงสร้างอะมานะห์การจัดค่ายที่สืบทอดมาจนถึงปัจจุบัน",
+      "ค่ายสานฝันเพื่อน้อง รุ่นที่ 2 สัญจร ณ โรงเรียนหาดใหญ่วิทยาคาร จ.สงขลา ขยายฐานวิชาการและริเริ่มระบบพี่เลี้ยงประจำกลุ่ม (Mentor) อย่างใกล้ชิด ก่อนจะปรับเปลี่ยนมาจัดในมหาวิทยาลัยตั้งแต่รุ่นที่ 3 เป็นต้นมา",
     description:
-      "รุ่นแห่งการขยายขอบเขตความรู้ พัฒนาระบบแบบทดสอบค้นหาตนเอง และจัดทำสมุดคู่มือแนะแนวการศึกษาฉบับแรกของค่าย",
-    highlights: ["ขยายฐานวิชาการครบทุกสายวิชา", "ริเริ่มระบบพี่เลี้ยงที่ปรึกษา", "จัดทำคู่มือแนะแนวฉบับแรก"],
+      "รุ่นสัญจรครั้งที่ 2 ที่ขยายขอบเขตความรู้ พัฒนาระบบแบบทดสอบค้นหาตนเอง และจัดทำคู่มือแนะแนวการศึกษาฉบับแรก",
+    highlights: ["ค่ายสัญจร ณ โรงเรียนหาดใหญ่วิทยาคาร", "ริเริ่มระบบพี่เลี้ยงประจำกลุ่ม (Mentor)", "เจาะลึกเทคนิคการเตรียมสอบ"],
   },
   {
     generation: 3,
     roman: "3rd",
+    seasonBadge: "Season 3",
     yearTh: "2565",
     yearEn: "2022",
-    themeTh: "จุดประกายไฟฝัน จุดประกายพลังแห่งอนาคต",
-    themeEn: "Ignite Your Inner Spark",
-    colorGradient: "from-purple-800 via-pink-900 to-purple-950",
-    borderColor: "border-purple-400/30",
+    dates: "11 - 13 พฤศจิกายน 2565",
+    location: "มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่",
+    locationType: "campus",
+    themeName: "นักสืบคดี (Detective)",
+    themeTh: "สืบค้นตัวตนที่ซ่อนในตัวเรา ไขกุญแจ 16 คณะใน ม.อ.",
+    themeEn: "Uncover Your Hidden Identity",
+    posterSrc: "/images/editions/ss3.jpg",
+    colorGradient: "from-amber-950 via-zinc-900 to-purple-950",
+    borderColor: "border-amber-500/40",
     description:
-      "เน้นย้ำการสร้างแรงบันดาลใจและเสริมสร้าง Mindset เชิงบวก ให้น้องๆ ก้าวข้ามความลังเลใจ กล้าที่จะวาดฝันในเส้นทางที่สอดคล้องกับศักยภาพของตนเอง",
-    highlights: ["เวทีเสวนาแรงบันดาลใจจากศิษย์เก่า", "กิจกรรม Workshop เชิงปฏิบัติการ", "เปิดบ้านแนะนำวิทยาเขต"],
+      "จุดเปลี่ยนสำคัญในการย้ายมาจัด ณ ม.อ. หาดใหญ่ อย่างเต็มรูปแบบ ในธีมนักสืบคดี ชวนน้องๆ มาร่วมสืบค้นหาตัวตนและไขรหัสกุญแจสู่ 16 คณะ",
+    highlights: ["ปรับเปลี่ยนมาจัด ณ ม.อ. หาดใหญ่ เต็มรูปแบบ", "ธีม 'นักสืบคดี' สืบค้นตัวตนและ 16 คณะ", "เวทีแลกเปลี่ยนประสบการณ์จริงจากรุ่นพี่"],
   },
   {
     generation: 4,
     roman: "4th",
+    seasonBadge: "Season 4",
     yearTh: "2566",
     yearEn: "2023",
-    themeTh: "มุ่งสู่เส้นชัย ด้วยศรัทธาและความรู้",
-    themeEn: "Navigating Pathways with Faith & Wisdom",
-    colorGradient: "from-slate-900 via-purple-900 to-indigo-900",
-    borderColor: "border-indigo-400/30",
+    dates: "10 - 12 พฤศจิกายน 2566",
+    location: "มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่",
+    locationType: "campus",
+    themeName: "อวกาศ (Space & Astronaut)",
+    themeTh: "พุ่งทะยานสู่ 16 คณะ ลงมือทำภารกิจแห่งห้วงอวกาศ",
+    themeEn: "Voyage into the Infinite Cosmos",
+    posterSrc: "/images/editions/ss4.jpg",
+    colorGradient: "from-indigo-950 via-purple-900 to-slate-900",
+    borderColor: "border-indigo-400/40",
     description:
-      "ยกระดับการเจาะลึกระบบ TCAS รอบ Portfolio, Quota และ Admission พร้อมจำลองสนามสอบสัมภาษณ์จริง (Mock Interview) ให้กับน้องๆ มัธยมปลาย",
-    highlights: ["Mock Interview จำลองสัมภาษณ์เสมือนจริง", "เทคนิคทำพอร์ตฟอลิโอให้โดนใจ", "ขยายเครือข่ายโรงเรียนเครือข่าย"],
+      "พาน้องๆ ท่องจักรวาลแห่งการเรียนรู้ในธีมอวกาศ สำรวจศักยภาพที่ไร้ขีดจำกัด จำลองสนามสอบสัมภาษณ์ (Mock Interview) และเวิร์กช็อปเข้มข้น",
+    highlights: ["ธีม 'อวกาศ' พุ่งทะยานสู่ 16 คณะในรั้วมหาลัย", "ภารกิจจำลองการเรียนรู้เชิงปฏิบัติการ", "Mock Interview จำลองสัมภาษณ์เสมือนจริง"],
   },
   {
     generation: 5,
     roman: "5th",
+    seasonBadge: "Season 5",
     yearTh: "2567",
     yearEn: "2024",
-    themeTh: "ร้อยเรียงความฝัน สู่ดวงดาวแห่งความสำเร็จ",
-    themeEn: "Weaving Dreams into Reality",
-    colorGradient: "from-purple-950 via-pink-950 to-purple-900",
-    borderColor: "border-pink-400/30",
+    dates: "8 - 10 พฤศจิกายน 2567",
+    location: "มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่",
+    locationType: "campus",
+    themeName: "นักเดินทาง (Explorer)",
+    themeTh: "เดินทางตามล่าหาขุมทรัพย์ 16 คณะ ถอดรหัสปริศนา",
+    themeEn: "Desert Expedition & Treasure Quest",
+    posterSrc: "/images/editions/ss5.jpg",
+    colorGradient: "from-amber-900 via-orange-950 to-purple-950",
+    borderColor: "border-amber-400/40",
     description:
-      "เชื่อมโยงความรู้เชิงวิชาการควบคู่กับการใช้ชีวิตในรั้วมหาวิทยาลัยจริง พร้อมทั้งเปิดเวทีแลกเปลี่ยนประสบการณ์ชีวิตนักศึกษาแพทย์ เภสัช วิศวะ และอื่นๆ",
-    highlights: ["เจาะลึก 16 คณะยอดนิยม", "ค่ำคืนสานสัมพันธ์บายเนียร์", "เพิ่มสื่อดิจิทัลและวิดีโอแนะนำคณะ"],
+      "ผจญภัยในธีมนักเดินทางทะเลทราย ตามล่าขุมทรัพย์ทางปัญญา 16 คณะ ถอดรหัสปริศนาเพื่อค้นพบศักยภาพที่ซ่อนอยู่ภายในตัวเอง",
+    highlights: ["ธีม 'นักเดินทาง' ตามล่าหาขุมทรัพย์ความรู้", "ถอดรหัสปริศนาศักยภาพและเป้าหมายชีวิต", "เปิดบ้าน 16 คณะแล็บจริงสถานที่จริง"],
   },
   {
     generation: 6,
     roman: "6th",
+    seasonBadge: "Season 6",
     yearTh: "2568",
     yearEn: "2025",
-    themeTh: "แสงนำทางสู่ยอดเขาแห่งเป้าหมาย",
-    themeEn: "The Guiding Beacon to the Summit",
-    colorGradient: "from-indigo-950 via-purple-900 to-pink-900",
-    borderColor: "border-purple-400/30",
+    dates: "7 - 10 พฤศจิกายน 2568",
+    location: "มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่",
+    locationType: "campus",
+    themeName: "โจรสลัด / แล่นเรือใบ (Pirates)",
+    themeTh: "ร่วมแล่นเรือสู่เป้าหมายที่ชัดเจนยิ่งขึ้น ผ่าน 16 คณะ",
+    themeEn: "Sailing Voyage to Clear Horizons",
+    posterSrc: "/images/editions/ss6.jpg",
+    colorGradient: "from-teal-950 via-cyan-900 to-purple-900",
+    borderColor: "border-teal-400/40",
     description:
-      "พัฒนามาตรฐานค่ายสู่ระดับมืออาชีพอย่างเต็มรูปแบบ มีระบบสารสนเทศทะเบียนดิจิทัล และเพิ่มเนื้อหาการวางแผนชีวิตและการเงินเบื้องต้นสำหรับนักศึกษา",
-    highlights: ["เปิดตัวระบบทะเบียนและ E-Book ค่าย", "ขยายกลุ่มเป้าหมายทั่วภาคใต้", "เครือข่ายวิทยากรระดับประเทศ"],
+      "ล่องเรือสำรวจมหาสมุทรแห่งความฝันในธีมโจรสลัดและนักเดินเรือ ฝ่าคลื่นลมมุ่งตรงสู่เป้าหมายที่ชัดเจนผ่านกิจกรรม 16 คณะ 4 วัน 3 คืน",
+    highlights: ["ธีม 'โจรสลัด/นักแล่นเรือ' กางใบเรือสู่เป้าหมาย", "ขยายระยะเวลาค่าย 4 วัน 3 คืน", "ระบบทะเบียนดิจิทัลและการเรียนรู้บูรณาการ"],
   },
   {
     generation: 7,
     roman: "7th",
+    seasonBadge: "Season 7",
     yearTh: "2569",
     yearEn: "2026",
-    themeTh: "เบ่งบานสู่ยอดเขา นำทางด้วยศรัทธา",
-    themeEn: "Bloom into your summit, guided by Deen",
-    colorGradient: "from-purple-800 via-purple-900 to-pink-800",
+    dates: "6 - 9 พฤศจิกายน 2569",
+    location: "มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่",
+    locationType: "campus",
+    themeName: "นักปีนเขา (Mountain Climber)",
+    themeTh: "Bloom into your summit, guided by Deen",
+    themeEn: "Climb to Your Summit, Guided by Deen",
+    posterSrc: "/images/editions/ss7.jpg",
+    colorGradient: "from-purple-900 via-pink-900 to-indigo-950",
     borderColor: "border-pink-400/60",
     description:
-      "ค่ายสานฝันเพื่อน้อง ครั้งที่ 7 — รุ่นปัจจุบันที่นำแนวคิด 'ดอกไม้บานบนยอดเขา' ดอกไม้แต่ละดอกต่างมีฤดูกาลเบ่งบานของตนเอง ขอเพียงยึดมั่นในศรัทธาและทุ่มเทอย่างเต็มกำลัง",
-    highlights: ["ธีม 'Bloom into your summit, guided by Deen'", "E-Book 3D Flipbook คมชัดระดับ Retina", "16 ฐานคณะแบบ Interactive"],
+      "รุ่นปัจจุบันในธีมนักปีนเขา — ดอกไม้แต่ละดอกต่างมีฤดูกาลเบ่งบานของตนเอง ร่วมออกเดินทางตามหาความฝันบนภูเขาแห่งการเติบโตโดยมีศาสนาเป็นแสงนำทาง",
+    highlights: ["ธีม 'นักปีนเขา' Bloom into your summit, guided by Deen", "ระบบ E-Book ดิจิทัล และผัง Roadmap กิจกรรม", "16 ฐานคณะ Interactive ครบทั้งวิทย์และศิลป์"],
+  },
+];
+
+/* ================================================================
+   DATA: HALL OF PRESIDENTS (ทำเนียบประธานค่าย รุ่นที่ 3 - 7)
+   ================================================================ */
+
+interface CampPresident {
+  generation: number;
+  roman: string;
+  seasonBadge: string;
+  yearTh: string;
+  name: string;
+  nickname: string;
+  faculty: string;
+  major: string;
+  theme: string;
+  quote: string;
+  color: string;
+  avatarBg: string;
+}
+
+const CAMP_PRESIDENTS: CampPresident[] = [
+  {
+    generation: 3,
+    roman: "3rd",
+    seasonBadge: "Season 3",
+    yearTh: "2565",
+    name: "นายวันอัฟฎอล รักมิตร",
+    nickname: "B' อัฟดอล",
+    faculty: "คณะเทคนิคการแพทย์",
+    major: "สาขาเทคนิคการแพทย์บัณฑิต",
+    theme: "นักสืบคดี (Detective)",
+    quote: "สืบค้นตัวตนที่ซ่อนอยู่ ไขรหัสกุญแจสู่ประตู 16 คณะใน ม.อ.",
+    color: "border-amber-200 hover:border-amber-400",
+    avatarBg: "from-amber-600 to-purple-800",
+  },
+  {
+    generation: 4,
+    roman: "4th",
+    seasonBadge: "Season 4",
+    yearTh: "2566",
+    name: "นายวารีฟ ดารอเง๊าะ",
+    nickname: "B' วารีฟ",
+    faculty: "คณะวิศวกรรมศาสตร์",
+    major: "สาขาวิศวกรรมปัญญาประดิษฐ์",
+    theme: "อวกาศ (Space & Astronaut)",
+    quote: "พุ่งทะยานสู่ห้วงอวกาศแห่งความฝัน ไร้ขีดจำกัดแห่งความเป็นไปได้",
+    color: "border-indigo-200 hover:border-indigo-400",
+    avatarBg: "from-indigo-600 to-purple-800",
+  },
+  {
+    generation: 5,
+    roman: "5th",
+    seasonBadge: "Season 5",
+    yearTh: "2567",
+    name: "นายฮานีฟ ดอเหล๊าะ",
+    nickname: "B'ฮานีฟ",
+    faculty: "คณะวิทยาศาสตร์",
+    major: "สาขาวิทยาการคอมพิวเตอร์",
+    theme: "นักเดินทาง (Explorer)",
+    quote: "เดินทางตามล่าหาขุมทรัพย์ความรู้ ถอดรหัสศักยภาพที่ซ่อนอยู่",
+    color: "border-orange-200 hover:border-orange-400",
+    avatarBg: "from-orange-600 to-purple-800",
+  },
+  {
+    generation: 6,
+    roman: "6th",
+    seasonBadge: "Season 6",
+    yearTh: "2568",
+    name: "นายมูอาซ ยามา",
+    nickname: "B'มูอาซ",
+    faculty: "คณะเศรษฐศาสตร์",
+    major: "สาขาเศรษฐศาสตร์",
+    theme: "โจรสลัด / แล่นเรือใบ (Pirates)",
+    quote: "แล่นเรือสู่เป้าหมายที่ชัดเจนยิ่งขึ้น ฝ่าคลื่นลมมุ่งตรงสู่อนาคต",
+    color: "border-teal-200 hover:border-teal-400",
+    avatarBg: "from-teal-600 to-purple-800",
+  },
+  {
+    generation: 7,
+    roman: "7th",
+    seasonBadge: "Season 7",
+    yearTh: "2569",
+    name: "นายฮนีฟ ต่วนมีเด่น",
+    nickname: "บังฮนีฟ",
+    faculty: "คณะวิศวกรรมศาสตร์",
+    major: "สาขาวิศวกรรมคอมพิวเตอร์",
+    theme: "นักปีนเขา (Mountain Climber)",
+    quote: "Bloom into your summit, guided by Deen. เติบโตและไปให้ถึงยอดเขาในหนทางที่ถูกต้อง",
+    color: "border-purple-300 hover:border-purple-500 ring-2 ring-purple-500/20",
+    avatarBg: "from-purple-700 to-pink-600",
   },
 ];
 
@@ -361,6 +501,7 @@ export default function AboutPage() {
   const [selectedDeptFilter, setSelectedDeptFilter] = useState<string>("all");
   const [males, setMales] = useState<TeamMember[]>(MALE_MEMBERS);
   const [females, setFemales] = useState<TeamMember[]>(FEMALE_MEMBERS);
+  const [previewPoster, setPreviewPoster] = useState<{ src: string; title: string; subtitle: string } | null>(null);
 
   // Fetch camp_staff from Supabase Database
   useEffect(() => {
@@ -387,8 +528,8 @@ export default function AboutPage() {
               studentId: d.student_id || "",
               phone: d.phone || "",
               facebook: d.facebook || "",
-              position: d.role,
-              department: d.dept || "ฝ่ายบริหาร",
+              position: (d.role || "").replace(/และคมนาคม/g, ""),
+              department: normalizeStaffDept(d.dept || "ฝ่ายบริหาร"),
             }));
 
           const mappedFemales: TeamMember[] = data
@@ -403,8 +544,8 @@ export default function AboutPage() {
               studentId: d.student_id || "",
               phone: d.phone || "",
               facebook: d.facebook || "",
-              position: d.role,
-              department: d.dept || "ฝ่ายบริหาร",
+              position: (d.role || "").replace(/และคมนาคม/g, ""),
+              department: normalizeStaffDept(d.dept || "ฝ่ายบริหาร"),
             }));
 
           if (mappedMales.length > 0) setMales(mappedMales);
@@ -453,22 +594,41 @@ export default function AboutPage() {
 
   const renderMemberCard = (m: TeamMember, gender: "male" | "female") => {
     const isMale = gender === "male";
+    const cleanNick = m.nickname.replace(/^(พี่|บัง|กะ)/, "").trim();
     return (
       <div
         key={m.id}
-        className={`p-5 rounded-2xl bg-white border shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between ${isMale ? "border-indigo-100 hover:border-indigo-300" : "border-pink-100 hover:border-pink-300"
+        className={`p-5 rounded-2xl bg-white border shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group ${isMale ? "border-indigo-100 hover:border-indigo-300" : "border-pink-100 hover:border-pink-300"
           }`}
       >
         <div>
           {/* Avatar & Header */}
           <div className="flex items-center gap-3.5 mb-4">
+            {/* Minimal Vector Profile Avatar */}
             <div
-              className={`w-14 h-14 rounded-2xl text-white flex items-center justify-center font-bold text-xl shadow-md shrink-0 ${isMale
-                ? "bg-gradient-to-tr from-indigo-700 to-purple-600"
-                : "bg-gradient-to-tr from-pink-600 to-purple-600"
+              className={`w-14 h-14 rounded-2xl bg-white border-2 p-1.5 shadow-xs transition-all duration-300 flex items-center justify-center shrink-0 group-hover:scale-105 ${isMale
+                ? "border-indigo-200 text-indigo-950 group-hover:border-indigo-400 group-hover:shadow-md"
+                : "border-pink-200 text-pink-950 group-hover:border-pink-400 group-hover:shadow-md"
                 }`}
             >
-              {m.nickname.charAt(0)}
+              <svg
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full h-full"
+              >
+                {/* Outer Circle Ring */}
+                <circle cx="50" cy="50" r="41" stroke="currentColor" strokeWidth="8" />
+                {/* Head Circle */}
+                <circle cx="50" cy="37" r="14" stroke="currentColor" strokeWidth="8" />
+                {/* Shoulder / Body Arc */}
+                <path
+                  d="M 20 78 C 24 64 35 58 50 58 C 65 58 76 64 80 78"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
             <div className="min-w-0">
               <h5 className="font-bold text-sm sm:text-base text-zinc-900 truncate">
@@ -478,7 +638,7 @@ export default function AboutPage() {
                 className={`text-xs font-semibold truncate ${isMale ? "text-indigo-600" : "text-pink-600"
                   }`}
               >
-                ชื่อเล่น: {isMale ? "พี่" : "กะ"}{m.nickname} • {m.year}
+                ชื่อเล่น: {isMale ? "บัง" : "กะ"}{cleanNick} • {m.year}
               </p>
               <span
                 className={`inline-block text-[11px] px-2 py-0.5 rounded-md font-bold border mt-1 truncate max-w-full ${isMale
@@ -486,7 +646,7 @@ export default function AboutPage() {
                   : "bg-pink-50 text-pink-800 border-pink-200"
                   }`}
               >
-                {m.position}
+                {(m.position || "").replace(/และคมนาคม/g, "")}
               </span>
             </div>
           </div>
@@ -497,39 +657,11 @@ export default function AboutPage() {
               <span className="text-zinc-400">คณะ:</span>
               <span className="font-medium text-zinc-800 text-right">{m.faculty}</span>
             </div>
-            {m.studentId && (
-              <div className="flex justify-between">
-                <span className="text-zinc-400">รหัสนักศึกษา:</span>
-                <span className="font-mono text-zinc-700">{m.studentId}</span>
-              </div>
-            )}
             <div className="flex justify-between">
               <span className="text-zinc-400">ฝ่าย:</span>
-              <span className="font-medium text-purple-700 text-right">{m.department}</span>
+              <span className="font-medium text-purple-700 text-right">{normalizeStaffDept(m.department)}</span>
             </div>
           </div>
-        </div>
-
-        {/* Contact details */}
-        <div className="mt-4 pt-3 border-t border-zinc-100 space-y-1 text-xs">
-          {m.phone && (
-            <div className="flex items-center gap-2 text-zinc-700">
-              <span className="text-zinc-400 font-mono text-[11px]">Tel:</span>
-              <a
-                href={`tel:${m.phone}`}
-                className={`font-mono font-medium ${isMale ? "hover:text-indigo-600" : "hover:text-pink-600"
-                  }`}
-              >
-                {m.phone}
-              </a>
-            </div>
-          )}
-          {m.facebook && (
-            <div className="flex items-center gap-2 text-zinc-700 truncate">
-              <span className="text-zinc-400 font-mono text-[11px]">FB:</span>
-              <span className="truncate text-zinc-800 font-medium">{m.facebook}</span>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -594,16 +726,56 @@ export default function AboutPage() {
                 <span className="text-xs font-bold text-pink-accent uppercase tracking-widest bg-pink-pale px-3 py-1 rounded-full border border-pink-light">
                   ค่ายสานฝันเพื่อน้อง
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-black text-purple-deeper mt-3 mb-4">
-                  นำทางความฝัน บ่มเพาะศรัทธา สู่รั้วมหาวิทยาลัย
+                <h2 className="text-2xl sm:text-3xl font-black text-purple-primary mt-3 mb-6">
+                  แรงบันดาลใจและเป้าหมายของค่าย
                 </h2>
                 <div className="prose prose-purple max-w-none text-zinc-700 leading-relaxed space-y-4 text-sm sm:text-base">
                   <p>
-                    <strong>Guidance for Dream (ค่ายสานฝันเพื่อน้อง)</strong> คือโครงการค่ายแนะแนวการศึกษาและพัฒนาศักยภาพเยาวชนระดับมัธยมศึกษาตอนปลาย จัดขึ้นโดย <strong>ชมรมมุสลิม มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่ (ม.อ.)</strong> ด้วยความมุ่งมั่นที่จะเป็นสะพานเชื่อมโอกาส มอบองค์ความรู้ และจุดประกายไฟแห่งความหวังให้กับน้องๆ นักเรียนในพื้นที่ภาคใต้และทั่วประเทศ
+                    ตลอดระยะเวลา 7 ปี ค่ายสานฝันเพื่อน้อง (Guidance for Dream) ได้เดินทางมาอย่างต่อเนื่อง ด้วยความมุ่งมั่น ความตั้งใจ และความร่วมมือของนักศึกษา รุ่นพี่ และผู้เกี่ยวข้อง จากทุกภาคส่วน จากประสบการณ์ในแต่ละปี ค่ายได้เติบโตและพัฒนาอย่างต่อเนื่อง โดยมีเจตนารมณ์เดียวกัน คือการสร้างพื้นที่แห่งการเรียนรู้ แรงบันดาลใจ และการค้นหาตัวตนให้แก่น้อง ๆ นักเรียนระดับมัธยมศึกษาตอนปลาย
                   </p>
                   <p>
-                    เราเชื่อมั่นว่า การศึกษาที่สมบูรณ์แบบไม่เพียงแต่มุ่งเน้นการสอบติดในคณะที่ใฝ่ฝันเท่านั้น หากแต่ต้องควบคู่กับการพัฒนาคุณธรรม จริยธรรม และการมีจิตสำนึกรับใช้สังคม ค่ายของเราจึงบูรณาการองค์ความรู้ TCAS กิจกรรมฐาน 16 คณะ การทดลองปฏิบัติการจริง และการแลกเปลี่ยนประสบการณ์ชีวิตนักศึกษาจากรุ่นพี่ในรั้ว ม.อ. อย่างอบอุ่นเสมือนครอบครัว
+                    การเดินทางมาถึงปีที่ 7 นี้ จะเกิดขึ้นไม่ได้หากปราศจากความช่วยเหลือ และ<span className="text-purple-primary font-bold">ความเมตตาจากอัลลอฮฺ (ซุบฮานะฮูวะตะอาลา)</span> ผู้ทรงเปิดทางและเอื้ออำนวยให้พวกเราสามารถก้าวผ่านอุปสรรคต่าง ๆ และเดินทางมาถึงวันนี้ได้ ด้วยเหตุนี้ พวกเราจึงตั้งใจที่จะสานต่อเจตนารมณ์ของค่ายให้เติบโตยิ่งขึ้น และสร้างประโยชน์แก่เยาวชน สังคม และผู้คนรอบข้างต่อไป &ldquo;<span className="text-purple-primary font-bold italic">Khairunnas Anfa&apos;uhum linnas</span>&rdquo;
                   </p>
+                  <p>
+                    Guidance for Dream Season 7 จึงไม่ได้มุ่งหมายเพียงให้น้อง ๆ ได้รู้จักคณะ หรือเตรียมตัวสอบเข้ามหาวิทยาลัยเท่านั้น แต่ยัง<span className="text-purple-primary font-bold">เป็นพื้นที่ให้น้อง ๆ ได้ เรียนรู้ ค้นหาตัวเอง ค้นพบความถนัด และมองเห็นเป้าหมายของตนเอง</span> พร้อมทั้งได้เรียนรู้เส้นทางการศึกษา และอาชีพที่หลากหลาย เพื่อให้สามารถวางแผนอนาคตและก้าวเดินต่อไปได้อย่างมั่นใจ ในขณะเดียวกัน ค่ายยังมุ่งส่งเสริมทักษะชีวิต ทั้งการสื่อสาร การทำงานร่วมกับผู้อื่น การแก้ปัญหา และการปรับตัว ตลอดจนปลูกฝังคุณธรรม จริยธรรม เพื่อให้เยาวชนเติบโตอย่างมีจุดยืน ในวิถีอิสลามและอยู่ร่วมกับผู้อื่นในสังคมพหุวัฒนธรรมได้อย่างเข้าใจและให้เกียรติซึ่งกันและกัน
+                  </p>
+                  <p>
+                    ค่ายมุ่งหวังให้น้อง ๆ ได้ค้นพบว่า ความสำเร็จไม่ได้มีเพียงรูปแบบเดียว และการเดินทางของแต่ละคนย่อมแตกต่างกัน ขอเพียงเชื่อมั่นในศักยภาพของตนเองพยายามอย่างเต็มที่และ<span className="text-purple-primary font-bold">วางใจในอัลลอฮฺ โดยเชื่อว่าอัลลอฮฺ จะทรงช่วยเหลือผู้ที่พยายาม และมอบหมายทุกสิ่งไว้กับพระองค์ (Tawakkul)</span>
+                  </p>
+                </div>
+
+                {/* Slogan & Core Quote Box */}
+                <div className="mt-8 p-6 sm:p-7 rounded-2xl bg-gradient-to-br from-purple-50/80 via-white to-pink-50/50 border border-purple-200/80 shadow-xs space-y-4">
+                  <div className="text-base sm:text-lg font-bold text-center sm:text-left">
+                    <span className="text-purple-primary font-extrabold tracking-wide">
+                      Bloom into your summit, guided by Deen.
+                    </span>{" "}
+                    <span className="text-zinc-800">
+                      เติบโต…และไปให้ถึง ในหนทางที่ถูกต้อง
+                    </span>
+                  </div>
+
+                  <div className="p-4 sm:p-5 rounded-xl bg-white/90 border border-purple-100 shadow-xs space-y-1.5 font-medium text-sm sm:text-base leading-relaxed text-zinc-700">
+                    <p>
+                      <span className="text-purple-primary font-bold">
+                        ꒰ ดอกไม้แต่ละดอกต่างมีฤดูกาลของการเบ่งบาน
+                      </span>
+                    </p>
+                    <p>
+                      <span>เพื่อออกเดินทางตามหา </span>
+                      <span className="text-purple-primary font-bold">
+                        &ldquo;เส้นทางแห่งความฝัน&rdquo;
+                      </span>
+                    </p>
+                    <p>
+                      <span>บนภูเขาแห่งการเติบโต โดยมีศาสนาเป็นแสงนำทาง </span>
+                      <span className="text-purple-primary font-bold">꒱</span>
+                    </p>
+                  </div>
+
+                  <div className="text-right text-xs sm:text-sm text-zinc-600 font-medium pt-2">
+                    ชมรมมุสลิม ม.อ.หาดใหญ่ ประจำปี 2569
+                  </div>
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-zinc-100 flex flex-wrap items-center justify-between gap-4">
@@ -613,7 +785,7 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <p className="text-xs font-bold text-purple-deeper">จัดต่อเนื่องเป็นปีที่ 7</p>
-                      <p className="text-[11px] text-zinc-500">สร้างแรงบันดาลใจแก่น้องๆ กว่า 2,000 คน</p>
+                      <p className="text-[11px] text-zinc-500">สร้างแรงบันดาลใจแก่น้องๆ กว่า 300 คน</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -623,17 +795,17 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* 7 Editions & Logos Section */}
+            {/* 7 Editions & Posters Section */}
             <div>
               <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
                 <span className="text-xs font-bold text-purple-primary uppercase tracking-wider bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
-                  เส้นทางการเติบโต
+                  เส้นทางการเติบโต 7 ปี
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-purple-deeper mt-2">
-                  โลโก้และประวัติค่ายทั้ง 7 รุ่น (1st – 7th)
+                  ประวัติและโปสเตอร์ค่ายทั้ง 7 รุ่น (Season 1 - 7)
                 </h3>
                 <p className="text-zinc-600 text-sm mt-1">
-                  ตราสัญลักษณ์และเอกลักษณ์ของค่ายสานฝันเพื่อน้องในแต่ละเจเนอเรชัน
+                  สรุปวันจัดกิจกรรม สถานที่ และธีมค่ายของแต่ละรุ่น จากค่ายสัญจรรุ่นบุกเบิกสู่ค่ายแนะแนวในรั้ว ม.อ. หาดใหญ่
                 </p>
               </div>
 
@@ -642,79 +814,240 @@ export default function AboutPage() {
                 {CAMP_EDITIONS.map((ed) => (
                   <div
                     key={ed.generation}
-                    className={`rounded-3xl bg-white border p-6 flex flex-col justify-between shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group ${ed.hasSpecialNote
-                      ? "md:col-span-2 lg:col-span-1 border-purple-primary/40 ring-2 ring-purple-primary/20 bg-gradient-to-b from-white to-purple-50/40"
-                      : "border-zinc-200 hover:border-purple-300"
-                      }`}
+                    className="rounded-3xl bg-white border border-zinc-200 hover:border-purple-300 p-5 sm:p-6 flex flex-col justify-between shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
                   >
-                    {/* Top: Edition Badge & Year */}
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-4">
-                        <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-purple-deeper text-white shadow-sm">
+                      {/* Top Badges */}
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className="px-3 py-1 rounded-full text-xs font-black bg-purple-deeper text-white shadow-xs">
                           รุ่นที่ {ed.generation} ({ed.roman})
                         </span>
-                        <span className="text-xs font-mono text-zinc-500">
-                          ปี {ed.yearTh} / {ed.yearEn}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border ${ed.locationType === "tour"
+                              ? "bg-amber-50 text-amber-800 border-amber-200"
+                              : "bg-purple-50 text-purple-800 border-purple-200"
+                              }`}
+                          >
+                            {ed.locationType === "tour" ? "ค่ายสัญจร" : "จัดที่ ม.อ.หาดใหญ่"}
+                          </span>
+                          <span className="text-xs font-mono text-zinc-500 font-semibold">
+                            ปี {ed.yearTh}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Symbolic Logo Badge (Vector Graphic representation) */}
-                      <div className="my-4 flex items-center justify-center">
-                        <div
-                          className={`w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br ${ed.colorGradient} flex flex-col items-center justify-center text-white shadow-lg p-2 text-center group-hover:scale-105 transition-transform duration-300 border-2 ${ed.borderColor}`}
-                        >
-                          <span className="text-[10px] font-mono tracking-widest text-pink-light/80 uppercase">
-                            GUIDANCE
-                          </span>
-                          <span className="text-2xl sm:text-3xl font-black font-lucian text-glow-white tracking-wider">
-                            {ed.roman}
-                          </span>
-                          <span className="text-[9px] text-white/70 line-clamp-1 font-mono">
-                            {ed.yearEn}
+                      {/* Poster Image Frame with Click to Zoom */}
+                      <div
+                        onClick={() =>
+                          setPreviewPoster({
+                            src: ed.posterSrc,
+                            title: `โปสเตอร์ค่ายสานฝันเพื่อน้อง ครั้งที่ ${ed.generation} (${ed.seasonBadge})`,
+                            subtitle: `${ed.dates} • ${ed.themeName} • ${ed.location}`,
+                          })
+                        }
+                        className="my-3 relative rounded-2xl overflow-hidden border border-zinc-200/80 bg-zinc-50 shadow-inner cursor-pointer group/poster aspect-[3/4] max-h-72 mx-auto flex items-center justify-center"
+                      >
+                        <img
+                          src={ed.posterSrc}
+                          alt={`โปสเตอร์รุ่นที่ ${ed.generation}`}
+                          className="w-full h-full object-cover group-hover/poster:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-purple-950/40 opacity-0 group-hover/poster:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="px-3 py-1.5 rounded-xl bg-white/95 text-purple-deeper text-xs font-bold shadow-lg backdrop-blur-xs flex items-center gap-1.5">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                            </svg>
+                            <span>คลิกดูภาพขยาย</span>
                           </span>
                         </div>
                       </div>
 
                       {/* Theme Title */}
-                      <h4 className="text-base sm:text-lg font-bold text-purple-deeper text-center mb-1">
-                        {ed.themeTh}
-                      </h4>
-                      <p className="text-xs text-zinc-500 text-center font-mono italic mb-4">
-                        &ldquo;{ed.themeEn}&rdquo;
-                      </p>
+                      <div className="text-center my-3">
+                        <span className="inline-block px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-pink-50 text-pink-700 border border-pink-200/70 mb-1">
+                          ธีมค่าย: {ed.themeName}
+                        </span>
+                        <h4 className="text-base sm:text-lg font-black text-purple-deeper leading-snug">
+                          {ed.themeTh}
+                        </h4>
+                      </div>
 
-                      {/* SPECIAL NOTE CALLOUT FOR 1ST AND 2ND EDITIONS */}
+                      {/* Key Summary Box (จัดวันไหน • จัดที่ไหน • ธีมค่าย) */}
+                      <div className="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2 text-xs text-zinc-700 mb-4">
+                        <div className="flex items-start gap-2">
+                          <span className="text-purple-primary font-bold shrink-0 min-w-[70px]">
+                            จัดวันไหน:
+                          </span>
+                          <span className="font-semibold text-zinc-900">{ed.dates}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-purple-primary font-bold shrink-0 min-w-[70px]">
+                            จัดที่ไหน:
+                          </span>
+                          <span className="font-medium text-zinc-800">{ed.location}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-purple-primary font-bold shrink-0 min-w-[70px]">
+                            ธีมค่าย:
+                          </span>
+                          <span className="font-bold text-purple-800">{ed.themeName}</span>
+                        </div>
+                      </div>
+
+                      {/* Special Note Callout for ss1 & ss2 */}
                       {ed.hasSpecialNote && (
-                        <div className="mb-4 p-4 rounded-2xl bg-purple-900 text-white border border-purple-700/60 shadow-inner">
-                          <div className="flex items-center gap-2 mb-2 text-pink-light font-bold text-xs uppercase tracking-wide">
-                            <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
+                        <div className="mb-4 p-3.5 rounded-xl bg-purple-900 text-white border border-purple-700/60 shadow-inner">
+                          <div className="flex items-center gap-1.5 mb-1.5 text-pink-light font-bold text-xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
                             <span>{ed.specialNoteTitle}</span>
                           </div>
-                          <p className="text-xs sm:text-[13px] text-white/90 leading-relaxed">
+                          <p className="text-[11px] text-white/90 leading-relaxed">
                             {ed.specialNoteBody}
                           </p>
                         </div>
                       )}
 
                       {/* Regular Description */}
-                      <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed mb-4">
+                      <p className="text-xs text-zinc-600 leading-relaxed mb-4">
                         {ed.description}
                       </p>
                     </div>
 
-                    {/* Bottom Highlights */}
-                    <div className="pt-4 border-t border-zinc-100 mt-2">
-                      <p className="text-[11px] font-bold text-purple-primary uppercase tracking-wider mb-2">
-                        จุดเด่นประจำรุ่น:
+                    {/* Bottom Action: View Poster Button & Highlights */}
+                    <div className="pt-3 border-t border-zinc-100 mt-2 space-y-3">
+                      <div>
+                        <p className="text-[11px] font-bold text-purple-primary uppercase tracking-wider mb-1.5">
+                          จุดเด่นประจำรุ่น:
+                        </p>
+                        <ul className="space-y-1">
+                          {ed.highlights.map((h, i) => (
+                            <li key={i} className="text-xs text-zinc-600 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-pink-accent shrink-0" />
+                              <span className="truncate">{h}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          setPreviewPoster({
+                            src: ed.posterSrc,
+                            title: `โปสเตอร์ค่ายสานฝันเพื่อน้อง ครั้งที่ ${ed.generation} (${ed.seasonBadge})`,
+                            subtitle: `${ed.dates} • ${ed.themeName} • ${ed.location}`,
+                          })
+                        }
+                        className="w-full py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-primary hover:text-purple-deeper text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 border border-purple-200/60"
+                      >
+                        <span>เปิดดูโปสเตอร์เต็ม</span>
+                        <span>→</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Hall of Presidents Section (ทำเนียบประธานค่าย รุ่นที่ 3 - 7) */}
+            <div className="pt-8 sm:pt-12 border-t border-purple-100">
+              <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+                <span className="text-xs font-bold text-pink-accent uppercase tracking-wider bg-pink-pale px-3 py-1 rounded-full border border-pink-light">
+                  ผู้นำค่ายแห่งการสานฝัน
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-black text-purple-deeper mt-2">
+                  ทำเนียบประธานค่าย (รุ่นที่ 3 – 7)
+                </h3>
+                <p className="text-zinc-600 text-sm mt-1">
+                  ผู้นำและอมีรค่ายสานฝันเพื่อน้อง ตั้งแต่เริ่มจัดในรั้วมหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
+                </p>
+              </div>
+
+              {/* Grid of Presidents (Season 3 - 7) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+                {CAMP_PRESIDENTS.map((pres) => (
+                  <div
+                    key={pres.generation}
+                    className={`rounded-3xl bg-white border p-5 flex flex-col justify-between shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden group ${pres.color}`}
+                  >
+                    <div>
+                      {/* Badge Row */}
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-purple-deeper text-white shadow-xs">
+                          รุ่นที่ {pres.generation} ({pres.roman})
+                        </span>
+                        <span className="text-[11px] font-mono text-zinc-500 font-semibold">
+                          ปี {pres.yearTh}
+                        </span>
+                      </div>
+
+                      {/* Avatar Profile Icon (สร้างขึ้นตามแบบไอคอนโปรไฟล์มินิมอล) */}
+                      <div className="flex justify-center mb-3.5">
+                        <div
+                          className="w-16 h-16 rounded-2xl bg-white border-2 border-zinc-200 p-2 shadow-xs group-hover:scale-105 group-hover:border-purple-400 group-hover:shadow-md transition-all duration-300 flex items-center justify-center"
+                        >
+                          <svg
+                            viewBox="0 0 100 100"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-full h-full text-zinc-900"
+                          >
+                            <defs>
+                              <clipPath id={`avatar-clip-${pres.generation}`}>
+                                <circle cx="50" cy="50" r="41" />
+                              </clipPath>
+                            </defs>
+                            {/* Outer Circle Ring */}
+                            <circle cx="50" cy="50" r="41" stroke="currentColor" strokeWidth="8" />
+                            {/* Clipped Inner Figure */}
+                            <g clipPath={`url(#avatar-clip-${pres.generation})`}>
+                              {/* Head Circle */}
+                              <circle cx="50" cy="40" r="15" stroke="currentColor" strokeWidth="8" />
+                              {/* Shoulder Arc */}
+                              <ellipse cx="50" cy="82" rx="28" ry="22" stroke="currentColor" strokeWidth="8" />
+                            </g>
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Name & Nickname */}
+                      <div className="text-center mb-2.5">
+                        <h4 className="font-bold text-sm sm:text-base text-zinc-900 leading-snug">
+                          {pres.name}
+                        </h4>
+                        <p className="text-xs font-semibold text-purple-primary mt-0.5">
+                          {pres.nickname}
+                        </p>
+                        <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-200 mt-1">
+                          ประธานโครงการ (อมีรค่าย)
+                        </span>
+                      </div>
+
+                      {/* Faculty, Major & Theme */}
+                      <div className="space-y-1.5 text-[11px] text-zinc-600 border-t border-zinc-100 pt-3">
+                        <div className="flex justify-between">
+                          <span className="text-zinc-400">คณะ:</span>
+                          <span className="font-medium text-zinc-800 text-right">{pres.faculty}</span>
+                        </div>
+                        {pres.major && (
+                          <div className="flex justify-between">
+                            <span className="text-zinc-400">สาขา:</span>
+                            <span className="font-medium text-purple-900 text-right font-medium">{pres.major}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-zinc-400">ธีมค่าย:</span>
+                          <span className="font-bold text-purple-700 text-right">{pres.theme}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quote */}
+                    <div className="mt-3.5 pt-3 border-t border-zinc-100">
+                      <p className="text-[11px] text-zinc-500 italic leading-relaxed text-center">
+                        &ldquo;{pres.quote}&rdquo;
                       </p>
-                      <ul className="space-y-1">
-                        {ed.highlights.map((h, i) => (
-                          <li key={i} className="text-xs text-zinc-600 flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-pink-accent" />
-                            <span>{h}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   </div>
                 ))}
@@ -834,7 +1167,7 @@ export default function AboutPage() {
                       {/* Member count badges */}
                       <div className="flex items-center gap-2 text-xs font-mono font-bold">
                         <span className="px-3 py-1.5 rounded-xl bg-purple-deeper text-white shadow-xs">
-                          รวม {totalInDept} ท่าน
+                          รวม {totalInDept} คน
                         </span>
                         {deptMales.length > 0 && (
                           <span className="px-2.5 py-1.5 rounded-xl bg-indigo-100 text-indigo-900 border border-indigo-200">
@@ -854,7 +1187,7 @@ export default function AboutPage() {
                       <div className="space-y-4">
                         <div className="flex items-center gap-2 pb-1.5 border-b border-indigo-200 text-xs font-bold text-indigo-950">
                           <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 shadow-sm" />
-                          <span>มุสลีมีน / พี่น้องฝ่ายชาย ({deptMales.length} ท่าน)</span>
+                          <span>มุสลีมีน / พี่น้องฝ่ายชาย ({deptMales.length} คน)</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                           {deptMales.map((m) => renderMemberCard(m, "male"))}
@@ -867,7 +1200,7 @@ export default function AboutPage() {
                       <div className="space-y-4 pt-2">
                         <div className="flex items-center gap-2 pb-1.5 border-b border-pink-200 text-xs font-bold text-pink-950">
                           <span className="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-sm" />
-                          <span>มุสลิมะฮ์ / พี่น้องฝ่ายหญิง ({deptFemales.length} ท่าน)</span>
+                          <span>มุสลิมะฮ์ / พี่น้องฝ่ายหญิง ({deptFemales.length} คน)</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                           {deptFemales.map((m) => renderMemberCard(m, "female"))}
@@ -1038,6 +1371,53 @@ export default function AboutPage() {
           </div>
         )}
       </main>
+
+      {/* Lightbox Modal for Poster Preview */}
+      {previewPoster && (
+        <div
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-3 sm:p-6 animate-fade-in"
+          onClick={() => setPreviewPoster(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full max-h-[95vh] flex flex-col bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-white/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 bg-slate-950/90 border-b border-white/10 flex items-center justify-between text-white shrink-0">
+              <div className="pr-4 min-w-0">
+                <h3 className="font-bold text-sm sm:text-base text-white truncate">{previewPoster.title}</h3>
+                <p className="text-xs text-purple-200/80 mt-0.5 truncate">{previewPoster.subtitle}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={previewPoster.src}
+                  download
+                  className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-colors inline-flex items-center gap-1.5"
+                >
+                  <span>ดาวน์โหลด</span>
+                  <span>↓</span>
+                </a>
+                <button
+                  onClick={() => setPreviewPoster(null)}
+                  className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
+                  aria-label="ปิดหน้าต่าง"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Image Area */}
+            <div className="p-3 sm:p-6 flex-1 overflow-auto flex items-center justify-center bg-black/40">
+              <img
+                src={previewPoster.src}
+                alt={previewPoster.title}
+                className="max-h-[80vh] w-auto object-contain rounded-xl shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

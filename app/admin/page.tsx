@@ -113,6 +113,9 @@ export default function AdminPage() {
   const [posters, setPosters] = useState<Poster[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
+  const [galleryCategories, setGalleryCategories] = useState<string[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [galleryCategoryFilter, setGalleryCategoryFilter] = useState<string>("all");
   const [videos, setVideos] = useState<Video[]>([]);
   const [documents, setDocuments] = useState<AdminDocument[]>([]);
 
@@ -435,7 +438,30 @@ export default function AdminPage() {
         );
       }
 
-      // 4. Fetch Gallery
+      // 4. Fetch Gallery Categories & Images
+      let loadedCats: string[] = [];
+      try {
+        const { data: catData } = await supabase
+          .from("gallery_categories")
+          .select("name")
+          .order("sort_order", { ascending: true });
+        if (catData && catData.length > 0) {
+          loadedCats = catData.map((c: any) => c.name);
+        }
+      } catch (err) {
+        console.warn("fetch gallery_categories fallback:", err);
+      }
+
+      if (loadedCats.length === 0 && typeof window !== "undefined") {
+        const stored = localStorage.getItem("gfd_gallery_categories");
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) loadedCats = parsed;
+          } catch {}
+        }
+      }
+
       const { data: galData } = await supabase
         .from("gallery_images")
         .select("*")
@@ -451,6 +477,24 @@ export default function AdminPage() {
             isActive: g.is_active ?? true,
           }))
         );
+
+        // Include any categories present in gallery images
+        galData.forEach((g: any) => {
+          if (g.category && !loadedCats.includes(g.category)) {
+            loadedCats.push(g.category);
+          }
+        });
+      }
+
+      if (loadedCats.length === 0) {
+        loadedCats = ["วันที่ 6", "วันที่ 7", "วันที่ 8", "วันที่ 9"];
+      }
+
+      setGalleryCategories(loadedCats);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("gfd_gallery_categories", JSON.stringify(loadedCats));
+        } catch {}
       }
 
       // 5. Fetch Videos
@@ -546,6 +590,50 @@ export default function AdminPage() {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // Gallery Category Management Handlers
+  const handleAddCategory = async (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (galleryCategories.includes(trimmed)) {
+      showToast("มีหมวดหมู่นี้อยู่แล้ว");
+      return;
+    }
+    const updated = [...galleryCategories, trimmed];
+    setGalleryCategories(updated);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("gfd_gallery_categories", JSON.stringify(updated));
+      } catch {}
+    }
+    try {
+      await supabase.from("gallery_categories").insert([{ name: trimmed, sort_order: updated.length }]);
+    } catch (e) {
+      console.warn("insert category error:", e);
+    }
+    setNewCategoryName("");
+    showToast(`เพิ่มหมวดหมู่ "${trimmed}" สำเร็จแล้ว`);
+  };
+
+  const handleDeleteCategory = async (name: string) => {
+    if (!confirm(`คุณต้องการลบหมวดหมู่ "${name}" หรือไม่?\n(รูปภาพในหมวดหมู่นี้จะยังอยู่ แต่จะไม่แสดงในหมวดหมู่ที่ถูกลบ)`)) {
+      return;
+    }
+    const updated = galleryCategories.filter((c) => c !== name);
+    setGalleryCategories(updated);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("gfd_gallery_categories", JSON.stringify(updated));
+      } catch {}
+    }
+    try {
+      await supabase.from("gallery_categories").delete().eq("name", name);
+    } catch (e) {
+      console.warn("delete category error:", e);
+    }
+    if (galleryCategoryFilter === name) setGalleryCategoryFilter("all");
+    showToast(`ลบหมวดหมู่ "${name}" เรียบร้อยแล้ว`);
   };
 
   // Loading auth state
@@ -808,7 +896,7 @@ export default function AdminPage() {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               </svg>
-              <span>ความทรงจำที่ผ่านมา</span>
+              <span>ประมวลภาพกิจกรรม (Memories)</span>
             </div>
             <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${activeTab === "gallery" ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-700"}`}>{gallery.length}</span>
           </button>
@@ -985,7 +1073,7 @@ export default function AdminPage() {
                 {activeTab === "speakers" && "จัดการข้อมูลวิทยากร (Speakers)"}
                 {activeTab === "posters" && "ประชาสัมพันธ์ โปสเตอร์ (Posters)"}
                 {activeTab === "partners" && "Blooming Partners"}
-                {activeTab === "gallery" && "คลังภาพความทรงจำที่ผ่านมา (Gallery)"}
+                {activeTab === "gallery" && "ประมวลภาพกิจกรรม & คลังภาพ (Memories)"}
                 {activeTab === "videos" && "คลิปวิดีโอประชาสัมพันธ์ (Videos)"}
                 {activeTab === "documents" && "เอกสารค่าย & E-Book"}
               </h2>
@@ -1526,90 +1614,264 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* GALLERY TAB */}
+          {/* GALLERY TAB (MEMORIES & DAILY RECAP) */}
           {!loading && activeTab === "gallery" && (
-            <div className="space-y-6">
+            <div className="space-y-8">
+              {/* Top Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-extrabold text-black">จัดการภาพความทรงจำที่ผ่านมา (Gallery)</h2>
-                  <p className="text-xs text-zinc-500 mt-0.5">จัดเก็บและอัปโหลดภาพกิจกรรมเก่าๆ เข้าสู่ดาต้าเบส</p>
+                  <h2 className="text-xl font-extrabold text-black">
+                    จัดการประมวลภาพกิจกรรม & คลังภาพ (Memories & Gallery)
+                  </h2>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    สร้างหมวดหมู่ประมวลภาพกิจกรรมในแต่ละวัน และอัปโหลดภาพความทรงจำเพื่อแสดงผลในหน้า Wall of Memories
+                  </p>
                 </div>
-                <button
-                  onClick={() => {
-                    setEditingGallery({
-                      id: "",
-                      src: "",
-                      caption: "Guidance for Dream 6th",
-                      category: "กิจกรรม",
-                      order: gallery.length + 1,
-                      isActive: true,
-                    });
-                    setIsGalleryModalOpen(true);
-                  }}
-                  className="px-4 py-2 bg-black hover:bg-zinc-800 text-white text-sm font-bold rounded-xl flex items-center gap-2 shadow-sm cursor-pointer self-start"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>เพิ่มรูปภาพใหม่</span>
-                </button>
               </div>
 
-              {gallery.length === 0 && (
-                <div className="p-12 text-center text-zinc-500 bg-zinc-50 rounded-2xl border border-zinc-200 border-zinc-200">
-                  ยังไม่มีรูปภาพในแกลเลอรี
-                </div>
-              )}
-
-              {/* Gallery Items Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {gallery.map((item) => (
-                  <div key={item.id} className="bg-white rounded-2xl border border-zinc-200 shadow-xs hover:border-purple-300 hover:shadow-md transition-all overflow-hidden group flex flex-col justify-between">
-                    <div>
-                      {/* Top Accent Gradient Line */}
-                      <div className="h-1 w-full bg-gradient-to-r from-purple-600 to-pink-500" />
-
-                      <div className="relative aspect-[4/3] bg-zinc-100 overflow-hidden">
-                        {item.src ? (
-                          <Image src={item.src} alt={item.caption} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-zinc-400 text-xs">ไม่มีรูป</div>
-                        )}
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => {
-                              setEditingGallery({ ...item });
-                              setIsGalleryModalOpen(true);
-                            }}
-                            className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-xs cursor-pointer transition-colors"
-                          >
-                            แก้ไข
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (confirm("ลบรูปนี้หรือไม่?")) {
-                                const { error } = await supabase.from("gallery_images").delete().eq("id", item.id);
-                                if (error) {
-                                  showToast("ลบไม่สำเร็จ: " + error.message);
-                                } else {
-                                  await fetchData();
-                                  showToast("ลบรูปภาพเรียบร้อยแล้ว");
-                                }
-                              }
-                            }}
-                            className="px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-100 text-black text-xs font-bold shadow-xs cursor-pointer transition-colors"
-                          >
-                            ลบ
-                          </button>
-                        </div>
-                      </div>
+              {/* CARD 1: จัดการหมวดหมู่กิจกรรม (สร้างหมวดหมู่ก่อน) */}
+              <div className="bg-white rounded-2xl border-2 border-purple-200 p-5 sm:p-6 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold flex items-center justify-center">
+                        1
+                      </span>
+                      <h3 className="font-extrabold text-base text-zinc-900">
+                        สร้างและจัดการหมวดหมู่กิจกรรม (สร้างหมวดหมู่ก่อนอัปโหลดรูป)
+                      </h3>
                     </div>
-                    <div className="p-3 bg-white border-t border-zinc-100">
-                      <p className="text-xs font-bold text-black truncate">{item.caption || "ภาพกิจกรรม"}</p>
-                      <span className="text-[10px] text-purple-700 font-semibold block mt-0.5">หมวด: {item.category}</span>
-                    </div>
+                    <p className="text-xs text-zinc-500 mt-1 pl-8">
+                      สร้างหมวดหมู่ตามความต้องการ เช่น วันที่ 6, วันที่ 7, พิธีเปิด-ปิด, กิจกรรมบายเนียร์ ฯลฯ เมื่อสร้างแล้วจึงจะสามารถเลือกหมวดหมู่นั้นตอนอัปโหลดรูปภาพได้
+                    </p>
                   </div>
-                ))}
+                </div>
+
+                {/* Create Category Input */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddCategory(newCategoryName);
+                        }
+                      }}
+                      placeholder="พิมพ์ชื่อหมวดหมู่ใหม่ เช่น วันที่ 6, วันที่ 7, พิธีบายเนียร์..."
+                      className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 border border-zinc-300 text-black text-sm placeholder:text-zinc-400 focus:bg-white focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAddCategory(newCategoryName)}
+                    className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                  >
+                    + สร้างหมวดหมู่
+                  </button>
+                </div>
+
+                {/* Category Chips List */}
+                <div className="space-y-2 pt-1">
+                  <label className="block text-xs font-bold text-zinc-700">
+                    หมวดหมู่ที่มีอยู่ในระบบ ({galleryCategories.length} หมวดหมู่):
+                  </label>
+                  {galleryCategories.length === 0 ? (
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs font-medium">
+                      ยังไม่มีหมวดหมู่ในระบบ กรุณากรอกชื่อหมวดหมู่ด้านบนแล้วกดปุ่ม "สร้างหมวดหมู่" ก่อนทำการอัปโหลดรูปภาพ
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {galleryCategories.map((cat) => {
+                        const count = gallery.filter((g) => g.category === cat).length;
+                        return (
+                          <div
+                            key={cat}
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-xs font-semibold shadow-2xs group"
+                          >
+                            <span>{cat}</span>
+                            <span className="px-1.5 py-0.5 rounded-md bg-purple-200/80 text-[10px] text-purple-800 font-bold">
+                              {count} รูป
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCategory(cat)}
+                              title={`ลบหมวดหมู่ ${cat}`}
+                              className="w-4 h-4 rounded-full bg-purple-200 hover:bg-red-500 hover:text-white text-purple-700 text-[10px] flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* CARD 2: รายการรูปภาพประมวลความทรงจำ */}
+              <div className="bg-white rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-sm space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center">
+                        2
+                      </span>
+                      <h3 className="font-extrabold text-base text-zinc-900">
+                        รายการรูปภาพประมวลความทรงจำ (อัปโหลดรูปภาพ)
+                      </h3>
+                    </div>
+                    <p className="text-xs text-zinc-500 mt-1 pl-8">
+                      เลือกหมวดหมู่ที่สร้างไว้แล้ว จากนั้นกดอัปโหลดรูปภาพ
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (galleryCategories.length === 0) {
+                        showToast("กรุณาสร้างหมวดหมู่อย่างน้อย 1 หมวดหมู่ในขั้นตอนที่ 1 ก่อนอัปโหลดรูปภาพ");
+                        return;
+                      }
+                      const initialCat =
+                        galleryCategoryFilter !== "all" ? galleryCategoryFilter : galleryCategories[0];
+                      setEditingGallery({
+                        id: "",
+                        src: "",
+                        caption: "",
+                        category: initialCat,
+                        order: gallery.length + 1,
+                        isActive: true,
+                      });
+                      setIsGalleryModalOpen(true);
+                    }}
+                    className="px-4 py-2.5 bg-black hover:bg-zinc-800 text-white text-xs sm:text-sm font-bold rounded-xl flex items-center gap-2 shadow-sm cursor-pointer self-start sm:self-center transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>+ อัปโหลดรูปภาพใหม่</span>
+                  </button>
+                </div>
+
+                {/* Filter Tabs by Category */}
+                <div className="flex flex-wrap items-center gap-2 pb-2">
+                  <button
+                    onClick={() => setGalleryCategoryFilter("all")}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      galleryCategoryFilter === "all"
+                        ? "bg-black text-white shadow-xs"
+                        : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700"
+                    }`}
+                  >
+                    ทั้งหมด ({gallery.length})
+                  </button>
+                  {galleryCategories.map((cat) => {
+                    const count = gallery.filter((g) => g.category === cat).length;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setGalleryCategoryFilter(cat)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          galleryCategoryFilter === cat
+                            ? "bg-purple-600 text-white shadow-xs"
+                            : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700"
+                        }`}
+                      >
+                        {cat} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Gallery Grid */}
+                {(() => {
+                  const filteredList =
+                    galleryCategoryFilter === "all"
+                      ? gallery
+                      : gallery.filter((item) => item.category === galleryCategoryFilter);
+
+                  if (filteredList.length === 0) {
+                    return (
+                      <div className="p-12 text-center text-zinc-500 bg-zinc-50 rounded-2xl border border-dashed border-zinc-300">
+                        <p className="text-sm font-medium">ยังไม่มีรูปภาพในหมวดหมู่นี้</p>
+                        <p className="text-xs text-zinc-400 mt-1">
+                          กดปุ่ม "+ อัปโหลดรูปภาพใหม่" ด้านบนเพื่อเริ่มเพิ่มรูปภาพในหมวดหมู่นี้
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {filteredList.map((item) => (
+                        <div
+                          key={item.id}
+                          className="bg-white rounded-2xl border border-zinc-200 shadow-2xs hover:border-purple-300 hover:shadow-md transition-all overflow-hidden group flex flex-col justify-between"
+                        >
+                          <div>
+                            {/* Top Accent Gradient Line */}
+                            <div className="h-1 w-full bg-gradient-to-r from-purple-600 to-pink-500" />
+
+                            <div className="relative aspect-[4/3] bg-zinc-100 overflow-hidden">
+                              {item.src ? (
+                                <Image
+                                  src={item.src}
+                                  alt={item.caption || "ภาพกิจกรรม"}
+                                  fill
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-zinc-400 text-xs">
+                                  ไม่มีรูป
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-black/50 backdrop-blur-2xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => {
+                                    setEditingGallery({ ...item });
+                                    setIsGalleryModalOpen(true);
+                                  }}
+                                  className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-2xs cursor-pointer transition-colors"
+                                >
+                                  แก้ไข
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (confirm("ลบรูปนี้หรือไม่?")) {
+                                      const { error } = await supabase
+                                        .from("gallery_images")
+                                        .delete()
+                                        .eq("id", item.id);
+                                      if (error) {
+                                        showToast("ลบไม่สำเร็จ: " + error.message);
+                                      } else {
+                                        await fetchData();
+                                        showToast("ลบรูปภาพเรียบร้อยแล้ว");
+                                      }
+                                    }
+                                  }}
+                                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-100 text-black text-xs font-bold shadow-2xs cursor-pointer transition-colors"
+                                >
+                                  ลบ
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-3 bg-white border-t border-zinc-100">
+                            <p className="text-xs font-bold text-black truncate">
+                              {item.caption || "ภาพประมวลความทรงจำ"}
+                            </p>
+                            <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-100 text-purple-700">
+                              หมวด: {item.category}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -2448,39 +2710,64 @@ export default function AdminPage() {
       {isGalleryModalOpen && editingGallery && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white border border-zinc-300 text-zinc-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-black">
-              {editingGallery.id ? "แก้ไขรูปภาพ Gallery" : "เพิ่มรูปภาพ Gallery ใหม่"}
-            </h3>
+            <div>
+              <h3 className="text-lg font-bold text-black">
+                {editingGallery.id ? "แก้ไขรูปภาพประมวลความทรงจำ" : "อัปโหลดรูปภาพประมวลความทรงจำใหม่"}
+              </h3>
+              <p className="text-xs text-zinc-500 mt-0.5">
+                เลือกหมวดหมู่ที่ได้สร้างไว้ล่วงหน้า และอัปโหลดไฟล์รูปภาพเข้าสู่ระบบ
+              </p>
+            </div>
             
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4 text-sm">
+              {/* 1. Category Selection Dropdown */}
               <div>
-                <label className="block text-xs font-bold text-zinc-700 mb-1">คำบรรยายภาพ (Caption)</label>
+                <label className="block text-xs font-bold text-zinc-800 mb-1">
+                  หมวดหมู่กิจกรรม <span className="text-red-500">* (เลือกจากที่สร้างไว้)</span>
+                </label>
+                {galleryCategories.length === 0 ? (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium">
+                    ยังไม่มีหมวดหมู่ในระบบ กรุณากดยกเลิกแล้วไปสร้างหมวดหมู่ในขั้นตอนที่ 1 ก่อน
+                  </div>
+                ) : (
+                  <select
+                    value={editingGallery.category}
+                    onChange={(e) => setEditingGallery({ ...editingGallery, category: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 border border-zinc-300 text-black font-semibold focus:bg-white focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 cursor-pointer text-sm"
+                  >
+                    {galleryCategories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  ต้องสร้างหมวดหมู่ในแผงจัดการหมวดหมู่ก่อน จึงจะมีตัวเลือกให้กดในส่วนนี้
+                </p>
+              </div>
+
+              {/* 2. Caption */}
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 mb-1">คำบรรยายภาพ / ชื่อกิจกรรม (Caption)</label>
                 <input
                   type="text"
                   value={editingGallery.caption}
                   onChange={(e) => setEditingGallery({ ...editingGallery, caption: e.target.value })}
-                  placeholder="เช่น บรรยากาศกิจกรรมค่าย 6th"
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-300 text-black focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  placeholder="เช่น บรรยากาศกิจกรรมช่วงเช้า, รอยยิ้มน้องๆ ในฐานกิจกรรม"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-300 text-black focus:bg-white focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 mb-1">หมวดหมู่</label>
-                <input
-                  type="text"
-                  value={editingGallery.category}
-                  onChange={(e) => setEditingGallery({ ...editingGallery, category: e.target.value })}
-                  placeholder="เช่น กิจกรรม, พิธีเปิด, ความทรงจำ"
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-300 text-black focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                />
-              </div>
-
+              {/* 3. Photo Upload & URL */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-zinc-500">อัปโหลดรูปภาพ (เลือกไฟล์จากเครื่อง)</label>
+                  <label className="block text-xs font-bold text-zinc-700">
+                    อัปโหลดรูปภาพ <span className="text-red-500">*</span>
+                  </label>
                   {isUploading && (
-                    <span className="text-[11px] text-amber-400 font-medium animate-pulse flex items-center gap-1">
-                      <span>⏳</span> กำลังอัปโหลด...
+                    <span className="text-[11px] text-purple-600 font-medium animate-pulse flex items-center gap-1">
+                      กำลังอัปโหลด...
                     </span>
                   )}
                 </div>
@@ -2490,34 +2777,68 @@ export default function AdminPage() {
                   onChange={(e) => handleFileUpload(e, "gallery", (url) => setEditingGallery({ ...editingGallery, src: url }))}
                   className="w-full text-xs text-zinc-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer"
                 />
+
+                <div className="mt-2">
+                  <label className="block text-[11px] text-zinc-500 mb-1">หรือระบุลิงก์รูปภาพโดยตรง (Image URL):</label>
+                  <input
+                    type="text"
+                    value={editingGallery.src}
+                    onChange={(e) => setEditingGallery({ ...editingGallery, src: e.target.value })}
+                    placeholder="https://... หรือ /images/..."
+                    className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs text-zinc-800 focus:bg-white focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
                 {editingGallery.src && (
                   <div className="mt-2.5 flex items-center gap-3 p-2 bg-zinc-50 rounded-xl border border-zinc-200">
                     <div className="w-16 h-12 relative rounded-lg overflow-hidden border border-zinc-300 flex-shrink-0">
                       <Image src={editingGallery.src} alt="Preview" fill className="object-cover" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="text-[11px] text-emerald-400 font-medium block">✓ รูปภาพพร้อมบันทึก</span>
+                      <span className="text-[11px] text-emerald-600 font-semibold block">รูปภาพพร้อมบันทึก</span>
                       <span className="text-[10px] text-zinc-500 font-mono truncate block max-w-xs">{editingGallery.src}</span>
                     </div>
                   </div>
                 )}
               </div>
+
+              {/* 4. Sort Order */}
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 mb-1">ลำดับการแสดงผล (Sort Order)</label>
+                <input
+                  type="number"
+                  value={editingGallery.order}
+                  onChange={(e) => setEditingGallery({ ...editingGallery, order: parseInt(e.target.value) || 0 })}
+                  className="w-24 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-300 text-black text-xs focus:bg-white focus:outline-none focus:border-purple-600"
+                />
+              </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-3 border-t border-zinc-200">
               <button
+                type="button"
                 onClick={() => setIsGalleryModalOpen(false)}
                 className="px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium cursor-pointer transition-colors"
               >
                 ยกเลิก
               </button>
               <button
-                disabled={isUploading}
+                type="button"
+                disabled={isUploading || galleryCategories.length === 0}
                 onClick={async () => {
+                  if (!editingGallery.category) {
+                    showToast("กรุณาเลือกหมวดหมู่สำหรับรูปภาพ");
+                    return;
+                  }
+                  if (!editingGallery.src.trim()) {
+                    showToast("กรุณาอัปโหลดรูปภาพหรือระบุ URL รูปภาพ");
+                    return;
+                  }
+
                   const row = {
-                    caption: editingGallery.caption,
-                    alt_text: editingGallery.caption,
-                    image_url: editingGallery.src,
+                    caption: editingGallery.caption || "ภาพกิจกรรม",
+                    alt_text: editingGallery.caption || "ภาพกิจกรรม",
+                    image_url: editingGallery.src.trim(),
                     category: editingGallery.category,
                     sort_order: editingGallery.order,
                     is_active: editingGallery.isActive,
@@ -2539,15 +2860,12 @@ export default function AdminPage() {
 
                   await fetchData();
                   setIsGalleryModalOpen(false);
-                  showToast("บันทึกรูปภาพเรียบร้อย! 🎉");
+                  showToast("บันทึกรูปภาพเรียบร้อยแล้ว");
                 }}
                 className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-2 transition-colors"
               >
                 {isUploading ? (
-                  <>
-                    <span className="animate-spin text-xs">🌀</span>
-                    <span>กำลังอัปโหลดรูป...</span>
-                  </>
+                  <span>กำลังอัปโหลดรูป...</span>
                 ) : (
                   <span>บันทึกรูปภาพ</span>
                 )}

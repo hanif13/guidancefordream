@@ -6,7 +6,7 @@ import SubpageHero from "../components/SubpageHero";
 import { supabase } from "../lib/supabase";
 
 /* ================================================================
-   DATA: STICKY NOTES MOCKUP (เสียงสะท้อนจากน้อง)
+   DATA TYPES: STICKY NOTES & WALL OF MEMORIES
    ================================================================ */
 
 interface StickyNote {
@@ -18,133 +18,15 @@ interface StickyNote {
   dateStr: string;
 }
 
-const INITIAL_NOTES: StickyNote[] = [
-  {
-    id: "note-1",
-    content:
-      "ค่ายนี้เปลี่ยนชีวิตหนูจริงๆ ค่ะ จากที่เคยไม่มั่นใจว่าตัวเองจะสอบแพทย์ได้ไหม พี่ๆ ฐานแพทย์ให้กำลังใจดีมาก ได้ลองจับหูฟัง Stethoscope ของจริง ประทับใจพี่เลี้ยงบ้าน 3 มากๆ ค่ะ สัญญาว่าจะพยายามให้เต็มที่เพื่อมาเจอกันในรั้วสีบลูนะคะ!",
-    bgColor: "bg-amber-100 border-amber-300",
-    textColor: "text-amber-950",
-    rotateDeg: "-rotate-2",
-    dateStr: "6 พ.ย. 68 • 16:45 น.",
-  },
-  {
-    id: "note-2",
-    content:
-      "ชอบฐานวิศวะกับหุ่นยนต์มากครับ พี่ๆ สอนเข้าใจง่ายมาก แถมยังได้เรียนรู้เรื่องการแบ่งเวลาและการละหมาดในรั้วมหาวิทยาลัย คืนบายเนียร์น้ำตาซึมเลยครับ อบอุ่นเหมือนครอบครัวจริงๆ",
-    bgColor: "bg-sky-100 border-sky-300",
-    textColor: "text-sky-950",
-    rotateDeg: "rotate-1",
-    dateStr: "7 พ.ย. 68 • 19:20 น.",
-  },
-  {
-    id: "note-3",
-    content:
-      "ขอบคุณพี่ๆ ทุกคนที่จัดค่ายดีๆ แบบนี้นะคะ อาหารฮาลาลอร่อยทุกมื้อ พี่ๆ ฝ่ายพยาบาลดูแลดีมาก ได้ทั้งความรู้ TCAS และเพื่อนใหม่จากหลายจังหวัดเลย เป็น 4 วันที่คุ้มค่าที่สุดในชีวิต ม.ปลาย ค่ะ",
-    bgColor: "bg-pink-100 border-pink-300",
-    textColor: "text-pink-950",
-    rotateDeg: "-rotate-1",
-    dateStr: "8 พ.ย. 68 • 12:30 น.",
-  },
-  {
-    id: "note-4",
-    content:
-      "ได้เข้าใจกฎหมายและบทบาทของนักกฎหมายมุสลิมในการช่วยเหลือสังคมอย่างลึกซึ้ง พี่ๆ ถ่ายทอดด้วยหัวใจจริงๆ ขอบคุณคำแนะนำเรื่องรอบพอร์ตโฟลิโอครับ จะนำไปปรับใช้แน่นอนครับ",
-    bgColor: "bg-emerald-100 border-emerald-300",
-    textColor: "text-emerald-950",
-    rotateDeg: "rotate-2",
-    dateStr: "8 พ.ย. 68 • 15:10 น.",
-  },
-  {
-    id: "note-5",
-    content:
-      "ฐานทันตะสนุกมากกก ได้ลองพิมพ์ฟันและกรอแบบจำลอง พี่ๆ ให้คำแนะนำการเตรียมตัวสอบแบบละเอียดสุดๆ ค่ายนี้ตอบโจทย์ทุกคำถามที่สงสัย ขอบคุณ Guidance for Dream มากๆ ค่ะ",
-    bgColor: "bg-purple-100 border-purple-300",
-    textColor: "text-purple-950",
-    rotateDeg: "-rotate-2",
-    dateStr: "9 พ.ย. 68 • 10:15 น.",
-  },
-  {
-    id: "note-6",
-    content:
-      "ค่ายสอนให้รู้ว่า 'ความฝันที่ยิ่งใหญ่ ต้องเริ่มต้นด้วยศรัทธาและความพยายาม' ขอบคุณพี่ๆ ทุกฝ่ายที่เหน็ดเหนื่อยเพื่อพวกเรา อาหารอร่อย กิจกรรมสนุก ได้รับพลังใจกลับไปเต็มร้อยเลยครับ",
-    bgColor: "bg-rose-100 border-rose-300",
-    textColor: "text-rose-950",
-    rotateDeg: "rotate-1",
-    dateStr: "9 พ.ย. 68 • 13:40 น.",
-  },
-];
-
-/* ================================================================
-   DATA: WALL OF MEMORIES (แกลเลอรีภาพความทรงจำ)
-   ================================================================ */
-
 interface MemoryPhoto {
   id: string;
   title: string;
-  category: "opening" | "stations" | "night" | "friendship";
-  categoryLabel: string;
-  edition: string;
+  category: string;
+  categoryLabel?: string;
+  edition?: string;
   imageUrl: string;
   caption: string;
 }
-
-const MEMORY_PHOTOS: MemoryPhoto[] = [
-  {
-    id: "p-1",
-    title: "พิธีเปิดอันยิ่งใหญ่และอบอุ่น",
-    category: "opening",
-    categoryLabel: "พิธีเปิด-ปิด",
-    edition: "Guidance 6th",
-    imageUrl: "/images/hero-bg.jpg",
-    caption: "ช่วงเวลาที่น้องๆ ทุกคนรวมพลังร้องเพลงค่ายและรับฟังคำกล่าวเปิดงาน",
-  },
-  {
-    id: "p-2",
-    title: "กิจกรรมฐานทดลองคณะแพทยศาสตร์",
-    category: "stations",
-    categoryLabel: "ฐานกิจกรรม 16 คณะ",
-    edition: "Guidance 6th",
-    imageUrl: "/images/hero-bg.jpg",
-    caption: "ทดลองฟังเสียงหัวใจด้วยหูฟังแพทย์ Stethoscope ภายใต้คำแนะนำของพี่ๆ หมอ",
-  },
-  {
-    id: "p-3",
-    title: "ค่ำคืนบายเนียร์แห่งสายใย",
-    category: "night",
-    categoryLabel: "ค่ำคืนบายเนียร์",
-    edition: "Guidance 5th",
-    imageUrl: "/images/hero-bg.jpg",
-    caption: "แสงเทียนและคำอวยพรจากใจพี่เลี้ยงสู่ใจน้องค่าย ในคืนสุดท้ายของกิจกรรม",
-  },
-  {
-    id: "p-4",
-    title: "รอยยิ้มและเสียงหัวเราะช่วง Ice Breaking",
-    category: "friendship",
-    categoryLabel: "มิตรภาพ & รอยยิ้ม",
-    edition: "Guidance 7th",
-    imageUrl: "/images/hero-bg.jpg",
-    caption: "ละลายพฤติกรรม สานมิตรภาพใหม่กับเพื่อนๆ จากต่างโรงเรียน",
-  },
-  {
-    id: "p-5",
-    title: "ฐานวิศวกรรมศาสตร์และหุ่นยนต์",
-    category: "stations",
-    categoryLabel: "ฐานกิจกรรม 16 คณะ",
-    edition: "Guidance 6th",
-    imageUrl: "/images/hero-bg.jpg",
-    caption: "ลงมือต่อวงจรและเขียนโปรแกรมควบคุมระบบเซนเซอร์อัตโนมัติ",
-  },
-  {
-    id: "p-6",
-    title: "ภาพถ่ายหมู่รวมประวัติศาสตร์",
-    category: "friendship",
-    categoryLabel: "มิตรภาพ & รอยยิ้ม",
-    edition: "Guidance 6th",
-    imageUrl: "/images/hero-bg.jpg",
-    caption: "ภาพความทรงจำที่ไม่มีวันลืมเลือนของพี่น้องครอบครัว Guidance for Dream",
-  },
-];
 
 /* ================================================================
    MAIN MEMORIES PAGE COMPONENT
@@ -153,11 +35,12 @@ const MEMORY_PHOTOS: MemoryPhoto[] = [
 export default function MemoriesPage() {
   const [activeTab, setActiveTab] = useState<"voices" | "wall" | "timecapsule">("voices");
 
-  // Sticky Notes state (Local storage supported)
-  const [notes, setNotes] = useState<StickyNote[]>(INITIAL_NOTES);
+  // Sticky Notes state
+  const [notes, setNotes] = useState<StickyNote[]>([]);
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
   const [newContent, setNewContent] = useState("");
   const [selectedColor, setSelectedColor] = useState("amber");
+  const [isSubmittingNote, setIsSubmittingNote] = useState(false);
 
   // Time Capsule Form state
   const [capsuleName, setCapsuleName] = useState("");
@@ -168,35 +51,161 @@ export default function MemoriesPage() {
   const [capsuleOpenDate, setCapsuleOpenDate] = useState("");
   const [capsuleSubmitted, setCapsuleSubmitted] = useState(false);
 
-  // Wall of memories filter
+  // Wall of memories filter & dynamic data
   const [photoFilter, setPhotoFilter] = useState<string>("all");
   const [lightboxPhoto, setLightboxPhoto] = useState<MemoryPhoto | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<MemoryPhoto[]>([]);
+
+  // Load dynamic categories & photos from Supabase & LocalStorage
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadWallData = async () => {
+      let loadedCats: string[] = [];
+
+      // 1. Fetch categories from Supabase
+      try {
+        const { data: catData } = await supabase
+          .from("gallery_categories")
+          .select("name")
+          .order("sort_order", { ascending: true });
+        if (catData && catData.length > 0) {
+          loadedCats = catData.map((c: any) => c.name);
+        }
+      } catch (err) {
+        console.warn("fetch gallery_categories fallback:", err);
+      }
+
+      // Fallback to localStorage if Supabase category table is empty
+      if (loadedCats.length === 0 && typeof window !== "undefined") {
+        const stored = localStorage.getItem("gfd_gallery_categories");
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) loadedCats = parsed;
+          } catch {}
+        }
+      }
+
+      // 2. Fetch photos from Supabase gallery_images
+      try {
+        const { data: imgData, error: imgErr } = await supabase
+          .from("gallery_images")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true });
+
+        if (!imgErr && imgData && imgData.length > 0 && isMounted) {
+          const mapped: MemoryPhoto[] = imgData.map((img: any) => ({
+            id: img.id,
+            title: img.caption || img.alt_text || "ภาพความทรงจำ",
+            category: img.category || "ทั่วไป",
+            categoryLabel: img.category || "ทั่วไป",
+            edition: "Guidance 7th",
+            imageUrl: img.image_url,
+            caption: img.caption || "",
+          }));
+          setPhotos(mapped);
+
+          // Include any categories present in image rows
+          imgData.forEach((img: any) => {
+            if (img.category && !loadedCats.includes(img.category)) {
+              loadedCats.push(img.category);
+            }
+          });
+        } else if (isMounted) {
+          setPhotos([]);
+        }
+      } catch (err) {
+        console.warn("fetch gallery_images fallback:", err);
+        if (isMounted) setPhotos([]);
+      }
+
+      // Default daily categories if totally empty
+      if (loadedCats.length === 0) {
+        loadedCats = ["วันที่ 6", "วันที่ 7", "วันที่ 8", "วันที่ 9"];
+      }
+
+      if (isMounted) {
+        setCategories(loadedCats);
+      }
+    };
+
+    loadWallData();
+
+    // Realtime subscriptions
+    const wallChannel = supabase
+      .channel("memories_wall_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "gallery_images" },
+        () => loadWallData()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "gallery_categories" },
+        () => loadWallData()
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(wallChannel);
+    };
+  }, []);
 
   // Load saved notes from Supabase & LocalStorage on mount
   useEffect(() => {
     let isMounted = true;
 
     const fetchFeedbacks = async () => {
+      let dbNotes: StickyNote[] = [];
       try {
         const { data, error } = await supabase
           .from("camp_feedbacks")
           .select("*")
-          .eq("is_approved", true)
           .order("created_at", { ascending: false });
 
-        if (!error && data && data.length > 0 && isMounted) {
-          const mapped: StickyNote[] = data.map((d: any) => ({
-            id: d.id,
-            content: d.content,
-            bgColor: d.bg_color || "bg-amber-100 border-amber-300",
-            textColor: d.text_color || "text-amber-950",
-            rotateDeg: d.rotate_deg || "rotate-0",
-            dateStr: d.date_display || new Date(d.created_at).toLocaleDateString("th-TH"),
-          }));
-          setNotes(mapped);
+        if (!error && data && data.length > 0) {
+          dbNotes = data
+            .filter((d: any) => d.is_approved !== false)
+            .map((d: any) => ({
+              id: d.id,
+              content: d.content,
+              bgColor: d.bg_color || "bg-amber-100 border-amber-300",
+              textColor: d.text_color || "text-amber-950",
+              rotateDeg: d.rotate_deg || "rotate-0",
+              dateStr: d.date_display || new Date(d.created_at).toLocaleDateString("th-TH"),
+            }));
         }
       } catch (err) {
         console.warn("Using offline notes fallback:", err);
+      }
+
+      // Check localStorage for any cached user notes
+      let localNotes: StickyNote[] = [];
+      if (typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("gfd_user_notes");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) localNotes = parsed;
+          }
+        } catch {}
+      }
+
+      // Merge: dbNotes + localNotes (that aren't already in dbNotes)
+      const combined: StickyNote[] = [...dbNotes];
+
+      localNotes.forEach((ln) => {
+        if (!combined.some((c) => c.id === ln.id || c.content.trim() === ln.content.trim())) {
+          combined.push(ln);
+        }
+      });
+
+      if (isMounted) {
+        setNotes(combined);
       }
     };
 
@@ -210,16 +219,25 @@ export default function MemoriesPage() {
         { event: "INSERT", schema: "public", table: "camp_feedbacks" },
         (payload) => {
           const newRow = payload.new as any;
-          if (newRow && newRow.is_approved) {
+          if (newRow && newRow.is_approved !== false) {
             const newNote: StickyNote = {
               id: newRow.id,
               content: newRow.content,
-              bgColor: newRow.bg_color,
-              textColor: newRow.text_color,
-              rotateDeg: newRow.rotate_deg,
-              dateStr: newRow.date_display,
+              bgColor: newRow.bg_color || "bg-amber-100 border-amber-300",
+              textColor: newRow.text_color || "text-amber-950",
+              rotateDeg: newRow.rotate_deg || "rotate-0",
+              dateStr: newRow.date_display || new Date(newRow.created_at).toLocaleDateString("th-TH"),
             };
-            setNotes((prev) => [newNote, ...prev.filter((n) => n.id !== newRow.id)]);
+            setNotes((prev) => {
+              // 1. If note with this exact ID already exists, do nothing
+              if (prev.some((n) => n.id === newRow.id)) return prev;
+              // 2. Remove any optimistic note that has matching content
+              const filtered = prev.filter(
+                (n) => !(n.id.startsWith("user-") && n.content.trim() === newRow.content.trim())
+              );
+              // 3. Prepend the new realtime note
+              return [newNote, ...filtered];
+            });
           }
         }
       )
@@ -243,7 +261,8 @@ export default function MemoriesPage() {
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newContent.trim()) return;
+    if (!newContent.trim() || isSubmittingNote) return;
+    setIsSubmittingNote(true);
 
     const colorMap: Record<string, { bg: string; text: string }> = {
       amber: { bg: "bg-amber-100 border-amber-300", text: "text-amber-950" },
@@ -267,48 +286,105 @@ export default function MemoriesPage() {
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const formattedDateTime = `${day} ${month} ${year} • ${hours}:${minutes} น.`;
 
+    const tempId = `user-${Date.now()}`;
+    const trimmedContent = newContent.trim();
+
     const newNoteObj: StickyNote = {
-      id: `user-${Date.now()}`,
-      content: newContent.trim(),
+      id: tempId,
+      content: trimmedContent,
       bgColor: chosen.bg,
       textColor: chosen.text,
       rotateDeg: randomRot,
       dateStr: formattedDateTime,
     };
 
-    // อัปเดต UI ทันทีแบบ Optimistic
-    const updated = [newNoteObj, ...notes];
-    setNotes(updated);
+    // 1. Optimistic update (deduplicated against existing content)
+    setNotes((prev) => {
+      if (prev.some((n) => n.content.trim() === trimmedContent)) return prev;
+      return [newNoteObj, ...prev];
+    });
 
-    // บันทึกลง Supabase Database
+    // 2. Persist to localStorage immediately so it survives page refresh
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("gfd_user_notes");
+        let list: StickyNote[] = stored ? JSON.parse(stored) : [];
+        if (!Array.isArray(list)) list = [];
+        list = [newNoteObj, ...list.filter((n) => n.content.trim() !== trimmedContent)];
+        localStorage.setItem("gfd_user_notes", JSON.stringify(list));
+      } catch {}
+    }
+
+    // 3. Insert into Supabase Database
     try {
-      await supabase.from("camp_feedbacks").insert([
-        {
-          content: newContent.trim(),
-          bg_color: chosen.bg,
-          text_color: chosen.text,
-          rotate_deg: randomRot,
-          date_display: formattedDateTime,
-          is_approved: true,
-        },
-      ]);
+      const { data: inserted, error } = await supabase
+        .from("camp_feedbacks")
+        .insert([
+          {
+            content: trimmedContent,
+            bg_color: chosen.bg,
+            text_color: chosen.text,
+            rotate_deg: randomRot,
+            date_display: formattedDateTime,
+            is_approved: true,
+          },
+        ])
+        .select()
+        .single();
+
+      if (!error && inserted) {
+        // Upgrade tempId to actual DB id
+        setNotes((prev) =>
+          prev.map((n) => (n.id === tempId ? { ...n, id: inserted.id } : n))
+        );
+        if (typeof window !== "undefined") {
+          try {
+            const stored = localStorage.getItem("gfd_user_notes");
+            let list: StickyNote[] = stored ? JSON.parse(stored) : [];
+            if (Array.isArray(list)) {
+              list = list.map((n) => (n.id === tempId ? { ...n, id: inserted.id } : n));
+              localStorage.setItem("gfd_user_notes", JSON.stringify(list));
+            }
+          } catch {}
+        }
+      } else if (error) {
+        console.warn("Supabase feedback insert error:", error);
+      }
     } catch (err) {
       console.warn("Supabase feedback insert offline fallback:", err);
     }
 
-    try {
-      const userNotes = updated.filter((n) => n.id.startsWith("user-"));
-      localStorage.setItem("gfd_user_notes", JSON.stringify(userNotes));
-    } catch {}
-
     // Reset Form
     setNewContent("");
     setIsWriteModalOpen(false);
+    setIsSubmittingNote(false);
   };
 
   const handleTimeCapsuleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!capsuleName || !capsuleLetter || !capsuleEmail) return;
+
+    const newLetterObj = {
+      id: `letter-${Date.now()}`,
+      name: capsuleName.trim(),
+      email: capsuleEmail.trim(),
+      school: capsuleSchool.trim(),
+      dream_faculty: capsuleDreamFaculty.trim(),
+      letter_content: capsuleLetter.trim(),
+      delivery_timing: capsuleOpenDate.trim(),
+      is_delivered: false,
+      created_at: new Date().toISOString(),
+    };
+
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("gfd_user_letters");
+        let list = stored ? JSON.parse(stored) : [];
+        if (!Array.isArray(list)) list = [];
+        list = [newLetterObj, ...list];
+        localStorage.setItem("gfd_user_letters", JSON.stringify(list));
+      } catch {}
+    }
 
     // บันทึกจดหมายลง Supabase Database (future_letters)
     try {
@@ -329,9 +405,9 @@ export default function MemoriesPage() {
     setCapsuleSubmitted(true);
   };
 
-  const filteredPhotos = MEMORY_PHOTOS.filter((p) => {
+  const filteredPhotos = photos.filter((p) => {
     if (photoFilter === "all") return true;
-    return p.category === photoFilter;
+    return p.category === photoFilter || p.categoryLabel === photoFilter;
   });
 
   return (
@@ -353,31 +429,28 @@ export default function MemoriesPage() {
           <div className="inline-flex p-1.5 rounded-2xl bg-purple-deeper/10 border border-purple-primary/20 backdrop-blur-md shadow-inner gap-1 sm:gap-2">
             <button
               onClick={() => setActiveTab("voices")}
-              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${
-                activeTab === "voices"
+              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${activeTab === "voices"
                   ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
                   : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
-              }`}
+                }`}
             >
               เสียงสะท้อนจากน้อง
             </button>
             <button
               onClick={() => setActiveTab("wall")}
-              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${
-                activeTab === "wall"
+              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${activeTab === "wall"
                   ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
                   : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
-              }`}
+                }`}
             >
               Wall of Memories
             </button>
             <button
               onClick={() => setActiveTab("timecapsule")}
-              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${
-                activeTab === "timecapsule"
+              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${activeTab === "timecapsule"
                   ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
                   : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
-              }`}
+                }`}
             >
               จดหมายถึงตัวฉันในอนาคต
             </button>
@@ -413,43 +486,57 @@ export default function MemoriesPage() {
               {/* Background texture line */}
               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:12px_12px]" />
 
-              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {notes.map((note) => (
-                  <div
-                    key={note.id}
-                    className={`p-6 rounded-2xl border-2 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:z-20 ${note.bgColor} ${note.rotateDeg} flex flex-col justify-between min-h-[200px]`}
-                  >
-                    {/* Pin / Tape graphic on top */}
-                    <div className="flex justify-center -mt-8 mb-3">
-                      <div className="w-4 h-4 rounded-full bg-red-600 border border-red-800 shadow-md ring-2 ring-white/60" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 flex items-start">
-                      <p className={`text-xs sm:text-[13px] leading-relaxed font-medium ${note.textColor}`}>
-                        &ldquo;{note.content}&rdquo;
-                      </p>
-                    </div>
-
-                    {/* Card Footer: Anonymous & Date-Time in bottom-right corner */}
-                    <div className="mt-4 pt-3 border-t border-black/10 flex items-center justify-between text-xs">
-                      <span className="text-[10px] text-zinc-500/80 font-medium tracking-wide flex items-center gap-1">
-                        <svg className="w-3 h-3 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        ไม่ระบุตัวตน
-                      </span>
-                      {/* มุมขวาล่าง: แสดงสถานะวัน เวลา ที่เขียน */}
-                      <span className="text-[11px] text-zinc-600 font-mono font-medium flex items-center gap-1.5 bg-black/5 px-2.5 py-1 rounded-lg">
-                        <svg className="w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {note.dateStr}
-                      </span>
-                    </div>
+              {notes.length === 0 ? (
+                <div className="relative z-10 flex flex-col items-center justify-center min-h-[380px] text-center p-8">
+                  <div className="w-16 h-16 rounded-3xl bg-amber-100/90 border-2 border-amber-300 flex items-center justify-center mb-4 shadow-sm text-amber-800">
+                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
                   </div>
-                ))}
-              </div>
+                  <h4 className="text-base font-bold text-amber-950">ยังไม่มีข้อความบนบอร์ด</h4>
+                  <p className="text-xs text-amber-900/70 mt-1 max-w-sm">
+                    ร่วมเป็นคนแรกที่ส่งต่อความรู้สึก ความประทับใจ หรือคำขอบคุณ โดยกดปุ่ม &quot;+ เขียนความรู้สึกของคุณ&quot; ด้านบนได้เลย
+                  </p>
+                </div>
+              ) : (
+                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {notes.map((note) => (
+                    <div
+                      key={note.id}
+                      className={`p-6 rounded-2xl border-2 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:z-20 ${note.bgColor} ${note.rotateDeg} flex flex-col justify-between min-h-[200px]`}
+                    >
+                      {/* Pin / Tape graphic on top */}
+                      <div className="flex justify-center -mt-8 mb-3">
+                        <div className="w-4 h-4 rounded-full bg-red-600 border border-red-800 shadow-md ring-2 ring-white/60" />
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 flex items-start">
+                        <p className={`text-xs sm:text-[13px] leading-relaxed font-medium ${note.textColor}`}>
+                          &ldquo;{note.content}&rdquo;
+                        </p>
+                      </div>
+
+                      {/* Card Footer: Anonymous & Date-Time in bottom-right corner */}
+                      <div className="mt-4 pt-3 border-t border-black/10 flex items-center justify-between text-xs">
+                        <span className="text-[10px] text-zinc-500/80 font-medium tracking-wide flex items-center gap-1">
+                          <svg className="w-3 h-3 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          ไม่ระบุตัวตน
+                        </span>
+                        {/* มุมขวาล่าง: แสดงสถานะวัน เวลา ที่เขียน */}
+                        <span className="text-[11px] text-zinc-600 font-mono font-medium flex items-center gap-1.5 bg-black/5 px-2.5 py-1 rounded-lg">
+                          <svg className="w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {note.dateStr}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Modal: Write Your Note (Anonymous, 2 fields only) */}
@@ -497,9 +584,8 @@ export default function MemoriesPage() {
                             key={c.id}
                             type="button"
                             onClick={() => setSelectedColor(c.id)}
-                            className={`w-9 h-9 rounded-xl border-2 transition-transform cursor-pointer ${c.bg} ${
-                              selectedColor === c.id ? "scale-125 ring-2 ring-purple-600 shadow-md" : "hover:scale-105"
-                            }`}
+                            className={`w-9 h-9 rounded-xl border-2 transition-transform cursor-pointer ${c.bg} ${selectedColor === c.id ? "scale-125 ring-2 ring-purple-600 shadow-md" : "hover:scale-105"
+                              }`}
                           />
                         ))}
                       </div>
@@ -530,9 +616,10 @@ export default function MemoriesPage() {
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-primary to-pink-accent text-white font-bold text-xs shadow-md hover:shadow-purple-500/25 transition-all cursor-pointer"
+                        disabled={isSubmittingNote}
+                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-primary to-pink-accent text-white font-bold text-xs shadow-md hover:shadow-purple-500/25 transition-all cursor-pointer disabled:opacity-50"
                       >
-                        แปะลงบอร์ดทันที
+                        {isSubmittingNote ? "กำลังแปะลงบอร์ด..." : "แปะลงบอร์ดทันที"}
                       </button>
                     </div>
                   </form>
@@ -549,63 +636,83 @@ export default function MemoriesPage() {
           <div className="space-y-8 animate-fade-in">
             {/* Filter Pills */}
             <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
-              {[
-                { key: "all", label: "ทั้งหมด" },
-                { key: "opening", label: "พิธีเปิด-ปิด" },
-                { key: "stations", label: "ฐานกิจกรรม 16 คณะ" },
-                { key: "night", label: "ค่ำคืนบายเนียร์" },
-                { key: "friendship", label: "มิตรภาพ & รอยยิ้ม" },
-              ].map((f) => (
+              <button
+                onClick={() => setPhotoFilter("all")}
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                  photoFilter === "all"
+                    ? "bg-purple-primary text-white shadow-md shadow-purple-primary/30"
+                    : "bg-white text-zinc-600 hover:text-purple-dark hover:bg-zinc-100 border border-zinc-200"
+                }`}
+              >
+                ทั้งหมด
+              </button>
+              {categories.map((cat) => (
                 <button
-                  key={f.key}
-                  onClick={() => setPhotoFilter(f.key)}
+                  key={cat}
+                  onClick={() => setPhotoFilter(cat)}
                   className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                    photoFilter === f.key
+                    photoFilter === cat
                       ? "bg-purple-primary text-white shadow-md shadow-purple-primary/30"
                       : "bg-white text-zinc-600 hover:text-purple-dark hover:bg-zinc-100 border border-zinc-200"
                   }`}
                 >
-                  {f.label}
+                  {cat}
                 </button>
               ))}
             </div>
 
             {/* Gallery Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPhotos.map((photo) => (
-                <div
-                  key={photo.id}
-                  onClick={() => setLightboxPhoto(photo)}
-                  className="rounded-3xl overflow-hidden bg-white border border-zinc-200 shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer group flex flex-col justify-between"
-                >
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100">
-                    <Image
-                      src={photo.imageUrl}
-                      alt={photo.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/60 backdrop-blur-md text-white border border-white/20">
-                        {photo.edition}
+            {filteredPhotos.length === 0 ? (
+              <div className="py-16 text-center bg-white rounded-3xl border border-dashed border-zinc-300 max-w-xl mx-auto p-8 shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h4 className="text-base font-bold text-zinc-800">ยังไม่มีรูปภาพในหมวดหมู่นี้</h4>
+                <p className="text-xs text-zinc-500 mt-1">
+                  ทีมงานกำลังเตรียมประมวลภาพกิจกรรม โปรดติดตามเร็วๆ นี้
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredPhotos.map((photo) => (
+                  <div
+                    key={photo.id}
+                    onClick={() => setLightboxPhoto(photo)}
+                    className="rounded-3xl overflow-hidden bg-white border border-zinc-200 shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer group flex flex-col justify-between"
+                  >
+                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100">
+                      <Image
+                        src={photo.imageUrl}
+                        alt={photo.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 left-3">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/60 backdrop-blur-md text-white border border-white/20">
+                          {photo.categoryLabel || photo.category || photo.edition || "Guidance"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-5">
+                      <span className="text-[10px] font-bold text-pink-accent uppercase tracking-wider block mb-1">
+                        {photo.categoryLabel || photo.category}
                       </span>
+                      <h4 className="font-bold text-sm sm:text-base text-purple-deeper group-hover:text-purple-primary transition-colors">
+                        {photo.title}
+                      </h4>
+                      {photo.caption && (
+                        <p className="text-xs text-zinc-500 mt-1 line-clamp-2">
+                          {photo.caption}
+                        </p>
+                      )}
                     </div>
                   </div>
-
-                  <div className="p-5">
-                    <span className="text-[10px] font-bold text-pink-accent uppercase tracking-wider block mb-1">
-                      {photo.categoryLabel}
-                    </span>
-                    <h4 className="font-bold text-sm sm:text-base text-purple-deeper group-hover:text-purple-primary transition-colors">
-                      {photo.title}
-                    </h4>
-                    <p className="text-xs text-zinc-500 mt-1 line-clamp-2">
-                      {photo.caption}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {/* Lightbox Modal */}
             {lightboxPhoto && (
@@ -628,7 +735,7 @@ export default function MemoriesPage() {
                   <div className="p-6 flex items-center justify-between bg-white">
                     <div>
                       <span className="text-xs font-bold text-pink-accent block font-mono">
-                        {lightboxPhoto.edition} • {lightboxPhoto.categoryLabel}
+                        {lightboxPhoto.edition || "Guidance 7th"} • {lightboxPhoto.categoryLabel || lightboxPhoto.category}
                       </span>
                       <h4 className="font-bold text-base sm:text-lg text-purple-deeper">
                         {lightboxPhoto.title}
@@ -672,7 +779,7 @@ export default function MemoriesPage() {
                       จดหมายถึงตัวฉันในอนาคต
                     </h3>
                     <p className="text-xs sm:text-sm text-zinc-600 mt-1 max-w-md mx-auto leading-relaxed">
-                      เขียนข้อความส่งถึงตัวเธอในวันที่ก้าวสู่รั้วมหาวิทยาลัยในฝัน ฝากความหวังและกำลังใจไว้ในกล่องกาลเวลา
+                      ถึงตัวฉันในอนาคต ขอให้เธอเชื่อมั่นในตัวเอง พยายามอย่างเต็มที่ และมอบหมายทุกสิ่งแด่อัลลอฮฺ ขอพระองค์ทรงประทานสิ่งที่ดีที่สุด และนำพาเธอไปสู่ความสำเร็จในเส้นทางที่พระองค์ทรงกำหนด
                     </p>
                   </div>
 

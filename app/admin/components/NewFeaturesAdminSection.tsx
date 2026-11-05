@@ -68,7 +68,7 @@ export const STAFF_DEPARTMENTS = [
   "ฝ่ายสื่อ",
   "ฝ่ายวิชาการ",
   "ฝ่ายพี่เลี้ยง",
-  "ฝ่ายสถานที่และคมนาคม",
+  "ฝ่ายสถานที่",
   "ฝ่ายสวัสดิการ",
   "ฝ่ายพยาบาล",
 ];
@@ -84,7 +84,7 @@ export function normalizeStaffDept(rawDept?: string): string {
   if (trimmed.includes("สื่อ")) return "ฝ่ายสื่อ";
   if (trimmed.includes("วิชาการ")) return "ฝ่ายวิชาการ";
   if (trimmed.includes("พี่เลี้ยง")) return "ฝ่ายพี่เลี้ยง";
-  if (trimmed.includes("สถานที่") || trimmed.includes("คมนาคม")) return "ฝ่ายสถานที่และคมนาคม";
+  if (trimmed.includes("สถานที่") || trimmed.includes("คมนาคม")) return "ฝ่ายสถานที่";
   if (trimmed.includes("สวัสดิการ")) return "ฝ่ายสวัสดิการ";
   if (trimmed.includes("พยาบาล")) return "ฝ่ายพยาบาล";
   return trimmed;
@@ -135,33 +135,94 @@ export default function NewFeaturesAdminSection({
   // Fetch Feedbacks
   const fetchFeedbacks = async () => {
     setLoadingFeedbacks(true);
+    let dbFeedbacks: CampFeedback[] = [];
     try {
       const { data, error } = await supabase
         .from("camp_feedbacks")
         .select("*")
         .order("created_at", { ascending: false });
-      if (!error && data) setFeedbacks(data);
+      if (!error && data) dbFeedbacks = data;
     } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingFeedbacks(false);
+      console.warn("fetchFeedbacks error:", e);
     }
+
+    // Merge with localStorage cached notes
+    let localNotes: any[] = [];
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("gfd_user_notes");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) localNotes = parsed;
+        }
+      } catch {}
+    }
+
+    const combined: CampFeedback[] = [...dbFeedbacks];
+
+    localNotes.forEach((ln: any) => {
+      if (!combined.some((c) => c.id === ln.id || c.content.trim() === ln.content?.trim())) {
+        combined.push({
+          id: ln.id,
+          content: ln.content,
+          bg_color: ln.bgColor || ln.bg_color || "bg-amber-100 border-amber-300",
+          text_color: ln.textColor || ln.text_color || "text-amber-950",
+          rotate_deg: ln.rotateDeg || ln.rotate_deg || "rotate-0",
+          date_display: ln.dateStr || ln.date_display || "",
+          is_approved: ln.is_approved !== false,
+          created_at: ln.created_at || new Date().toISOString(),
+        });
+      }
+    });
+
+    setFeedbacks(combined);
+    setLoadingFeedbacks(false);
   };
 
   // Fetch Letters
   const fetchLetters = async () => {
     setLoadingLetters(true);
+    let dbLetters: FutureLetter[] = [];
     try {
       const { data, error } = await supabase
         .from("future_letters")
         .select("*")
         .order("created_at", { ascending: false });
-      if (!error && data) setLetters(data);
+      if (!error && data) dbLetters = data;
     } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingLetters(false);
+      console.warn("fetchLetters error:", e);
     }
+
+    let localLetters: any[] = [];
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("gfd_user_letters");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) localLetters = parsed;
+        }
+      } catch {}
+    }
+
+    const combined: FutureLetter[] = [...dbLetters];
+    localLetters.forEach((ll: any) => {
+      if (!combined.some((c) => c.id === ll.id || (c.email === ll.email && c.letter_content === ll.letter_content))) {
+        combined.push({
+          id: ll.id || `letter-${Date.now()}`,
+          name: ll.name || "",
+          email: ll.email || "",
+          school: ll.school || "",
+          dream_faculty: ll.dream_faculty || "",
+          letter_content: ll.letter_content || "",
+          delivery_timing: ll.delivery_timing || "",
+          is_delivered: ll.is_delivered || false,
+          created_at: ll.created_at || new Date().toISOString(),
+        });
+      }
+    });
+
+    setLetters(combined);
+    setLoadingLetters(false);
   };
 
   // Fetch Staff
@@ -203,27 +264,82 @@ export default function NewFeaturesAdminSection({
     if (activeSubTab === "meals") fetchMeals();
   }, [activeSubTab]);
 
+  // Realtime subscription for feedbacks
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin_feedbacks_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "camp_feedbacks" },
+        () => {
+          fetchFeedbacks();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   // Actions for Feedbacks
   const toggleFeedbackApproval = async (id: string, current: boolean) => {
-    const { error } = await supabase
-      .from("camp_feedbacks")
-      .update({ is_approved: !current })
-      .eq("id", id);
-    if (!error) {
-      setFeedbacks((prev) =>
-        prev.map((f) => (f.id === id ? { ...f, is_approved: !current } : f))
-      );
-      showToast(!current ? "แสดงข้อความบนบอร์ดแล้ว" : "ซ่อนข้อความเรียบร้อย");
+    const updatedApproved = !current;
+    setFeedbacks((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, is_approved: updatedApproved } : f))
+    );
+
+    // Update localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("gfd_user_notes");
+        if (stored) {
+          let list = JSON.parse(stored);
+          if (Array.isArray(list)) {
+            list = list.map((n: any) =>
+              n.id === id ? { ...n, is_approved: updatedApproved } : n
+            );
+            localStorage.setItem("gfd_user_notes", JSON.stringify(list));
+          }
+        }
+      } catch {}
     }
+
+    // Update Supabase
+    try {
+      await supabase
+        .from("camp_feedbacks")
+        .update({ is_approved: updatedApproved })
+        .eq("id", id);
+    } catch {}
+
+    showToast(updatedApproved ? "แสดงข้อความบนบอร์ดแล้ว" : "ซ่อนข้อความเรียบร้อย");
   };
 
   const deleteFeedback = async (id: string) => {
     if (!confirm("ต้องการลบข้อความนี้ใช่หรือไม่?")) return;
-    const { error } = await supabase.from("camp_feedbacks").delete().eq("id", id);
-    if (!error) {
-      setFeedbacks((prev) => prev.filter((f) => f.id !== id));
-      showToast("ลบข้อความเรียบร้อย");
+    setFeedbacks((prev) => prev.filter((f) => f.id !== id));
+
+    // Remove from localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("gfd_user_notes");
+        if (stored) {
+          let list = JSON.parse(stored);
+          if (Array.isArray(list)) {
+            list = list.filter((n: any) => n.id !== id);
+            localStorage.setItem("gfd_user_notes", JSON.stringify(list));
+          }
+        }
+      } catch {}
     }
+
+    // Remove from Supabase
+    try {
+      await supabase.from("camp_feedbacks").delete().eq("id", id);
+    } catch {}
+
+    showToast("ลบข้อความเรียบร้อย");
   };
 
   // Actions for Staff
