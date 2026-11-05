@@ -57,6 +57,52 @@ const DAYS_META = [
 const LOCAL_STORAGE_KEY = "gfd_admin_master_schedule_v1";
 const LOCAL_STORAGE_SUBGROUP_KEY = "gfd_admin_subgroup_schedule_v1";
 
+const SUPABASE_SCHEMA_SQL = `-- =============================================
+-- Camp Schedule: Supabase Table Migration
+-- Guidance for Dream 7th (ค่ายสานฝันเพื่อน้อง ครั้งที่ 7)
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.camp_schedule (
+  id TEXT PRIMARY KEY,
+  schedule_type TEXT NOT NULL DEFAULT 'master',       -- 'master' (กำหนดการหลัก) | 'subgroup' (แยกกลุ่ม)
+  day_num INT NOT NULL DEFAULT 1,                     -- 1, 2, 3, 4
+  date_str TEXT DEFAULT '',                           -- e.g. 'วันศุกร์ 6 พ.ย. 2569'
+  date_iso TEXT DEFAULT '',                           -- e.g. '2026-11-06'
+  time TEXT NOT NULL,                                 -- e.g. '10:00 - 12:00'
+  start_time TEXT DEFAULT '',                         -- e.g. '10:00'
+  end_time TEXT DEFAULT '',                           -- e.g. '12:00'
+  duration TEXT DEFAULT '',                           -- e.g. '120' (นาที)
+  title TEXT NOT NULL,                                -- กิจกรรมหลัก
+  description TEXT DEFAULT '',                        -- รายละเอียดเพิ่มเติม
+  location TEXT DEFAULT '',                           -- สถานที่ทั่วไป
+  loc_male TEXT DEFAULT '',                           -- สถานที่มุสลีมีน
+  loc_female TEXT DEFAULT '',                         -- สถานที่มุสลีมะฮฺ
+  dept TEXT DEFAULT '',                               -- ฝ่ายที่รับผิดชอบ
+  note TEXT DEFAULT '',                               -- หมายเหตุ
+  category TEXT NOT NULL DEFAULT 'activity',          -- 'activity' | 'prayer' | 'meal_break' | 'travel'
+  gender TEXT DEFAULT 'both',                         -- 'both' | 'male' | 'female'
+  target_group TEXT DEFAULT 'main',                   -- 'main' or e.g. 'มุสลีมีน กลุ่ม 1'
+  sort_order INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_schedule_type ON public.camp_schedule(schedule_type);
+CREATE INDEX IF NOT EXISTS idx_schedule_day ON public.camp_schedule(day_num);
+CREATE INDEX IF NOT EXISTS idx_schedule_sort ON public.camp_schedule(sort_order);
+CREATE INDEX IF NOT EXISTS idx_schedule_active ON public.camp_schedule(is_active);
+
+ALTER TABLE public.camp_schedule ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read schedule" ON public.camp_schedule
+  FOR SELECT USING (true);
+
+CREATE POLICY "Allow all for schedule" ON public.camp_schedule
+  FOR ALL USING (true) WITH CHECK (true);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE public.camp_schedule;
+`;
+
 const DEFAULT_SUBGROUP_ITEMS: EditableSubgroupItem[] = ALL_CAMP_SCHEDULE.map((it, idx) => ({
   ...it,
   id: `sub-${it.dayNum}-${it.group.replace(/\s+/g, "_")}-${idx}`,
@@ -94,6 +140,389 @@ function calculateDurationMinutes(startStr: string, endStr: string, fallback = 6
   return diff > 0 ? diff : fallback;
 }
 
+/* ================================================================
+   SMART LOCATION & STATION SYNC MODAL COMPONENT
+   ================================================================ */
+
+function LocationSyncModal({
+  isOpen,
+  onClose,
+  dayNum,
+  onDayChange,
+  scheduleItems,
+  subgroupItems,
+  onApplySingleSync,
+  onBatchApplyAll,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  dayNum: number;
+  onDayChange: (d: number) => void;
+  scheduleItems: MasterScheduleItem[];
+  subgroupItems: EditableSubgroupItem[];
+  onApplySingleSync: (
+    dayNum: number,
+    keyName: string,
+    maleLoc: string,
+    femaleLoc: string,
+    isStation: boolean
+  ) => void;
+  onBatchApplyAll: (
+    dayNum: number,
+    updates: Array<{ keyName: string; maleLoc: string; femaleLoc: string; isStation: boolean }>
+  ) => void;
+}) {
+  // 1. Stations on dayNum (Day 2 & Day 3)
+  const stations = useMemo(() => {
+    if (dayNum !== 2 && dayNum !== 3) return [];
+    const map = new Map<string, { name: string; maleLoc: string; femaleLoc: string; count: number }>();
+    subgroupItems.forEach((it) => {
+      if (it.dayNum !== dayNum) return;
+      if (!it.desc.includes("ฐาน") && !it.title.includes("ฐาน")) return;
+      const baseName = it.desc.trim();
+      if (!baseName || baseName === "เดินเปลี่ยนฐาน") return;
+
+      if (!map.has(baseName)) {
+        map.set(baseName, {
+          name: baseName,
+          maleLoc: "",
+          femaleLoc: "",
+          count: 0,
+        });
+      }
+      const item = map.get(baseName)!;
+      item.count++;
+      if (it.gender === "male" && !item.maleLoc && it.location) {
+        item.maleLoc = it.location;
+      } else if (it.gender === "female" && !item.femaleLoc && it.location) {
+        item.femaleLoc = it.location;
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, "th"));
+  }, [subgroupItems, dayNum]);
+
+  // 2. Common routines on dayNum
+  const routines = useMemo(() => {
+    return scheduleItems
+      .filter((it) => it.dayNum === dayNum)
+      .map((it) => ({
+        id: it.id,
+        time: it.time,
+        title: it.title,
+        desc: it.desc,
+        maleLoc: it.locMale || "",
+        femaleLoc: it.locFemale || "",
+      }));
+  }, [scheduleItems, dayNum]);
+
+  // Local state for live edits
+  const [stationEdits, setStationEdits] = useState<Record<string, { male: string; female: string }>>({});
+  const [routineEdits, setRoutineEdits] = useState<Record<string, { male: string; female: string }>>({});
+
+  // Sync edits when dayNum changes or modal opens
+  useEffect(() => {
+    const sMap: Record<string, { male: string; female: string }> = {};
+    stations.forEach((st) => {
+      sMap[st.name] = { male: st.maleLoc, female: st.femaleLoc };
+    });
+    setStationEdits(sMap);
+
+    const rMap: Record<string, { male: string; female: string }> = {};
+    routines.forEach((rt) => {
+      rMap[rt.id] = { male: rt.maleLoc, female: rt.femaleLoc };
+    });
+    setRoutineEdits(rMap);
+  }, [dayNum, stations, routines]);
+
+  if (!isOpen) return null;
+
+  const handleSaveAll = () => {
+    const updates: Array<{ keyName: string; maleLoc: string; femaleLoc: string; isStation: boolean }> = [];
+    
+    // Stations
+    stations.forEach((st) => {
+      const edit = stationEdits[st.name] || { male: st.maleLoc, female: st.femaleLoc };
+      updates.push({
+        keyName: st.name,
+        maleLoc: edit.male,
+        femaleLoc: edit.female,
+        isStation: true,
+      });
+    });
+
+    // Routines
+    routines.forEach((rt) => {
+      const edit = routineEdits[rt.id] || { male: rt.maleLoc, female: rt.femaleLoc };
+      updates.push({
+        keyName: rt.title,
+        maleLoc: edit.male,
+        femaleLoc: edit.female,
+        isStation: false,
+      });
+    });
+
+    onBatchApplyAll(dayNum, updates);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-3xl border border-zinc-200 shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-zinc-900"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="p-5 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/70">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg font-bold shadow-2xs">
+              🎯
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-extrabold text-black">
+                  ศูนย์จัดการสถานที่ฐาน & กิจกรรมรวม
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold">
+                  แก้จุดเดียวเปลี่ยนทุกกลุ่ม
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500 mt-0.5">
+                แก้ไขสถานที่ที่นี่ แล้วระบบจะกระจายไปยังทุกกลุ่มย่อย (กลุ่ม 1-6) และกำหนดการหลักให้อัตโนมัติ โดยแยกสถานที่มุสลีมีน และมุสลีมะฮฺ
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-black flex items-center justify-center text-sm font-bold transition-colors cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Day Selector */}
+        <div className="px-5 py-3 border-b border-zinc-200 flex items-center gap-2 overflow-x-auto bg-zinc-50/40">
+          <span className="text-xs font-bold text-zinc-500 mr-1 shrink-0">เลือกวันของค่าย:</span>
+          {[1, 2, 3, 4].map((d) => (
+            <button
+              key={d}
+              onClick={() => onDayChange(d)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                dayNum === d
+                  ? "bg-purple-700 text-white shadow-xs"
+                  : "bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200"
+              }`}
+            >
+              วันที่ {d}
+            </button>
+          ))}
+        </div>
+
+        {/* Body */}
+        <div className="p-5 overflow-y-auto space-y-6 flex-1 text-xs">
+          {/* SECTION 1: STATIONS (If Day 2 or 3) */}
+          {stations.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-extrabold text-purple-950 flex items-center gap-1.5">
+                    <span>🎪</span>
+                    <span>ฐานหมุนเวียนประจำวันที่ {dayNum} ({stations.length} ฐาน)</span>
+                  </h4>
+                  <p className="text-[11px] text-zinc-500">
+                    น้องๆ แต่ละกลุ่มจะหมุนเวียนเข้าฐานเหล่านี้ตามเวลา เมื่อเปลี่ยนห้อง/ตึกที่นี่ ทุกกลุ่มที่เข้าฐานนี้จะได้รับสถานที่ใหม่ทันที
+                  </p>
+                </div>
+              </div>
+
+              <div className="border border-zinc-200 rounded-2xl overflow-hidden divide-y divide-zinc-200 bg-white shadow-2xs">
+                {stations.map((st) => {
+                  const currentEdit = stationEdits[st.name] || { male: st.maleLoc, female: st.femaleLoc };
+                  return (
+                    <div key={st.name} className="p-3.5 hover:bg-purple-50/30 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3">
+                      <div className="min-w-0 md:w-56 shrink-0">
+                        <span className="font-bold text-black text-xs block truncate" title={st.name}>
+                          {st.name}
+                        </span>
+                        <span className="text-[10px] text-purple-700 font-medium">
+                          หมุนเวียนรวม {st.count} กลุ่ม
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                        {/* Male Location */}
+                        <div className="flex items-center gap-1.5 bg-blue-50/50 border border-blue-200/80 rounded-xl px-2.5 py-1.5">
+                          <span className="text-[10px] font-bold text-blue-900 shrink-0">👦 มุสลีมีน:</span>
+                          <input
+                            type="text"
+                            value={currentEdit.male}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setStationEdits((prev) => ({
+                                ...prev,
+                                [st.name]: { ...currentEdit, male: val },
+                              }));
+                            }}
+                            placeholder="ระบุสถานที่ฝั่งชาย (เช่น ห้อง 507)..."
+                            className="bg-transparent text-xs text-blue-950 font-bold focus:outline-none w-full"
+                          />
+                        </div>
+
+                        {/* Female Location */}
+                        <div className="flex items-center gap-1.5 bg-pink-50/50 border border-pink-200/80 rounded-xl px-2.5 py-1.5">
+                          <span className="text-[10px] font-bold text-pink-900 shrink-0">🧕 มุสลีมะฮฺ:</span>
+                          <input
+                            type="text"
+                            value={currentEdit.female}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setStationEdits((prev) => ({
+                                ...prev,
+                                [st.name]: { ...currentEdit, female: val },
+                              }));
+                            }}
+                            placeholder="ระบุสถานที่ฝั่งหญิง (เช่น ห้อง 514)..."
+                            className="bg-transparent text-xs text-pink-950 font-bold focus:outline-none w-full"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 flex items-center justify-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onApplySingleSync(dayNum, st.name, currentEdit.male, currentEdit.female, true);
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-300 font-bold text-[11px] transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                          title="อัปเดตสถานที่ของฐานนี้ไปยังทุกกลุ่มทันที"
+                        >
+                          <span>⚡</span>
+                          <span>ซิงค์ฐานนี้</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 2: COMMON ROUTINES & MAIN EVENTS */}
+          <div className="space-y-3">
+            <div>
+              <h4 className="text-sm font-extrabold text-zinc-900 flex items-center gap-1.5">
+                <span>⏰</span>
+                <span>กิจกรรมหลัก & ภารกิจส่วนรวมประจำวันที่ {dayNum} ({routines.length} รายการ)</span>
+              </h4>
+              <p className="text-[11px] text-zinc-500">
+                กิจกรรมร่วมกัน เช่น ละหมาด, รับประทานอาหาร, บรรยาย TCAS ฯลฯ เมื่อแก้ที่นี่จะอัปเดตทั้งในกำหนดการหลักและกลุ่มย่อยทุกกลุ่ม
+              </p>
+            </div>
+
+            <div className="border border-zinc-200 rounded-2xl overflow-hidden divide-y divide-zinc-200 bg-white shadow-2xs">
+              {routines.map((rt) => {
+                const currentEdit = routineEdits[rt.id] || { male: rt.maleLoc, female: rt.femaleLoc };
+                return (
+                  <div key={rt.id} className="p-3.5 hover:bg-zinc-50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div className="min-w-0 md:w-56 shrink-0">
+                      <span className="text-[10px] font-mono text-zinc-400 block font-bold">
+                        {rt.time}
+                      </span>
+                      <span className="font-bold text-black text-xs block truncate" title={rt.title}>
+                        {rt.desc || rt.title}
+                      </span>
+                      {rt.desc && rt.desc !== rt.title && (
+                        <span className="text-[10px] text-zinc-500 block truncate">
+                          {rt.title}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                      {/* Male Location */}
+                      <div className="flex items-center gap-1.5 bg-blue-50/50 border border-blue-200/80 rounded-xl px-2.5 py-1.5">
+                        <span className="text-[10px] font-bold text-blue-900 shrink-0">👦 มุสลีมีน:</span>
+                        <input
+                          type="text"
+                          value={currentEdit.male}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setRoutineEdits((prev) => ({
+                              ...prev,
+                              [rt.id]: { ...currentEdit, male: val },
+                            }));
+                          }}
+                          placeholder="สถานที่ชาย (เช่น หอพัก 6, โรงช้าง)..."
+                          className="bg-transparent text-xs text-blue-950 font-bold focus:outline-none w-full"
+                        />
+                      </div>
+
+                      {/* Female Location */}
+                      <div className="flex items-center gap-1.5 bg-pink-50/50 border border-pink-200/80 rounded-xl px-2.5 py-1.5">
+                        <span className="text-[10px] font-bold text-pink-900 shrink-0">🧕 มุสลีมะฮฺ:</span>
+                        <input
+                          type="text"
+                          value={currentEdit.female}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setRoutineEdits((prev) => ({
+                              ...prev,
+                              [rt.id]: { ...currentEdit, female: val },
+                            }));
+                          }}
+                          placeholder="สถานที่หญิง (เช่น หอพัก 7, โรงช้าง)..."
+                          className="bg-transparent text-xs text-pink-950 font-bold focus:outline-none w-full"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 flex items-center justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onApplySingleSync(dayNum, rt.title, currentEdit.male, currentEdit.female, false);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-300 font-bold text-[11px] transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                        title="อัปเดตสถานที่ของกิจกรรมนี้ไปยังทุกกลุ่มทันที"
+                      >
+                        <span>⚡</span>
+                        <span>ซิงค์กิจกรรมนี้</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="p-4 border-t border-zinc-200 bg-zinc-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[11px] text-zinc-500">
+            💡 กดปุ่มสีม่วงด้านขวาเพื่อ <span className="font-bold text-purple-700">บันทึกและกระจายสถานที่ทั้งหมดในวันที่ {dayNum}</span> ไปยังทุกกลุ่มในคลิกเดียว
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSaveAll}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 text-white text-xs font-bold transition-all cursor-pointer shadow-md flex items-center gap-1.5"
+            >
+              <span>⚡</span>
+              <span>บันทึกและกระจายสถานที่ทั้งหมดของวันที่ {dayNum}</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl bg-zinc-200 hover:bg-zinc-300 text-zinc-800 text-xs font-bold transition-all cursor-pointer"
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ScheduleAdminSection() {
   // Master schedule items (94 items)
   const [scheduleItems, setScheduleItems] = useState<MasterScheduleItem[]>([]);
@@ -103,6 +532,9 @@ export default function ScheduleAdminSection() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [supabaseTableMissing, setSupabaseTableMissing] = useState(false);
+  const [isLocationSyncOpen, setIsLocationSyncOpen] = useState(false);
+  const [syncDayNum, setSyncDayNum] = useState<number>(2);
 
   // Debounced auto-save timer ref
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -207,9 +639,17 @@ export default function ScheduleAdminSection() {
           }));
           setScheduleItems(mapped);
           masterLoaded = true;
+          setSupabaseTableMissing(false);
+        } else if (error) {
+          if (error.code === "PGRST205" || error.message?.includes("camp_schedule")) {
+            setSupabaseTableMissing(true);
+          }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.warn("Supabase fetch failed for master schedule:", err);
+        if (err?.code === "PGRST205" || String(err).includes("camp_schedule")) {
+          setSupabaseTableMissing(true);
+        }
       }
 
       if (!masterLoaded) {
@@ -252,16 +692,24 @@ export default function ScheduleAdminSection() {
             duration: d.duration,
             title: d.title,
             desc: d.description || d.title,
-            location: d.gender === "female" ? (d.loc_female || d.loc_male || "") : (d.loc_male || d.loc_female || ""),
+            location: d.location || (d.gender === "female" ? (d.loc_female || d.loc_male || "") : (d.loc_male || d.loc_female || "")) || "",
             dept: d.dept || "",
             note: d.note || "",
             category: d.category || "activity",
           }));
           setSubgroupItems(mapped);
           subgroupLoaded = true;
+          setSupabaseTableMissing(false);
+        } else if (error) {
+          if (error.code === "PGRST205" || error.message?.includes("camp_schedule")) {
+            setSupabaseTableMissing(true);
+          }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.warn("Supabase fetch failed for subgroup schedule:", err);
+        if (err?.code === "PGRST205" || String(err).includes("camp_schedule")) {
+          setSupabaseTableMissing(true);
+        }
       }
 
       if (!subgroupLoaded) {
@@ -312,6 +760,7 @@ export default function ScheduleAdminSection() {
         duration: it.duration,
         title: it.title,
         description: it.desc,
+        location: it.locMale || it.locFemale || "",
         loc_male: it.locMale,
         loc_female: it.locFemale,
         dept: it.dept,
@@ -324,9 +773,17 @@ export default function ScheduleAdminSection() {
       const { error } = await supabase.from("camp_schedule").upsert(records, { onConflict: "id" });
       if (error) {
         console.warn("Supabase schedule upsert warning:", error.message);
+        if (error.code === "PGRST205" || error.message?.includes("camp_schedule")) {
+          setSupabaseTableMissing(true);
+        }
+      } else {
+        setSupabaseTableMissing(false);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.warn("Supabase save error:", err);
+      if (err?.code === "PGRST205" || String(err).includes("camp_schedule")) {
+        setSupabaseTableMissing(true);
+      }
     }
 
     setIsSaving(false);
@@ -358,6 +815,7 @@ export default function ScheduleAdminSection() {
         duration: it.duration,
         title: it.title,
         description: it.desc,
+        location: it.location || "",
         loc_male: it.gender === "male" ? it.location : "",
         loc_female: it.gender === "female" ? it.location : "",
         dept: it.dept,
@@ -369,16 +827,211 @@ export default function ScheduleAdminSection() {
         updated_at: new Date().toISOString(),
       }));
 
-      const { error } = await supabase.from("camp_schedule").upsert(records, { onConflict: "id" });
-      if (error) {
-        console.warn("Supabase subgroup schedule upsert warning:", error.message);
+      // Upsert in batches of 100 rows to prevent payload limit overflow
+      let hadMissingTable = false;
+      for (let i = 0; i < records.length; i += 100) {
+        const chunk = records.slice(i, i + 100);
+        const { error } = await supabase.from("camp_schedule").upsert(chunk, { onConflict: "id" });
+        if (error) {
+          console.warn("Supabase subgroup schedule upsert warning:", error.message);
+          if (error.code === "PGRST205" || error.message?.includes("camp_schedule")) {
+            hadMissingTable = true;
+            break;
+          }
+        }
       }
-    } catch (err) {
+      if (hadMissingTable) {
+        setSupabaseTableMissing(true);
+      } else {
+        setSupabaseTableMissing(false);
+      }
+    } catch (err: any) {
       console.warn("Supabase save error:", err);
+      if (err?.code === "PGRST205" || String(err).includes("camp_schedule")) {
+        setSupabaseTableMissing(true);
+      }
     }
 
     setIsSaving(false);
     showToast(notifyText);
+  };
+
+  // ==============================================================
+  // SMART LOCATION SYNC HANDLERS (แก้จุดเดียว เปลี่ยนทุกกลุ่มอัตโนมัติ)
+  // ==============================================================
+
+  // Quick sync from Subgroup row to all matching groups of that gender
+  const handleQuickSyncSubgroupLocation = (item: EditableSubgroupItem) => {
+    const loc = (item.location || "").trim();
+    if (!loc) {
+      showToast("กรุณากรอกสถานที่ก่อนกดซิงค์");
+      return;
+    }
+
+    const isStation = item.desc.includes("ฐาน") || item.title.includes("ฐาน");
+    const searchKey = isStation ? item.desc.trim() : item.title.trim();
+
+    let count = 0;
+    const nextSub = subgroupItems.map((sub) => {
+      if (sub.dayNum !== item.dayNum || sub.gender !== item.gender) return sub;
+      const match = isStation
+        ? sub.desc.trim() === searchKey || sub.desc.includes(searchKey) || searchKey.includes(sub.desc.trim())
+        : sub.title.trim() === searchKey || sub.desc.trim() === searchKey;
+
+      if (match) {
+        count++;
+        return { ...sub, location: loc };
+      }
+      return sub;
+    });
+
+    // Also update Master schedule
+    const nextMaster = scheduleItems.map((m) => {
+      if (m.dayNum !== item.dayNum) return m;
+      const match = isStation
+        ? m.desc.includes(searchKey) || m.title.includes(searchKey)
+        : m.title.trim() === searchKey || m.desc.trim() === searchKey;
+
+      if (match) {
+        if (item.gender === "male") {
+          return { ...m, locMale: loc };
+        } else {
+          return { ...m, locFemale: loc };
+        }
+      }
+      return m;
+    });
+
+    setSubgroupItems(nextSub);
+    setScheduleItems(nextMaster);
+    persistSubgroups(nextSub, `นำสถานที่ "${loc}" ไปใช้กับทุกกลุ่ม${item.gender === "male" ? "มุสลีมีน (ชาย)" : "มุสลีมะฮฺ (หญิง)"} (${count} จุด) เรียบร้อย!`);
+    persistSchedule(nextMaster);
+  };
+
+  // Quick sync from Master row locMale or locFemale to all subgroups of that gender
+  const handleQuickSyncMasterLocation = (item: MasterScheduleItem, gender: "male" | "female") => {
+    const loc = (gender === "male" ? item.locMale : item.locFemale || "").trim();
+    if (!loc) {
+      showToast(`กรุณากรอกสถานที่ฝ่าย${gender === "male" ? "ชาย" : "หญิง"}ก่อนกดซิงค์`);
+      return;
+    }
+
+    const isStation = item.desc.includes("ฐาน") || item.title.includes("ฐาน");
+    const searchKey = isStation ? item.desc.trim() : item.title.trim();
+
+    let count = 0;
+    const nextSub = subgroupItems.map((sub) => {
+      if (sub.dayNum !== item.dayNum || sub.gender !== gender) return sub;
+      const match = isStation
+        ? sub.desc.includes(searchKey) || searchKey.includes(sub.desc)
+        : sub.title.trim() === searchKey || sub.desc.trim() === searchKey;
+
+      if (match) {
+        count++;
+        return { ...sub, location: loc };
+      }
+      return sub;
+    });
+
+    setSubgroupItems(nextSub);
+    persistSubgroups(nextSub, `นำสถานที่ "${loc}" ไปใช้กับทุกกลุ่ม${gender === "male" ? "มุสลีมีน (กลุ่ม 1-6)" : "มุสลีมะฮฺ (กลุ่ม 1-8)"} (${count} จุด) เรียบร้อย!`);
+  };
+
+  // Batch sync a single station or activity with male and female locations
+  const handleApplySingleLocationSync = (
+    dayNum: number,
+    keyName: string,
+    maleLoc: string,
+    femaleLoc: string,
+    isStation: boolean
+  ) => {
+    let subCount = 0;
+    const nextSub = subgroupItems.map((sub) => {
+      if (sub.dayNum !== dayNum) return sub;
+      const match = isStation
+        ? sub.desc.trim() === keyName.trim() || sub.desc.includes(keyName.trim()) || keyName.trim().includes(sub.desc.trim())
+        : sub.title.trim() === keyName.trim() || sub.desc.trim() === keyName.trim();
+
+      if (!match) return sub;
+
+      subCount++;
+      if (sub.gender === "male" && maleLoc.trim()) {
+        return { ...sub, location: maleLoc.trim() };
+      } else if (sub.gender === "female" && femaleLoc.trim()) {
+        return { ...sub, location: femaleLoc.trim() };
+      }
+      return sub;
+    });
+
+    const nextMaster = scheduleItems.map((m) => {
+      if (m.dayNum !== dayNum) return m;
+      const match = isStation
+        ? m.desc.includes(keyName.trim()) || m.title.includes(keyName.trim())
+        : m.title.trim() === keyName.trim() || m.desc.trim() === keyName.trim();
+
+      if (!match) return m;
+
+      return {
+        ...m,
+        locMale: maleLoc.trim() ? maleLoc.trim() : m.locMale,
+        locFemale: femaleLoc.trim() ? femaleLoc.trim() : m.locFemale,
+      };
+    });
+
+    setSubgroupItems(nextSub);
+    setScheduleItems(nextMaster);
+    persistSubgroups(nextSub, `อัปเดตสถานที่ "${keyName}" ไปยัง ${subCount} จุด และกำหนดการหลักสำเร็จ!`);
+    persistSchedule(nextMaster);
+  };
+
+  // Batch sync multiple stations/activities for a given day in one operation
+  const handleBatchApplyLocationSync = (
+    dayNum: number,
+    updates: Array<{ keyName: string; maleLoc: string; femaleLoc: string; isStation: boolean }>
+  ) => {
+    let subCount = 0;
+    const nextSub = subgroupItems.map((sub) => {
+      if (sub.dayNum !== dayNum) return sub;
+      for (const u of updates) {
+        const match = u.isStation
+          ? sub.desc.trim() === u.keyName.trim() || sub.desc.includes(u.keyName.trim()) || u.keyName.trim().includes(sub.desc.trim())
+          : sub.title.trim() === u.keyName.trim() || sub.desc.trim() === u.keyName.trim();
+
+        if (match) {
+          subCount++;
+          if (sub.gender === "male" && u.maleLoc.trim()) {
+            return { ...sub, location: u.maleLoc.trim() };
+          } else if (sub.gender === "female" && u.femaleLoc.trim()) {
+            return { ...sub, location: u.femaleLoc.trim() };
+          }
+        }
+      }
+      return sub;
+    });
+
+    const nextMaster = scheduleItems.map((m) => {
+      if (m.dayNum !== dayNum) return m;
+      for (const u of updates) {
+        const match = u.isStation
+          ? m.desc.includes(u.keyName.trim()) || m.title.includes(u.keyName.trim())
+          : m.title.trim() === u.keyName.trim() || m.desc.trim() === u.keyName.trim();
+
+        if (match) {
+          return {
+            ...m,
+            locMale: u.maleLoc.trim() ? u.maleLoc.trim() : m.locMale,
+            locFemale: u.femaleLoc.trim() ? u.femaleLoc.trim() : m.locFemale,
+          };
+        }
+      }
+      return m;
+    });
+
+    setSubgroupItems(nextSub);
+    setScheduleItems(nextMaster);
+    persistSubgroups(nextSub, `บันทึกและกระจายสถานที่ทั้งหมดในวันที่ ${dayNum} สำเร็จ (${subCount} จุด)!`);
+    persistSchedule(nextMaster);
+    setIsLocationSyncOpen(false);
   };
 
   // ==============================================================
@@ -860,6 +1513,47 @@ export default function ScheduleAdminSection() {
         </div>
       )}
 
+      {/* Supabase Missing Table Warning Banner */}
+      {supabaseTableMissing && (
+        <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-fade-in">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-amber-900 font-extrabold text-sm flex items-center gap-1.5">
+                <span>⚠️</span>
+                <span>ยังไม่พบตาราง "camp_schedule" ใน Supabase</span>
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-bold">
+                สำคัญ
+              </span>
+            </div>
+            <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+              การแก้ไขในระบบตอนนี้ยังถูกบันทึกแค่ในเบราว์เซอร์เครื่องนี้ (หน้าเว็บจริง <strong>guidance.msspsuhatyai.org</strong> จึงยังไม่ได้รับข้อมูลที่แก้) 
+              กรุณากดปุ่มเพื่อคัดลอกคำสั่ง SQL แล้วนำไปวางใน <strong>Supabase SQL Editor</strong> เพื่อสร้างตารางและเปิดใช้งานการซิงก์ข้อมูลสดข้ามอุปกรณ์
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(SUPABASE_SCHEMA_SQL);
+                showToast("📋 คัดลอก SQL เรียบร้อย! นำไปวางใน Supabase SQL Editor แล้วกด Run ได้เลย");
+              }}
+              className="px-4 py-2.5 rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+            >
+              <span>📋</span>
+              <span>คัดลอก SQL สร้างตาราง</span>
+            </button>
+            <a
+              href="https://supabase.com/dashboard/project/tsedkchdkghlkywlzqle/editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-zinc-100 text-amber-900 border border-amber-300 text-xs font-bold transition-all"
+            >
+              เปิด Supabase ↗
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white rounded-2xl border border-zinc-200 shadow-xs">
         <div>
@@ -885,9 +1579,22 @@ export default function ScheduleAdminSection() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Smart Location Sync Center Button */}
+          <button
+            onClick={() => {
+              setSyncDayNum(selectedDayNum === 0 ? 2 : selectedDayNum);
+              setIsLocationSyncOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+            title="จัดการสถานที่ฐานและกิจกรรมรวม แก้จุดเดียวเปลี่ยนทุกกลุ่มย่อยและกำหนดการหลักอัตโนมัติ"
+          >
+            <span>🎯</span>
+            <span>จัดการสถานที่ฐาน & กิจกรรมรวม</span>
+          </button>
+
           <button
             onClick={handleOpenAdd}
-            className="px-4 py-2 rounded-xl bg-black hover:bg-zinc-800 text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-xl bg-black hover:bg-zinc-800 text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
             <span>+</span>
             <span>{isMasterMode ? "เพิ่มกิจกรรมหลักใหม่" : `เพิ่มกิจกรรม (${selectedGroup})`}</span>
@@ -1311,7 +2018,7 @@ export default function ScheduleAdminSection() {
                         </td>
 
                         {/* 4. Location Male (Editable in place) */}
-                        <td className="py-2.5 px-2 w-40">
+                        <td className="py-2.5 px-2 w-44">
                           <input
                             type="text"
                             value={item.locMale}
@@ -1323,10 +2030,20 @@ export default function ScheduleAdminSection() {
                             }`}
                             placeholder="สถานที่ฝ่ายชาย..."
                           />
+                          {item.locMale && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickSyncMasterLocation(item, "male")}
+                              className="mt-1 text-[9px] text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded px-1.5 py-0.5 inline-flex items-center gap-1 transition-all cursor-pointer shadow-2xs font-semibold"
+                              title="นำสถานที่นี้ไปอัปเดตทุกกลุ่มมุสลีมีน (กลุ่ม 1-6)"
+                            >
+                              <span>⚡ ใช้กับกลุ่มชาย 1-6</span>
+                            </button>
+                          )}
                         </td>
 
                         {/* 5. Location Female (Editable in place) */}
-                        <td className="py-2.5 px-2 w-40">
+                        <td className="py-2.5 px-2 w-44">
                           <input
                             type="text"
                             value={item.locFemale}
@@ -1338,6 +2055,16 @@ export default function ScheduleAdminSection() {
                             }`}
                             placeholder="สถานที่ฝ่ายหญิง..."
                           />
+                          {item.locFemale && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickSyncMasterLocation(item, "female")}
+                              className="mt-1 text-[9px] text-pink-700 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded px-1.5 py-0.5 inline-flex items-center gap-1 transition-all cursor-pointer shadow-2xs font-semibold"
+                              title="นำสถานที่นี้ไปอัปเดตทุกกลุ่มมุสลีมะฮฺ (กลุ่ม 1-8)"
+                            >
+                              <span>⚡ ใช้กับกลุ่มหญิง 1-8</span>
+                            </button>
+                          )}
                         </td>
 
                         {/* 6. Dept (Editable in place) */}
@@ -1556,7 +2283,7 @@ export default function ScheduleAdminSection() {
                         </td>
 
                         {/* 4. Location for Subgroup (Editable in place) */}
-                        <td className="py-2.5 px-2 w-44">
+                        <td className="py-2.5 px-2 w-48">
                           <input
                             type="text"
                             value={item.location}
@@ -1564,6 +2291,16 @@ export default function ScheduleAdminSection() {
                             className="text-xs text-black w-full bg-zinc-50/80 hover:bg-white focus:bg-white border border-zinc-300 focus:border-black rounded-lg px-2.5 py-1 outline-none transition-all"
                             placeholder="สถานที่ของกลุ่มนี้..."
                           />
+                          {item.location && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickSyncSubgroupLocation(item)}
+                              className="mt-1 text-[9px] text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded px-1.5 py-0.5 inline-flex items-center gap-1 transition-all cursor-pointer shadow-2xs font-semibold"
+                              title={`นำสถานที่ "${item.location}" ไปใช้กับทุกกลุ่ม${item.gender === 'male' ? 'มุสลีมีน (ชาย)' : 'มุสลีมะฮฺ (หญิง)'} ที่มีกิจกรรมนี้`}
+                            >
+                              <span>⚡ ใช้กับทุกกลุ่ม{item.gender === 'male' ? 'ชาย' : 'หญิง'}</span>
+                            </button>
+                          )}
                         </td>
 
                         {/* 5. Group Badge */}
@@ -1952,6 +2689,18 @@ export default function ScheduleAdminSection() {
           </div>
         </div>
       )}
+
+      {/* Smart Location & Station Sync Modal */}
+      <LocationSyncModal
+        isOpen={isLocationSyncOpen}
+        onClose={() => setIsLocationSyncOpen(false)}
+        dayNum={syncDayNum}
+        onDayChange={(d) => setSyncDayNum(d)}
+        scheduleItems={scheduleItems}
+        subgroupItems={subgroupItems}
+        onApplySingleSync={handleApplySingleLocationSync}
+        onBatchApplyAll={handleBatchApplyLocationSync}
+      />
 
     </div>
   );

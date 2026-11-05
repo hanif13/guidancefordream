@@ -158,14 +158,15 @@ export default function SchedulePage() {
 
       // 2. Try Supabase
       try {
-        const { data, error } = await supabase
+        // Fetch Master Schedule
+        const { data: masterData, error: masterError } = await supabase
           .from("camp_schedule")
           .select("*")
           .eq("schedule_type", "master")
           .order("sort_order", { ascending: true });
 
-        if (!error && data && data.length > 0) {
-          const mapped: MasterScheduleItem[] = data.map((d: any) => ({
+        if (!masterError && masterData && masterData.length > 0) {
+          const mapped: MasterScheduleItem[] = masterData.map((d: any) => ({
             id: d.id,
             dayNum: d.day_num,
             dateStr: d.date_str,
@@ -187,12 +188,60 @@ export default function SchedulePage() {
             localStorage.setItem("gfd_admin_master_schedule_v1", JSON.stringify(mapped));
           } catch (e) {}
         }
+
+        // Fetch Subgroup Schedule
+        const { data: subData, error: subError } = await supabase
+          .from("camp_schedule")
+          .select("*")
+          .eq("schedule_type", "subgroup")
+          .order("sort_order", { ascending: true });
+
+        if (!subError && subData && subData.length > 0) {
+          const mappedSub: CampScheduleItem[] = subData.map((d: any) => ({
+            dayNum: d.day_num,
+            dayLabel: d.date_str || `วันที่ ${d.day_num}`,
+            dateISO: d.date_iso || "",
+            gender: (d.gender as any) || "male",
+            group: d.target_group || "มุสลีมีน",
+            startTime: d.start_time || "08:00",
+            endTime: d.end_time || "09:00",
+            time: d.time || `${d.start_time} - ${d.end_time}`,
+            duration: d.duration || "60",
+            title: d.title || "",
+            desc: d.description || d.title || "",
+            location: d.location || (d.gender === "female" ? (d.loc_female || d.loc_male || "") : (d.loc_male || d.loc_female || "")) || "",
+            dept: d.dept || "",
+            note: d.note || "",
+            category: (d.category as any) || "activity",
+          }));
+          setSubgroupSchedule(mappedSub);
+          try {
+            localStorage.setItem("gfd_admin_subgroup_schedule_v1", JSON.stringify(mappedSub));
+          } catch (e) {}
+        }
       } catch (e) {
         // Fallback gracefully
       }
     };
 
     loadSchedule();
+
+    // Supabase Realtime channel for live instant schedule updates
+    let channel: any = null;
+    try {
+      channel = supabase
+        .channel("public:camp_schedule:live_site")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "camp_schedule" },
+          () => {
+            loadSchedule();
+          }
+        )
+        .subscribe();
+    } catch (e) {
+      console.warn("Could not subscribe to schedule realtime:", e);
+    }
 
     const handleStorageUpdate = () => {
       try {
@@ -219,6 +268,9 @@ export default function SchedulePage() {
     window.addEventListener("gfd_schedule_updated", handleStorageUpdate);
     window.addEventListener("storage", handleStorageUpdate);
     return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
       window.removeEventListener("gfd_schedule_updated", handleStorageUpdate);
       window.removeEventListener("storage", handleStorageUpdate);
     };

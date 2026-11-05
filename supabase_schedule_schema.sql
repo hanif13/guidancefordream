@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS public.camp_schedule (
   duration TEXT DEFAULT '',                           -- e.g. '120' (นาที)
   title TEXT NOT NULL,                                -- กิจกรรมหลัก
   description TEXT DEFAULT '',                        -- รายละเอียดเพิ่มเติม
+  location TEXT DEFAULT '',                           -- สถานที่ทั่วไป
   loc_male TEXT DEFAULT '',                           -- สถานที่มุสลีมีน
   loc_female TEXT DEFAULT '',                         -- สถานที่มุสลีมะฮฺ
   dept TEXT DEFAULT '',                               -- ฝ่ายที่รับผิดชอบ
