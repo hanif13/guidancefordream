@@ -1,59 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import Image from "next/image";
 
-const ENTRANCE_EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
-
-// วันค่าย: 6 พฤศจิกายน 2569 (พ.ศ.) = 6 Nov 2026 (ค.ศ.) เวลา 00:00 น.
-const DEADLINE = new Date("2026-11-06T00:00:00+07:00").getTime();
-
-interface TimeLeft {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
-
-function getTimeLeft(): TimeLeft {
-  const now = Date.now();
-  const diff = Math.max(0, DEADLINE - now);
-
-  return {
-    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((diff / (1000 * 60)) % 60),
-    seconds: Math.floor((diff / 1000) % 60),
-  };
-}
-
 export default function HeroSection() {
-  const [mounted, setMounted] = useState(false);
-  // Initialize with zeros to avoid hydration mismatch (Date.now() differs server vs client)
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-
-  useEffect(() => {
-    setMounted(true);
-    setTimeLeft(getTimeLeft());
-    const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   const scrollToSection = useCallback((id: string) => {
     const el = document.querySelector(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   }, []);
-
-  const isExpired = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
-
-  const countdownUnits = [
-    { value: timeLeft.days, label: "วัน" },
-    { value: timeLeft.hours, label: "ชั่วโมง" },
-    { value: timeLeft.minutes, label: "นาที" },
-    { value: timeLeft.seconds, label: "วินาที" },
-  ];
 
   return (
     <section
@@ -76,54 +30,32 @@ export default function HeroSection() {
       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/30 via-black/20 to-purple-deeper/70" />
 
       {/* Content — centered */}
-      <div className="relative z-10 text-center px-4 sm:px-8 max-w-3xl mx-auto">
+      <div className="relative z-10 text-center px-4 sm:px-8 max-w-5xl mx-auto -mt-4 sm:-mt-8">
         {/* Title */}
-        <h1 className="text-glow-white text-[2.75rem] xs:text-[3.25rem] sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-wider uppercase select-none leading-[1.1] sm:leading-tight mb-3 md:mb-5">
+        <h1 className="text-glow-white text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[5.5rem] font-black tracking-wider uppercase select-none leading-[1.08] sm:leading-tight mb-4 md:mb-6">
           Guidance For Dream
           <br />
-          <span className="text-pink-light">SS7</span>
+          <span className="text-pink-light tracking-widest inline-block mt-1 sm:mt-2">SS7</span>
         </h1>
 
-        {/* Camp Name */}
-        <p
-          className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-2 md:mb-3"
-          style={{
-            textShadow: "0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(35, 10, 60, 0.9)",
-          }}
-        >
-          ค่ายสานฝันเพื่อน้อง ปีที่ 7
-        </p>
-        <p
-          className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-2 md:mb-3"
-          style={{
-            textShadow: "0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(35, 10, 60, 0.9)",
-          }}
-        >
-          วันที่  6 - 9 พฤศจิกายน 2569
-        </p>
-
-        {/* Spacer */}
-        <div className="mb-8 md:mb-10" />
-
-        {/* Countdown Label */}
-        <p className="text-white/80 text-sm sm:text-base tracking-wide mb-4">
-          {isExpired ? "ถึงวันค่ายแล้ว!" : "นับถอยหลังวันค่าย"}
-        </p>
-
-        {/* Countdown Timer */}
-        <div className="flex items-center justify-center gap-3 sm:gap-5">
-          {countdownUnits.map((unit) => (
-            <div key={unit.label} className="flex flex-col items-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center rounded-2xl bg-white/15 border border-white/20 backdrop-blur-sm">
-                <span className="text-white text-2xl sm:text-3xl md:text-4xl font-bold tabular-nums drop-shadow-md">
-                  {String(unit.value).padStart(2, "0")}
-                </span>
-              </div>
-              <span className="text-white/60 text-xs sm:text-sm mt-2">
-                {unit.label}
-              </span>
-            </div>
-          ))}
+        {/* Camp Name & Dates */}
+        <div className="space-y-2 sm:space-y-3 mt-3 sm:mt-6">
+          <p
+            className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide"
+            style={{
+              textShadow: "0 2px 14px rgba(0, 0, 0, 0.85), 0 4px 24px rgba(35, 10, 60, 0.95)",
+            }}
+          >
+            ค่ายสานฝันเพื่อน้อง ปีที่ 7
+          </p>
+          <p
+            className="text-white/95 text-base sm:text-xl md:text-2xl lg:text-3xl font-medium tracking-wider"
+            style={{
+              textShadow: "0 2px 12px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(35, 10, 60, 0.9)",
+            }}
+          >
+            วันที่  6 - 9 พฤศจิกายน 2569
+          </p>
         </div>
       </div>
 
