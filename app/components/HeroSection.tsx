@@ -56,6 +56,14 @@ export default function HeroSection() {
           >
             วันที่  6 - 9 พฤศจิกายน 2569
           </p>
+          <p
+            className="text-white/95 text-base sm:text-xl md:text-2xl lg:text-3xl font-medium tracking-wider"
+            style={{
+              textShadow: "0 2px 12px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(35, 10, 60, 0.9)",
+            }}
+          >
+            ณ มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
+          </p>
         </div>
       </div>
 
