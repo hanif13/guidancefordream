@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase, uploadMedia } from "../lib/supabase";
@@ -79,6 +79,76 @@ interface AdminDocument {
   isActive: boolean;
 }
 
+function GallerySelectedPreviews({
+  files,
+  onRemove,
+  onClear,
+}: {
+  files: File[];
+  onRemove: (idx: number) => void;
+  onClear: () => void;
+}) {
+  const previews = useMemo(() => {
+    return files.map((file) => ({
+      file,
+      name: file.name,
+      size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+      url: URL.createObjectURL(file),
+    }));
+  }, [files]);
+
+  useEffect(() => {
+    return () => {
+      previews.forEach((p) => URL.revokeObjectURL(p.url));
+    };
+  }, [previews]);
+
+  return (
+    <div className="space-y-2 mt-2">
+      <div className="flex items-center justify-between text-xs font-bold text-zinc-700">
+        <span className="flex items-center gap-1.5 text-purple-700">
+          <span>📸</span>
+          <span>เลือกรูปภาพแล้ว {files.length} รูป</span>
+        </span>
+        <button
+          type="button"
+          onClick={onClear}
+          className="text-[11px] text-rose-600 hover:text-rose-700 font-semibold cursor-pointer"
+        >
+          ล้างทั้งหมด
+        </button>
+      </div>
+
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2 bg-zinc-50 rounded-xl border border-zinc-200">
+        {previews.map((p, idx) => (
+          <div
+            key={`${p.name}-${idx}`}
+            className="group relative aspect-square bg-zinc-100 rounded-lg overflow-hidden border border-zinc-200 shadow-2xs"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={p.url}
+              alt={p.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            />
+            <button
+              type="button"
+              onClick={() => onRemove(idx)}
+              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-rose-600 text-white flex items-center justify-center text-[10px] font-bold shadow-xs transition-colors cursor-pointer"
+              title="ลบรูปนี้"
+            >
+              ✕
+            </button>
+            <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-2xs p-1 text-[9px] text-white truncate text-center">
+              {p.size}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   // Auth State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -139,9 +209,16 @@ export default function AdminPage() {
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
 
-  // Gallery Modal State
+  // Gallery Modal State & Multi-Upload
   const [editingGallery, setEditingGallery] = useState<GalleryImage | null>(null);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
+  const [galleryUploadProgress, setGalleryUploadProgress] = useState<{
+    current: number;
+    total: number;
+    percent: number;
+  } | null>(null);
+  const [isDraggingGallery, setIsDraggingGallery] = useState(false);
 
   // Video Modal State
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
@@ -590,6 +667,154 @@ export default function AdminPage() {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // Gallery Multi-File Upload Handlers
+  const handleSelectGalleryFiles = (filesList: FileList | File[] | null) => {
+    if (!filesList) return;
+    const filesArray = Array.from(filesList);
+    const imageFiles = filesArray.filter((f) => f.type.startsWith("image/"));
+    if (imageFiles.length === 0) {
+      showToast("กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น (JPG, PNG, WEBP, GIF)");
+      return;
+    }
+    // Append to existing selected files (deduplicating by name & size)
+    setSelectedGalleryFiles((prev) => {
+      const existingKey = new Set(prev.map((f) => `${f.name}-${f.size}`));
+      const nonDuplicate = imageFiles.filter((f) => !existingKey.has(`${f.name}-${f.size}`));
+      return [...prev, ...nonDuplicate];
+    });
+  };
+
+  const handleRemoveGalleryFile = (index: number) => {
+    setSelectedGalleryFiles((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  const handleClearAllGalleryFiles = () => {
+    setSelectedGalleryFiles([]);
+  };
+
+  const handleSaveGallery = async () => {
+    if (!editingGallery) return;
+    if (!editingGallery.category) {
+      showToast("กรุณาเลือกหมวดหมู่สำหรับรูปภาพ");
+      return;
+    }
+
+    // Single Edit Mode (editing existing row)
+    if (editingGallery.id) {
+      if (!editingGallery.src.trim()) {
+        showToast("กรุณาอัปโหลดรูปภาพหรือระบุ URL รูปภาพ");
+        return;
+      }
+      const row = {
+        caption: editingGallery.caption.trim() || "ภาพกิจกรรม",
+        alt_text: editingGallery.caption.trim() || "ภาพกิจกรรม",
+        image_url: editingGallery.src.trim(),
+        category: editingGallery.category,
+        sort_order: editingGallery.order,
+        is_active: editingGallery.isActive,
+      };
+      const { error } = await supabase.from("gallery_images").update(row).eq("id", editingGallery.id);
+      if (error) {
+        showToast("บันทึกไม่สำเร็จ: " + error.message);
+        return;
+      }
+      await fetchData();
+      setIsGalleryModalOpen(false);
+      showToast("บันทึกการแก้ไขรูปภาพเรียบร้อยแล้ว ✅");
+      return;
+    }
+
+    // New Image Mode: Multi-file Upload
+    if (selectedGalleryFiles.length > 0) {
+      setIsUploading(true);
+      const totalFiles = selectedGalleryFiles.length;
+      setGalleryUploadProgress({ current: 0, total: totalFiles, percent: 0 });
+
+      const newRows: any[] = [];
+      const CONCURRENCY = 3;
+      let completedCount = 0;
+
+      for (let i = 0; i < selectedGalleryFiles.length; i += CONCURRENCY) {
+        const chunk = selectedGalleryFiles.slice(i, i + CONCURRENCY);
+        const chunkResults = await Promise.all(
+          chunk.map(async (file, chunkIndex) => {
+            const fileIdx = i + chunkIndex;
+            const res = await uploadMedia(file, "gallery");
+            completedCount++;
+            setGalleryUploadProgress({
+              current: completedCount,
+              total: totalFiles,
+              percent: Math.round((completedCount / totalFiles) * 100),
+            });
+            return { file, fileIdx, url: res?.url || null };
+          })
+        );
+
+        for (const res of chunkResults) {
+          if (res.url) {
+            const rawName = res.file.name.replace(/\.[^/.]+$/, "");
+            const baseCaption = editingGallery.caption.trim();
+            const caption = baseCaption
+              ? totalFiles > 1
+                ? `${baseCaption} (${res.fileIdx + 1})`
+                : baseCaption
+              : rawName || "ภาพกิจกรรม";
+
+            newRows.push({
+              caption: caption,
+              alt_text: caption,
+              image_url: res.url,
+              category: editingGallery.category,
+              sort_order: editingGallery.order + res.fileIdx,
+              is_active: true,
+            });
+          }
+        }
+      }
+
+      if (newRows.length > 0) {
+        const { error } = await supabase.from("gallery_images").insert(newRows);
+        if (error) {
+          showToast("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + error.message);
+          setIsUploading(false);
+          setGalleryUploadProgress(null);
+          return;
+        }
+      }
+
+      await fetchData();
+      setIsUploading(false);
+      setGalleryUploadProgress(null);
+      setSelectedGalleryFiles([]);
+      setIsGalleryModalOpen(false);
+      showToast(`อัปโหลดและบันทึกรูปภาพสำเร็จทั้งหมด ${newRows.length} รูป! 🎉`);
+      return;
+    }
+
+    // New Image Mode: Direct URL specified
+    if (editingGallery.src.trim()) {
+      const row = {
+        caption: editingGallery.caption.trim() || "ภาพกิจกรรม",
+        alt_text: editingGallery.caption.trim() || "ภาพกิจกรรม",
+        image_url: editingGallery.src.trim(),
+        category: editingGallery.category,
+        sort_order: editingGallery.order,
+        is_active: editingGallery.isActive,
+      };
+      const { error } = await supabase.from("gallery_images").insert([row]);
+      if (error) {
+        showToast("บันทึกไม่สำเร็จ: " + error.message);
+        return;
+      }
+      await fetchData();
+      setIsGalleryModalOpen(false);
+      showToast("บันทึกรูปภาพเรียบร้อยแล้ว ✅");
+      return;
+    }
+
+    showToast("กรุณาเลือกไฟล์รูปภาพอย่างน้อย 1 ไฟล์ หรือระบุ URL รูปภาพ");
   };
 
   // Gallery Category Management Handlers
@@ -1744,6 +1969,7 @@ export default function AdminPage() {
                         order: gallery.length + 1,
                         isActive: true,
                       });
+                      setSelectedGalleryFiles([]);
                       setIsGalleryModalOpen(true);
                     }}
                     className="px-4 py-2.5 bg-black hover:bg-zinc-800 text-white text-xs sm:text-sm font-bold rounded-xl flex items-center gap-2 shadow-sm cursor-pointer self-start sm:self-center transition-colors"
@@ -1751,7 +1977,7 @@ export default function AdminPage() {
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    <span>+ อัปโหลดรูปภาพใหม่</span>
+                    <span>+ อัปโหลดรูปภาพใหม่ (เลือกหลายรูปได้)</span>
                   </button>
                 </div>
 
@@ -1794,11 +2020,71 @@ export default function AdminPage() {
 
                   if (filteredList.length === 0) {
                     return (
-                      <div className="p-12 text-center text-zinc-500 bg-zinc-50 rounded-2xl border border-dashed border-zinc-300">
-                        <p className="text-sm font-medium">ยังไม่มีรูปภาพในหมวดหมู่นี้</p>
-                        <p className="text-xs text-zinc-400 mt-1">
-                          กดปุ่ม "+ อัปโหลดรูปภาพใหม่" ด้านบนเพื่อเริ่มเพิ่มรูปภาพในหมวดหมู่นี้
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDraggingGallery(true);
+                        }}
+                        onDragLeave={() => setIsDraggingGallery(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDraggingGallery(false);
+                          if (galleryCategories.length === 0) {
+                            showToast("กรุณาสร้างหมวดหมู่อย่างน้อย 1 หมวดหมู่ในขั้นตอนที่ 1 ก่อนอัปโหลดรูปภาพ");
+                            return;
+                          }
+                          const files = e.dataTransfer.files;
+                          if (files && files.length > 0) {
+                            const initialCat =
+                              galleryCategoryFilter !== "all" ? galleryCategoryFilter : galleryCategories[0];
+                            setEditingGallery({
+                              id: "",
+                              src: "",
+                              caption: "",
+                              category: initialCat,
+                              order: gallery.length + 1,
+                              isActive: true,
+                            });
+                            handleSelectGalleryFiles(files);
+                            setIsGalleryModalOpen(true);
+                          }
+                        }}
+                        onClick={() => {
+                          if (galleryCategories.length === 0) {
+                            showToast("กรุณาสร้างหมวดหมู่อย่างน้อย 1 หมวดหมู่ในขั้นตอนที่ 1 ก่อนอัปโหลดรูปภาพ");
+                            return;
+                          }
+                          const initialCat =
+                            galleryCategoryFilter !== "all" ? galleryCategoryFilter : galleryCategories[0];
+                          setEditingGallery({
+                            id: "",
+                            src: "",
+                            caption: "",
+                            category: initialCat,
+                            order: gallery.length + 1,
+                            isActive: true,
+                          });
+                          setSelectedGalleryFiles([]);
+                          setIsGalleryModalOpen(true);
+                        }}
+                        className={`p-10 text-center rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
+                          isDraggingGallery
+                            ? "bg-purple-50 border-purple-500 scale-[1.01]"
+                            : "bg-zinc-50 hover:bg-zinc-100/80 border-zinc-300"
+                        }`}
+                      >
+                        <div className="w-12 h-12 rounded-2xl bg-white border border-zinc-200 text-purple-600 flex items-center justify-center mx-auto mb-3 shadow-xs text-xl">
+                          📸
+                        </div>
+                        <p className="text-sm font-bold text-zinc-800">
+                          ยังไม่มีรูปภาพในหมวดหมู่นี้
                         </p>
+                        <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
+                          คลิกที่นี่ หรือ <span className="font-bold text-purple-600">ลากไฟล์รูปภาพหลายๆ ไฟล์มาวางลงตรงนี้</span> เพื่ออัปโหลดเข้าหมวดหมู่นี้พร้อมกันทันที
+                        </p>
+                        <div className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-black text-white text-xs font-bold shadow-xs">
+                          <span>+ เลือกไฟล์รูปภาพ (หลายรูป)</span>
+                        </div>
                       </div>
                     );
                   }
@@ -2712,10 +2998,12 @@ export default function AdminPage() {
           <div className="bg-white border border-zinc-300 text-zinc-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div>
               <h3 className="text-lg font-bold text-black">
-                {editingGallery.id ? "แก้ไขรูปภาพประมวลความทรงจำ" : "อัปโหลดรูปภาพประมวลความทรงจำใหม่"}
+                {editingGallery.id
+                  ? "แก้ไขรูปภาพประมวลความทรงจำ"
+                  : "อัปโหลดรูปภาพประมวลความทรงจำใหม่ (เลือกหลายรูปได้)"}
               </h3>
               <p className="text-xs text-zinc-500 mt-0.5">
-                เลือกหมวดหมู่ที่ได้สร้างไว้ล่วงหน้า และอัปโหลดไฟล์รูปภาพเข้าสู่ระบบ
+                เลือกหมวดหมู่ที่ต้องการ จากนั้นเลือกรูปภาพ 1 รูป หรือหลายๆ รูปพร้อมกันเข้าสู่ระบบ
               </p>
             </div>
             
@@ -2749,125 +3037,256 @@ export default function AdminPage() {
 
               {/* 2. Caption */}
               <div>
-                <label className="block text-xs font-bold text-zinc-700 mb-1">คำบรรยายภาพ / ชื่อกิจกรรม (Caption)</label>
+                <label className="block text-xs font-bold text-zinc-700 mb-1">
+                  คำบรรยายภาพ / ชื่อกิจกรรม (Caption)
+                </label>
                 <input
                   type="text"
                   value={editingGallery.caption}
                   onChange={(e) => setEditingGallery({ ...editingGallery, caption: e.target.value })}
-                  placeholder="เช่น บรรยากาศกิจกรรมช่วงเช้า, รอยยิ้มน้องๆ ในฐานกิจกรรม"
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-300 text-black focus:bg-white focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600"
+                  placeholder={
+                    editingGallery.id
+                      ? "เช่น บรรยากาศกิจกรรมช่วงเช้า"
+                      : "เช่น บรรยากาศกิจกรรมช่วงเช้า (หากอัปโหลดหลายรูป จะใช้คำบรรยายนี้ หรือเว้นว่างเพื่อใช้ชื่อไฟล์อัตโนมัติ)"
+                  }
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-300 text-black focus:bg-white focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 text-xs"
                 />
-              </div>
-
-              {/* 3. Photo Upload & URL */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-zinc-700">
-                    อัปโหลดรูปภาพ <span className="text-red-500">*</span>
-                  </label>
-                  {isUploading && (
-                    <span className="text-[11px] text-purple-600 font-medium animate-pulse flex items-center gap-1">
-                      กำลังอัปโหลด...
-                    </span>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileUpload(e, "gallery", (url) => setEditingGallery({ ...editingGallery, src: url }))}
-                  className="w-full text-xs text-zinc-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer"
-                />
-
-                <div className="mt-2">
-                  <label className="block text-[11px] text-zinc-500 mb-1">หรือระบุลิงก์รูปภาพโดยตรง (Image URL):</label>
-                  <input
-                    type="text"
-                    value={editingGallery.src}
-                    onChange={(e) => setEditingGallery({ ...editingGallery, src: e.target.value })}
-                    placeholder="https://... หรือ /images/..."
-                    className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs text-zinc-800 focus:bg-white focus:outline-none focus:border-purple-500"
-                  />
-                </div>
-
-                {editingGallery.src && (
-                  <div className="mt-2.5 flex items-center gap-3 p-2 bg-zinc-50 rounded-xl border border-zinc-200">
-                    <div className="w-16 h-12 relative rounded-lg overflow-hidden border border-zinc-300 flex-shrink-0">
-                      <Image src={editingGallery.src} alt="Preview" fill className="object-cover" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="text-[11px] text-emerald-600 font-semibold block">รูปภาพพร้อมบันทึก</span>
-                      <span className="text-[10px] text-zinc-500 font-mono truncate block max-w-xs">{editingGallery.src}</span>
-                    </div>
-                  </div>
+                {!editingGallery.id && (
+                  <p className="text-[11px] text-zinc-400 mt-1">
+                    💡 หากอัปโหลดหลายรูปและระบุคำบรรยายไว้ ระบบจะต่อท้ายด้วยลำดับ เช่น (1), (2) ... ให้อัตโนมัติ หรือถ้าเว้นว่างจะใช้ชื่อไฟล์รูปภาพ
+                  </p>
                 )}
               </div>
 
+              {/* 3. Photo Upload (Single Edit vs Multi-File New) */}
+              {editingGallery.id ? (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-zinc-700">
+                      เปลี่ยนรูปภาพ <span className="text-red-500">*</span>
+                    </label>
+                    {isUploading && (
+                      <span className="text-[11px] text-purple-600 font-medium animate-pulse flex items-center gap-1">
+                        กำลังอัปโหลด...
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, "gallery", (url) => setEditingGallery({ ...editingGallery, src: url }))}
+                    className="w-full text-xs text-zinc-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer"
+                  />
+
+                  <div className="mt-2">
+                    <label className="block text-[11px] text-zinc-500 mb-1">หรือระบุลิงก์รูปภาพโดยตรง (Image URL):</label>
+                    <input
+                      type="text"
+                      value={editingGallery.src}
+                      onChange={(e) => setEditingGallery({ ...editingGallery, src: e.target.value })}
+                      placeholder="https://... หรือ /images/..."
+                      className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs text-zinc-800 focus:bg-white focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+
+                  {editingGallery.src && (
+                    <div className="mt-2.5 flex items-center gap-3 p-2 bg-zinc-50 rounded-xl border border-zinc-200">
+                      <div className="w-16 h-12 relative rounded-lg overflow-hidden border border-zinc-300 flex-shrink-0">
+                        <Image src={editingGallery.src} alt="Preview" fill className="object-cover" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[11px] text-emerald-600 font-semibold block">รูปภาพพร้อมบันทึก</span>
+                        <span className="text-[10px] text-zinc-500 font-mono truncate block max-w-xs">{editingGallery.src}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Multi-File Upload Mode for New Images */
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-zinc-700">
+                      เลือกไฟล์รูปภาพ <span className="text-red-500">* (เลือกได้หลายรูป)</span>
+                    </label>
+                    {selectedGalleryFiles.length > 0 && (
+                      <span className="text-[11px] text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                        {selectedGalleryFiles.length} รูปพร้อมอัปโหลด
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Drag & Drop Zone */}
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDraggingGallery(true);
+                    }}
+                    onDragLeave={() => setIsDraggingGallery(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDraggingGallery(false);
+                      handleSelectGalleryFiles(e.dataTransfer.files);
+                    }}
+                    className={`p-5 rounded-2xl border-2 border-dashed transition-all text-center ${
+                      isDraggingGallery
+                        ? "border-purple-600 bg-purple-50 scale-[1.01]"
+                        : "border-zinc-300 bg-zinc-50/70 hover:bg-zinc-100/70"
+                    }`}
+                  >
+                    <input
+                      id="modal-bulk-gallery-input"
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => {
+                        handleSelectGalleryFiles(e.target.files);
+                        e.target.value = "";
+                      }}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="modal-bulk-gallery-input"
+                      className="cursor-pointer flex flex-col items-center justify-center gap-2"
+                    >
+                      <div className="w-11 h-11 rounded-2xl bg-white border border-zinc-200 text-purple-600 flex items-center justify-center shadow-2xs text-xl">
+                        📁
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-zinc-800">
+                          คลิกเพื่อเลือกไฟล์ หรือลากรูปภาพมาวางที่นี่
+                        </p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5">
+                          รองรับ JPG, PNG, WEBP, GIF (สามารถเลือกหลายๆ รูปพร้อมกันได้)
+                        </p>
+                      </div>
+                      <span className="mt-1 px-3.5 py-1.5 rounded-xl bg-black hover:bg-zinc-800 text-white text-xs font-bold shadow-xs">
+                        + เลือกไฟล์รูปภาพจากเครื่อง
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Selected Previews Grid */}
+                  {selectedGalleryFiles.length > 0 && (
+                    <GallerySelectedPreviews
+                      files={selectedGalleryFiles}
+                      onRemove={handleRemoveGalleryFile}
+                      onClear={handleClearAllGalleryFiles}
+                    />
+                  )}
+
+                  {/* Fallback Single Image URL option */}
+                  <details className="text-xs text-zinc-600 pt-1 cursor-pointer">
+                    <summary className="font-semibold text-zinc-500 hover:text-black">
+                      หรือต้องการระบุลิงก์รูปภาพภายนอกโดยตรง (Image URL) คลิกที่นี่
+                    </summary>
+                    <div className="mt-2 space-y-2 pl-2 border-l-2 border-purple-200">
+                      <input
+                        type="text"
+                        value={editingGallery.src}
+                        onChange={(e) => setEditingGallery({ ...editingGallery, src: e.target.value })}
+                        placeholder="https://... หรือ /images/..."
+                        className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs text-zinc-800 focus:bg-white focus:outline-none focus:border-purple-500"
+                      />
+                      {editingGallery.src && (
+                        <div className="flex items-center gap-3 p-2 bg-zinc-50 rounded-xl border border-zinc-200">
+                          <div className="w-16 h-12 relative rounded-lg overflow-hidden border border-zinc-300 flex-shrink-0">
+                            <Image src={editingGallery.src} alt="Preview" fill className="object-cover" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[11px] text-emerald-600 font-semibold block">รูปภาพพร้อมบันทึก</span>
+                            <span className="text-[10px] text-zinc-500 font-mono truncate block max-w-xs">{editingGallery.src}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                </div>
+              )}
+
               {/* 4. Sort Order */}
               <div>
-                <label className="block text-xs font-bold text-zinc-700 mb-1">ลำดับการแสดงผล (Sort Order)</label>
-                <input
-                  type="number"
-                  value={editingGallery.order}
-                  onChange={(e) => setEditingGallery({ ...editingGallery, order: parseInt(e.target.value) || 0 })}
-                  className="w-24 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-300 text-black text-xs focus:bg-white focus:outline-none focus:border-purple-600"
-                />
+                <label className="block text-xs font-bold text-zinc-700 mb-1">
+                  ลำดับการแสดงผลเริ่มต้น (Sort Order)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={editingGallery.order}
+                    onChange={(e) => setEditingGallery({ ...editingGallery, order: parseInt(e.target.value) || 0 })}
+                    className="w-24 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-300 text-black text-xs focus:bg-white focus:outline-none focus:border-purple-600"
+                  />
+                  {!editingGallery.id && selectedGalleryFiles.length > 1 && (
+                    <span className="text-[11px] text-zinc-500">
+                      (รูปภาพจะรันลำดับต่อเนื่อง {editingGallery.order} ถึง {editingGallery.order + selectedGalleryFiles.length - 1})
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Upload Progress Bar */}
+            {isUploading && galleryUploadProgress && (
+              <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-purple-900">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
+                    กำลังอัปโหลดรูปภาพ ({galleryUploadProgress.current}/{galleryUploadProgress.total} รูป)...
+                  </span>
+                  <span>{galleryUploadProgress.percent}%</span>
+                </div>
+                <div className="w-full h-2 bg-purple-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-300"
+                    style={{ width: `${galleryUploadProgress.percent}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-purple-700 text-center">
+                  กำลังประมวลผลและจัดเก็บบนคลาวด์ความเร็วสูง กรุณาอย่าเพิ่งปิดหน้าต่างนี้
+                </p>
+              </div>
+            )}
 
             <div className="flex justify-end gap-3 pt-3 border-t border-zinc-200">
               <button
                 type="button"
-                onClick={() => setIsGalleryModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium cursor-pointer transition-colors"
+                disabled={isUploading}
+                onClick={() => {
+                  setSelectedGalleryFiles([]);
+                  setGalleryUploadProgress(null);
+                  setIsGalleryModalOpen(false);
+                }}
+                className="px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium cursor-pointer transition-colors disabled:opacity-50"
               >
                 ยกเลิก
               </button>
               <button
                 type="button"
-                disabled={isUploading || galleryCategories.length === 0}
-                onClick={async () => {
-                  if (!editingGallery.category) {
-                    showToast("กรุณาเลือกหมวดหมู่สำหรับรูปภาพ");
-                    return;
-                  }
-                  if (!editingGallery.src.trim()) {
-                    showToast("กรุณาอัปโหลดรูปภาพหรือระบุ URL รูปภาพ");
-                    return;
-                  }
-
-                  const row = {
-                    caption: editingGallery.caption || "ภาพกิจกรรม",
-                    alt_text: editingGallery.caption || "ภาพกิจกรรม",
-                    image_url: editingGallery.src.trim(),
-                    category: editingGallery.category,
-                    sort_order: editingGallery.order,
-                    is_active: editingGallery.isActive,
-                  };
-
-                  if (editingGallery.id) {
-                    const { error } = await supabase.from("gallery_images").update(row).eq("id", editingGallery.id);
-                    if (error) {
-                      showToast("บันทึกไม่สำเร็จ: " + error.message);
-                      return;
-                    }
-                  } else {
-                    const { error } = await supabase.from("gallery_images").insert([row]);
-                    if (error) {
-                      showToast("บันทึกไม่สำเร็จ: " + error.message);
-                      return;
-                    }
-                  }
-
-                  await fetchData();
-                  setIsGalleryModalOpen(false);
-                  showToast("บันทึกรูปภาพเรียบร้อยแล้ว");
-                }}
-                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-2 transition-colors"
+                disabled={
+                  isUploading ||
+                  galleryCategories.length === 0 ||
+                  (!editingGallery.id && selectedGalleryFiles.length === 0 && !editingGallery.src.trim()) ||
+                  (Boolean(editingGallery.id) && !editingGallery.src.trim())
+                }
+                onClick={handleSaveGallery}
+                className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-2 transition-colors"
               >
                 {isUploading ? (
-                  <span>กำลังอัปโหลดรูป...</span>
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>
+                      {galleryUploadProgress
+                        ? `กำลังอัปโหลด (${galleryUploadProgress.current}/${galleryUploadProgress.total})...`
+                        : "กำลังบันทึก..."}
+                    </span>
+                  </>
                 ) : (
-                  <span>บันทึกรูปภาพ</span>
+                  <span>
+                    {editingGallery.id
+                      ? "บันทึกการแก้ไข"
+                      : selectedGalleryFiles.length > 1
+                      ? `บันทึกและอัปโหลด (${selectedGalleryFiles.length} รูป)`
+                      : "บันทึกรูปภาพ"}
+                  </span>
                 )}
               </button>
             </div>

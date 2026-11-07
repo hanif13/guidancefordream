@@ -58,6 +58,7 @@ export interface DisplayScheduleItem {
   dept?: string;
   note?: string;
   group?: string;
+  gender?: "both" | "male" | "female";
 }
 
 function mapMasterItemToDisplay(
@@ -93,6 +94,7 @@ function mapMasterItemToDisplay(
     dept: it.dept,
     note: it.note,
     group: "main",
+    gender: it.gender || "both",
   };
 }
 
@@ -182,6 +184,7 @@ export default function SchedulePage() {
             dept: d.dept || "",
             note: d.note || "",
             category: d.category || "activity",
+            gender: d.gender || "both",
           }));
           setMasterSchedule(mapped);
           try {
@@ -320,6 +323,10 @@ export default function SchedulePage() {
       // Use Master Camp Schedule (กำหนดการหลักภาพรวม)
       const baseMaster = masterSchedule.filter((it) => {
         if (selectedDayNum !== 0 && it.dayNum !== selectedDayNum) return false;
+        // Filter by gender: if male selected, include 'both' and 'male'; if female selected, include 'both' and 'female'
+        const itGender = it.gender || "both";
+        if (selectedGender === "male" && itGender === "female") return false;
+        if (selectedGender === "female" && itGender === "male") return false;
         return true;
       });
       list = baseMaster.map((it) => mapMasterItemToDisplay(it, selectedGender));
@@ -718,6 +725,7 @@ export default function SchedulePage() {
                         key={`${item.dayNum}-${item.time}-${idx}`}
                         item={item}
                         status={getItemLiveStatus(item)}
+                        selectedGender={selectedGender}
                       />
                     ))}
                   </div>
@@ -738,6 +746,7 @@ export default function SchedulePage() {
                   item={item}
                   ref={getItemLiveStatus(item) === "current" ? currentItemRef : undefined}
                   status={getItemLiveStatus(item)}
+                  selectedGender={selectedGender}
                 />
               ))}
             </div>
@@ -796,12 +805,14 @@ function ScheduleColumnHeaders() {
 interface RowProps {
   item: DisplayScheduleItem;
   status: "current" | "past" | "upcoming";
+  selectedGender?: "all" | "male" | "female";
   ref?: React.Ref<HTMLDivElement>;
 }
 
 function ScheduleItemRow({
   item,
   status,
+  selectedGender = "all",
   ref,
 }: RowProps) {
   const isCurrent = status === "current";
@@ -856,6 +867,22 @@ function ScheduleItemRow({
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] sm:text-[10px] font-bold shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               <span>กำลังดำเนินอยู่ ณ เวลานี้</span>
+            </div>
+          )}
+
+          {/* Gender Badge if view is 'all' and item is gender-specific */}
+          {selectedGender === "all" && item.gender && item.gender !== "both" && (
+            <div className="inline-flex items-center gap-1">
+              {item.gender === "male" && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
+                  👦 เฉพาะมุสลีมีน (ชาย)
+                </span>
+              )}
+              {item.gender === "female" && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-pink-100 text-pink-900 border border-pink-200">
+                  🧕 เฉพาะมุสลีมะฮฺ (หญิง)
+                </span>
+              )}
             </div>
           )}
 

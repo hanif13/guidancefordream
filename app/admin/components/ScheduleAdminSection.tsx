@@ -567,7 +567,7 @@ export default function ScheduleAdminSection() {
   const [formLocFemale, setFormLocFemale] = useState("");
   const [formLocation, setFormLocation] = useState("");
   const [formGroup, setFormGroup] = useState("");
-  const [formGender, setFormGender] = useState<"male" | "female">("male");
+  const [formGender, setFormGender] = useState<"both" | "male" | "female">("both");
   const [formDept, setFormDept] = useState("");
   const [formNote, setFormNote] = useState("");
   const [formCategory, setFormCategory] = useState<ScheduleCategory>("activity");
@@ -636,6 +636,7 @@ export default function ScheduleAdminSection() {
             dept: d.dept || "",
             note: d.note || "",
             category: d.category || "activity",
+            gender: d.gender || "both",
           }));
           setScheduleItems(mapped);
           masterLoaded = true;
@@ -1098,6 +1099,11 @@ export default function ScheduleAdminSection() {
       if (selectedDayNum !== 0 && item.dayNum !== selectedDayNum) return false;
       if (selectedCategory !== "all" && item.category !== selectedCategory) return false;
 
+      // Filter by Gender: if male, show 'both' and 'male'; if female, show 'both' and 'female'
+      const itemGender = item.gender || "both";
+      if (selectedGender === "male" && itemGender === "female") return false;
+      if (selectedGender === "female" && itemGender === "male") return false;
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const combined = `${item.title} ${item.desc} ${item.locMale} ${item.locFemale} ${item.note} ${item.dept}`.toLowerCase();
@@ -1105,7 +1111,7 @@ export default function ScheduleAdminSection() {
       }
       return true;
     });
-  }, [scheduleItems, selectedDayNum, selectedCategory, searchQuery]);
+  }, [scheduleItems, selectedDayNum, selectedGender, selectedCategory, searchQuery]);
 
   // Filtered Subgroup Items
   const filteredSubgroupList = useMemo(() => {
@@ -1159,7 +1165,11 @@ export default function ScheduleAdminSection() {
     setFormLocFemale("");
     setFormLocation("");
     setFormGroup(selectedGroup !== "main" ? selectedGroup : "มุสลีมีน กลุ่ม 1");
-    setFormGender(selectedGroup.includes("มุสลีมะฮฺ") ? "female" : "male");
+    setFormGender(
+      selectedGroup !== "main"
+        ? (selectedGroup.includes("มุสลีมะฮฺ") ? "female" : "male")
+        : (selectedGender === "female" ? "female" : selectedGender === "male" ? "male" : "both")
+    );
     setFormDept("");
     setFormNote("");
     setFormCategory("activity");
@@ -1215,6 +1225,7 @@ export default function ScheduleAdminSection() {
         dept: formDept.trim(),
         note: formNote.trim(),
         category: formCategory,
+        gender: isMasterMode ? formGender : (formGender === "female" ? "female" : "male"),
       };
 
       const next = [...scheduleItems];
@@ -1233,7 +1244,11 @@ export default function ScheduleAdminSection() {
       persistSchedule(next, "เพิ่มกิจกรรมกำหนดการหลักเรียบร้อยแล้ว");
     } else {
       const targetGrp = formGroup || selectedGroup;
-      const targetGndr = targetGrp.includes("มุสลีมะฮฺ") ? "female" : formGender;
+      const targetGndr: "male" | "female" = targetGrp.includes("มุสลีมะฮฺ")
+        ? "female"
+        : formGender === "female"
+        ? "female"
+        : "male";
 
       const newItem: EditableSubgroupItem = {
         id: `sub-d${formDayNum}-${targetGrp.replace(/\s+/g, "_")}-${Date.now()}`,
@@ -1315,6 +1330,7 @@ export default function ScheduleAdminSection() {
       dept: item.dept || "",
       note: "",
       category: item.category || "activity",
+      gender: item.gender || "both",
     };
 
     const globalIdx = scheduleItems.findIndex((it) => it.id === item.id);
@@ -1597,7 +1613,15 @@ export default function ScheduleAdminSection() {
             className="px-3.5 py-2 rounded-xl bg-black hover:bg-zinc-800 text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
             <span>+</span>
-            <span>{isMasterMode ? "เพิ่มกิจกรรมหลักใหม่" : `เพิ่มกิจกรรม (${selectedGroup})`}</span>
+            <span>
+              {isMasterMode
+                ? selectedGender === "male"
+                  ? "เพิ่มกิจกรรม (มุสลีมีน)"
+                  : selectedGender === "female"
+                  ? "เพิ่มกิจกรรม (มุสลีมะฮฺ)"
+                  : "เพิ่มกิจกรรมหลักใหม่"
+                : `เพิ่มกิจกรรม (${selectedGroup})`}
+            </span>
           </button>
 
           <button
@@ -1876,7 +1900,11 @@ export default function ScheduleAdminSection() {
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
             <span className="text-xs font-extrabold text-black">
               {isMasterMode
-                ? `ตารางกำหนดการหลักภาพรวม (${filteredMasterList.length} รายการ)`
+                ? selectedGender === "male"
+                  ? `ตารางกำหนดการหลัก: ฝ่ายมุสลีมีน (ชาย) (${filteredMasterList.length} รายการ)`
+                  : selectedGender === "female"
+                  ? `ตารางกำหนดการหลัก: ฝ่ายมุสลีมะฮฺ (หญิง) (${filteredMasterList.length} รายการ)`
+                  : `ตารางกำหนดการหลักภาพรวม (ทุกฝ่าย) (${filteredMasterList.length} รายการ)`
                 : `ตารางหมุนเวียนกลุ่ม: ${selectedGroup} (${filteredSubgroupList.length} รายการ)`}
             </span>
           </div>
@@ -1920,13 +1948,18 @@ export default function ScheduleAdminSection() {
                   <tr className="bg-zinc-100 text-zinc-700 border-b border-zinc-200 uppercase tracking-wider font-extrabold">
                     <th className="py-3 px-2 text-center w-20">วัน</th>
                     <th className="py-3 px-2 text-center w-36">เวลา (เริ่ม - จบ)</th>
-                    <th className="py-3 px-3 min-w-[260px]">กิจกรรมหลัก / รายละเอียด</th>
-                    <th className={`py-3 px-2 w-40 ${selectedGender === "male" ? "text-purple-900 font-black" : ""}`}>
-                      สถานที่ มุสลีมีน (ชาย)
-                    </th>
-                    <th className={`py-3 px-2 w-40 ${selectedGender === "female" ? "text-pink-900 font-black" : ""}`}>
-                      สถานที่ มุสลีมะฮฺ (หญิง)
-                    </th>
+                    <th className="py-3 px-3 min-w-[240px]">กิจกรรมหลัก / รายละเอียด</th>
+                    <th className="py-3 px-2 text-center w-28">ฝ่าย / เพศ</th>
+                    {selectedGender !== "female" && (
+                      <th className={`py-3 px-2 w-40 ${selectedGender === "male" ? "text-purple-900 font-black bg-purple-50/50" : ""}`}>
+                        สถานที่ มุสลีมีน (ชาย)
+                      </th>
+                    )}
+                    {selectedGender !== "male" && (
+                      <th className={`py-3 px-2 w-40 ${selectedGender === "female" ? "text-pink-900 font-black bg-pink-50/50" : ""}`}>
+                        สถานที่ มุสลีมะฮฺ (หญิง)
+                      </th>
+                    )}
                     <th className="py-3 px-2 w-36">ฝ่ายรับผิดชอบ</th>
                     <th className="py-3 px-2 w-40">หมายเหตุ</th>
                     <th className="py-3 px-2 text-center w-28">หมวดหมู่</th>
@@ -2000,7 +2033,7 @@ export default function ScheduleAdminSection() {
                         </td>
 
                         {/* 3. Title & Desc (Editable in place - Swapped to match front-end web layout) */}
-                        <td className="py-2.5 px-3 min-w-[260px]">
+                        <td className="py-2.5 px-3 min-w-[240px]">
                           <input
                             type="text"
                             value={item.desc}
@@ -2017,55 +2050,79 @@ export default function ScheduleAdminSection() {
                           />
                         </td>
 
-                        {/* 4. Location Male (Editable in place) */}
-                        <td className="py-2.5 px-2 w-44">
-                          <input
-                            type="text"
-                            value={item.locMale}
-                            onChange={(e) => handleUpdateMasterField(item.id, "locMale", e.target.value)}
-                            className={`text-xs text-black w-full bg-zinc-50/80 hover:bg-white focus:bg-white border rounded-lg px-2.5 py-1 outline-none transition-all ${
-                              selectedGender === "male"
-                                ? "border-purple-600 focus:ring-1 focus:ring-purple-600 font-bold bg-purple-50/40"
-                                : "border-zinc-300 focus:border-black"
+                        {/* Gender Selector: both / male / female */}
+                        <td className="py-2.5 px-2 text-center whitespace-nowrap w-28">
+                          <select
+                            value={item.gender || "both"}
+                            onChange={(e) => handleUpdateMasterField(item.id, "gender", e.target.value as "both" | "male" | "female")}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border cursor-pointer outline-none transition-all ${
+                              item.gender === "male"
+                                ? "bg-purple-50 text-purple-800 border-purple-300"
+                                : item.gender === "female"
+                                ? "bg-pink-50 text-pink-800 border-pink-300"
+                                : "bg-zinc-100 text-zinc-700 border-zinc-300"
                             }`}
-                            placeholder="สถานที่ฝ่ายชาย..."
-                          />
-                          {item.locMale && (
-                            <button
-                              type="button"
-                              onClick={() => handleQuickSyncMasterLocation(item, "male")}
-                              className="mt-1 text-[9px] text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded px-1.5 py-0.5 inline-flex items-center gap-1 transition-all cursor-pointer shadow-2xs font-semibold"
-                              title="นำสถานที่นี้ไปอัปเดตทุกกลุ่มมุสลีมีน (กลุ่ม 1-6)"
-                            >
-                              <span>⚡ ใช้กับกลุ่มชาย 1-6</span>
-                            </button>
-                          )}
+                            title="เลือกฝ่ายที่ทำกิจกรรมนี้ (ร่วมกัน / เฉพาะชาย / เฉพาะหญิง)"
+                          >
+                            <option value="both">👦🧕 ทั้งสองฝ่าย</option>
+                            <option value="male">👦 มุสลีมีน</option>
+                            <option value="female">🧕 มุสลีมะฮฺ</option>
+                          </select>
                         </td>
 
+                        {/* 4. Location Male (Editable in place) */}
+                        {selectedGender !== "female" && (
+                          <td className="py-2.5 px-2 w-44">
+                            <input
+                              type="text"
+                              value={item.locMale}
+                              onChange={(e) => handleUpdateMasterField(item.id, "locMale", e.target.value)}
+                              className={`text-xs text-black w-full bg-zinc-50/80 hover:bg-white focus:bg-white border rounded-lg px-2.5 py-1 outline-none transition-all ${
+                                selectedGender === "male"
+                                  ? "border-purple-600 focus:ring-1 focus:ring-purple-600 font-bold bg-purple-50/40"
+                                  : "border-zinc-300 focus:border-black"
+                              }`}
+                              placeholder="สถานที่ฝ่ายชาย..."
+                            />
+                            {item.locMale && (
+                              <button
+                                type="button"
+                                onClick={() => handleQuickSyncMasterLocation(item, "male")}
+                                className="mt-1 text-[9px] text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded px-1.5 py-0.5 inline-flex items-center gap-1 transition-all cursor-pointer shadow-2xs font-semibold"
+                                title="นำสถานที่นี้ไปอัปเดตทุกกลุ่มมุสลีมีน (กลุ่ม 1-6)"
+                              >
+                                <span>⚡ ใช้กับกลุ่มชาย 1-6</span>
+                              </button>
+                            )}
+                          </td>
+                        )}
+
                         {/* 5. Location Female (Editable in place) */}
-                        <td className="py-2.5 px-2 w-44">
-                          <input
-                            type="text"
-                            value={item.locFemale}
-                            onChange={(e) => handleUpdateMasterField(item.id, "locFemale", e.target.value)}
-                            className={`text-xs text-black w-full bg-zinc-50/80 hover:bg-white focus:bg-white border rounded-lg px-2.5 py-1 outline-none transition-all ${
-                              selectedGender === "female"
-                                ? "border-pink-600 focus:ring-1 focus:ring-pink-600 font-bold bg-pink-50/40"
-                                : "border-zinc-300 focus:border-black"
-                            }`}
-                            placeholder="สถานที่ฝ่ายหญิง..."
-                          />
-                          {item.locFemale && (
-                            <button
-                              type="button"
-                              onClick={() => handleQuickSyncMasterLocation(item, "female")}
-                              className="mt-1 text-[9px] text-pink-700 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded px-1.5 py-0.5 inline-flex items-center gap-1 transition-all cursor-pointer shadow-2xs font-semibold"
-                              title="นำสถานที่นี้ไปอัปเดตทุกกลุ่มมุสลีมะฮฺ (กลุ่ม 1-8)"
-                            >
-                              <span>⚡ ใช้กับกลุ่มหญิง 1-8</span>
-                            </button>
-                          )}
-                        </td>
+                        {selectedGender !== "male" && (
+                          <td className="py-2.5 px-2 w-44">
+                            <input
+                              type="text"
+                              value={item.locFemale}
+                              onChange={(e) => handleUpdateMasterField(item.id, "locFemale", e.target.value)}
+                              className={`text-xs text-black w-full bg-zinc-50/80 hover:bg-white focus:bg-white border rounded-lg px-2.5 py-1 outline-none transition-all ${
+                                selectedGender === "female"
+                                  ? "border-pink-600 focus:ring-1 focus:ring-pink-600 font-bold bg-pink-50/40"
+                                  : "border-zinc-300 focus:border-black"
+                              }`}
+                              placeholder="สถานที่ฝ่ายหญิง..."
+                            />
+                            {item.locFemale && (
+                              <button
+                                type="button"
+                                onClick={() => handleQuickSyncMasterLocation(item, "female")}
+                                className="mt-1 text-[9px] text-pink-700 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded px-1.5 py-0.5 inline-flex items-center gap-1 transition-all cursor-pointer shadow-2xs font-semibold"
+                                title="นำสถานที่นี้ไปอัปเดตทุกกลุ่มมุสลีมะฮฺ (กลุ่ม 1-8)"
+                              >
+                                <span>⚡ ใช้กับกลุ่มหญิง 1-8</span>
+                              </button>
+                            )}
+                          </td>
+                        )}
 
                         {/* 6. Dept (Editable in place) */}
                         <td className="py-2.5 px-2 w-36">
@@ -2482,8 +2539,49 @@ export default function ScheduleAdminSection() {
                 </div>
               </div>
 
-              {/* Subgroup specifics: If in subgroup mode */}
-              {!isMasterMode && (
+              {/* Gender selector for Master Mode or Subgroup Mode */}
+              {isMasterMode ? (
+                <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <label className="block text-zinc-700 font-bold mb-1.5 text-xs">
+                    ฝ่ายที่เข้าร่วมกิจกรรมนี้
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormGender("both")}
+                      className={`py-2 px-3 rounded-lg text-xs font-bold border transition-all cursor-pointer text-center ${
+                        formGender === "both"
+                          ? "bg-black text-white border-black shadow-xs"
+                          : "bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-100"
+                      }`}
+                    >
+                      👦🧕 ทั้งสองฝ่าย (ร่วมกัน)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormGender("male")}
+                      className={`py-2 px-3 rounded-lg text-xs font-bold border transition-all cursor-pointer text-center ${
+                        formGender === "male"
+                          ? "bg-purple-700 text-white border-purple-700 shadow-xs"
+                          : "bg-white text-purple-700 border-purple-200 hover:bg-purple-50"
+                      }`}
+                    >
+                      👦 มุสลีมีน (เฉพาะชาย)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormGender("female")}
+                      className={`py-2 px-3 rounded-lg text-xs font-bold border transition-all cursor-pointer text-center ${
+                        formGender === "female"
+                          ? "bg-pink-600 text-white border-pink-600 shadow-xs"
+                          : "bg-white text-pink-700 border-pink-200 hover:bg-pink-50"
+                      }`}
+                    >
+                      🧕 มุสลีมะฮฺ (เฉพาะหญิง)
+                    </button>
+                  </div>
+                </div>
+              ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-200">
                   <div>
                     <label className="block text-zinc-700 font-bold mb-1">

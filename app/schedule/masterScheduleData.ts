@@ -17,6 +17,7 @@ export interface MasterScheduleItem {
   dept: string;
   note: string;
   category: 'activity' | 'prayer' | 'meal_break' | 'travel';
+  gender?: 'both' | 'male' | 'female';
 }
 
 export const MASTER_CAMP_SCHEDULE: MasterScheduleItem[] = [
