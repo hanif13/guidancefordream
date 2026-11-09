@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import SubpageHero from "../components/SubpageHero";
 import { supabase } from "../lib/supabase";
+import CampQuizSection from "./components/CampQuizSection";
 
 /* ================================================================
    DATA TYPES: STICKY NOTES & WALL OF MEMORIES
@@ -33,7 +34,7 @@ interface MemoryPhoto {
    ================================================================ */
 
 export default function MemoriesPage() {
-  const [activeTab, setActiveTab] = useState<"voices" | "wall" | "timecapsule">("voices");
+  const [activeTab, setActiveTab] = useState<"voices" | "quiz" | "wall" | "timecapsule">("voices");
 
   // Sticky Notes state
   const [notes, setNotes] = useState<StickyNote[]>([]);
@@ -494,6 +495,16 @@ export default function MemoriesPage() {
               เสียงสะท้อนจากน้อง
             </button>
             <button
+              onClick={() => setActiveTab("quiz")}
+              className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer flex items-center gap-1.5 ${activeTab === "quiz"
+                  ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
+                  : "text-purple-dark/80 hover:text-purple-deeper hover:bg-white/40"
+                }`}
+            >
+              <span>🎯</span>
+              <span>ควิซสะท้อนคิด (3 มิติ)</span>
+            </button>
+            <button
               onClick={() => setActiveTab("wall")}
               className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${activeTab === "wall"
                   ? "bg-gradient-to-r from-purple-primary to-pink-accent text-white shadow-md shadow-purple-900/20"
@@ -535,6 +546,32 @@ export default function MemoriesPage() {
                 className="px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-primary to-pink-accent text-white font-bold text-xs sm:text-sm shadow-lg hover:shadow-purple-500/25 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2 shrink-0"
               >
                 <span>+ เขียนความรู้สึกของคุณ</span>
+              </button>
+            </div>
+
+            {/* Quick Invitation Banner to 3-Dimension Quiz */}
+            <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-800 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg border border-purple-primary/30">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl shrink-0">
+                  🎯
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-pink-500/30 text-pink-200 text-[10px] font-black uppercase tracking-wider mb-0.5">
+                    <span>ฟีเจอร์ใหม่</span>
+                  </div>
+                  <h4 className="font-extrabold text-sm sm:text-base text-white">
+                    ควิซสะท้อนคิดค่ายสานฝัน 3 มิติ (ตัวเอง • กิจกรรม • พี่ค่ายและเพื่อน)
+                  </h4>
+                  <p className="text-xs text-purple-200/80">
+                    ร่วมทำแบบประเมินและทดสอบความจำจับเวลารายชื่อพี่ค่าย (1 นาที) และเพื่อนๆ (2 นาที)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveTab("quiz")}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-accent to-purple-primary hover:scale-105 active:scale-95 text-white font-extrabold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap shrink-0"
+              >
+                เริ่มทำควิซ 3 มิติ →
               </button>
             </div>
 
@@ -684,6 +721,13 @@ export default function MemoriesPage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* ========================================================
+            SECTION: ควิซสะท้อนคิด 3 มิติ (3-DIMENSION CAMP QUIZ)
+            ======================================================== */}
+        {activeTab === "quiz" && (
+          <CampQuizSection onBackToVoices={() => setActiveTab("voices")} />
         )}
 
         {/* ========================================================

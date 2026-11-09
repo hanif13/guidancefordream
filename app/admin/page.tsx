@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { supabase, uploadMedia } from "../lib/supabase";
 import { getPdfJs, compressPdfInBrowser } from "../components/PdfSpreadReader";
+import { extractGoogleDriveId, isGoogleDriveUrl } from "../components/GoogleDriveEBookReader";
 import ScheduleAdminSection from "./components/ScheduleAdminSection";
 import NewFeaturesAdminSection from "./components/NewFeaturesAdminSection";
 
@@ -3654,35 +3655,57 @@ export default function AdminPage() {
                 )}
 
                 <div>
-                  <label className="block text-[11px] text-zinc-500 mb-1">หรือระบุลิงก์ไฟล์ตรง (File URL / Google Drive / Supabase):</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] font-bold text-zinc-700">
+                      ระบุลิงก์ไฟล์ (แนะนำ: ลิงก์ Google Drive เพื่อประหยัดแบนด์วิธ):
+                    </label>
+                    {isGoogleDriveUrl(editingDocument.fileUrl) && (
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                        ✓ ลิงก์ Google Drive
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
                     value={editingDocument.fileUrl}
                     onChange={(e) => setEditingDocument({ ...editingDocument, fileUrl: e.target.value })}
-                    placeholder="https://tsedkchdkghlkywlzqle.supabase.co/storage/v1/object/public/gfd-media/documents/..."
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-zinc-300 text-black font-mono text-[11px] focus:outline-none focus:border-purple-600"
+                    placeholder="วางลิงก์ เช่น https://drive.google.com/file/d/1BxiMVs.../view?usp=sharing"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-zinc-300 text-black font-mono text-xs focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600"
                   />
+                  <p className="text-[10px] text-zinc-500 mt-1">
+                    💡 <strong>วิธีใช้ Google Drive:</strong> อัปโหลดไฟล์ PDF ขึ้น Drive &gt; กดแชร์ &gt; เลือก &quot;ทุกคนที่มีลิงก์มีสิทธิ์ดู&quot; &gt; คัดลอกลิงก์มาวางได้ทันที
+                  </p>
                 </div>
 
                 {editingDocument.fileUrl && (
-                  <div className="p-3 rounded-xl bg-white border border-purple-200 text-purple-900 text-xs space-y-1 shadow-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold flex items-center gap-1.5 text-xs text-purple-900">
-                        <span>✨</span>
-                        <span>มีไฟล์ PDF เชื่อมต่อแล้ว ({editingDocument.totalPages} หน้า • {editingDocument.fileSize || "พร้อมเปิดอ่าน"})</span>
+                  <div className="p-3.5 rounded-xl bg-white border border-purple-200 text-purple-900 text-xs space-y-1.5 shadow-xs">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <span className="font-bold flex items-center gap-1.5 text-xs text-purple-900">
+                        <span>{isGoogleDriveUrl(editingDocument.fileUrl) ? "🚀" : "✨"}</span>
+                        <span>
+                          {isGoogleDriveUrl(editingDocument.fileUrl)
+                            ? `เชื่อมต่อ Google Drive แล้ว (E-Book Viewer ความเร็วสูง ไม่กินโควตาเว็บ)`
+                            : `มีไฟล์ PDF เชื่อมต่อแล้ว (${editingDocument.totalPages} หน้า • ${editingDocument.fileSize || "พร้อมเปิดอ่าน"})`}
+                        </span>
                       </span>
                       <a
-                        href={editingDocument.fileUrl}
+                        href={
+                          isGoogleDriveUrl(editingDocument.fileUrl)
+                            ? `https://drive.google.com/file/d/${extractGoogleDriveId(editingDocument.fileUrl) || ""}/preview`
+                            : editingDocument.fileUrl
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 transition-colors font-semibold text-[11px] flex items-center gap-1 border border-purple-200"
+                        className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 transition-colors font-bold text-[11px] flex items-center gap-1 border border-purple-200"
                       >
-                        <span>ทดสอบเปิดไฟล์จริง</span>
+                        <span>ทดสอบเปิดดูจริง</span>
                         <span>↗</span>
                       </a>
                     </div>
                     <p className="text-[11px] text-zinc-600 leading-relaxed">
-                      ระบบจะเรนเดอร์หน้าจริงจาก PDF นี้เป็นสมุด 2 หน้าคู่อัตโนมัติบนหน้าเว็บ
+                      {isGoogleDriveUrl(editingDocument.fileUrl)
+                        ? "เมื่อน้องๆ สแกน QR Code หรือกดเปิดอ่านบนเว็บ ระบบจะเปิดเครื่องอ่าน E-Book ให้เต็มจออย่างลื่นไหลทันที"
+                        : "ระบบจะเรนเดอร์หน้าจริงจาก PDF นี้เป็นสมุด 2 หน้าคู่อัตโนมัติบนหน้าเว็บ"}
                     </p>
                   </div>
                 )}

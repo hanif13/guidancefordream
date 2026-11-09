@@ -5,6 +5,7 @@ import Image from "next/image";
 import SubpageHero from "../components/SubpageHero";
 import { supabase } from "../lib/supabase";
 import PdfSpreadReader, { PdfCoverThumbnail } from "../components/PdfSpreadReader";
+import GoogleDriveEBookReader, { isGoogleDriveUrl } from "../components/GoogleDriveEBookReader";
 
 /* ================================================================
    DATA TYPES FOR REAL 2-PAGE SPREAD E-BOOK
@@ -439,9 +440,20 @@ export default function DocumentsPage() {
       </section>
 
       {/* ========================================================
-          REALISTIC 2-PAGE SPREAD E-BOOK MODAL (OPEN BOOK VIEW)
+          E-BOOK MODAL VIEWER: GOOGLE DRIVE EMBED OR 3D PDF SPREAD READER
           ======================================================== */}
-      {activeEBook && activeEBook.fileUrl && (activeEBook.fileUrl.toLowerCase().includes(".pdf") || activeEBook.fileUrl.includes("/documents/")) ? (
+      {activeEBook && activeEBook.fileUrl && isGoogleDriveUrl(activeEBook.fileUrl) ? (
+        <GoogleDriveEBookReader
+          fileUrl={activeEBook.fileUrl}
+          title={activeEBook.title}
+          subtitle={activeEBook.subtitle}
+          author={activeEBook.author}
+          icon={activeEBook.icon}
+          badge={activeEBook.badge}
+          onClose={closeEBook}
+          onDownload={() => handleDownload(activeEBook)}
+        />
+      ) : activeEBook && activeEBook.fileUrl && (activeEBook.fileUrl.toLowerCase().includes(".pdf") || activeEBook.fileUrl.includes("/documents/")) ? (
         <PdfSpreadReader
           fileUrl={activeEBook.fileUrl}
           title={activeEBook.title}
