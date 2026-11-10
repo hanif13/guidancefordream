@@ -1559,7 +1559,7 @@ export default function ScheduleAdminSection() {
               <span>คัดลอก SQL สร้างตาราง</span>
             </button>
             <a
-              href="https://supabase.com/dashboard/project/tsedkchdkghlkywlzqle/editor"
+              href="https://supabase.com/dashboard/project/dnsatsumnlggkpwfpgjk/editor"
               target="_blank"
               rel="noopener noreferrer"
               className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-zinc-100 text-amber-900 border border-amber-300 text-xs font-bold transition-all"
